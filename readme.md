@@ -1,4 +1,4 @@
-# MSkinWellness
+# Proyecto Intermodular Final - MSkinWellness
 
 MSkinWellness es un SaaS de gestión para clínicas estéticas y salones de belleza. El proyecto está planteado como una aplicación multi-centro en la que cada centro trabaja con sus propios usuarios, sesiones, tratamientos, salas, máquinas, ventas, facturas, archivos e inventario dentro de una misma plataforma.
 
