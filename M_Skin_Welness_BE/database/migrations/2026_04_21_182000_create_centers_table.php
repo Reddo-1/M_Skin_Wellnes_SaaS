@@ -24,7 +24,8 @@ return new class extends Migration
             $table->unique(['custom_domain'], 'uq_centers_custom_domain');
 
             $table->foreign('plan_id', 'fk_centers_plan')
-                ->references('id')->on('plans');
+                ->references('id')->on('plans')
+                ->restrictOnDelete();
         });
     }
 

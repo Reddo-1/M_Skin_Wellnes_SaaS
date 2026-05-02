@@ -15,10 +15,12 @@ return new class extends Migration
             $table->primary(['client_profile_id', 'variation_id'], 'pk_client_profile_variation');
 
             $table->foreign('client_profile_id', 'fk_client_prof_var_profile')
-                ->references('id')->on('client_profiles');
+                ->references('id')->on('client_profiles')
+                ->cascadeOnDelete();
 
             $table->foreign('variation_id', 'fk_client_prof_var_variation')
-                ->references('id')->on('variations');
+                ->references('id')->on('variations')
+                ->cascadeOnDelete();
         });
     }
 

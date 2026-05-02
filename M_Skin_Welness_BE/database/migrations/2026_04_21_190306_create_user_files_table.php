@@ -23,7 +23,9 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_user_files_id_center');
 
             $table->foreign('center_id', 'fk_user_files_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['user_id', 'center_id'], 'fk_user_files_user')
                 ->references(['id', 'center_id'])->on('users');

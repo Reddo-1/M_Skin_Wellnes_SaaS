@@ -12,7 +12,7 @@ class SaleStatusSeeder extends Seeder
         $statuses = [
             ['name' => 'pendiente'],
             ['name' => 'pagada'],
-            ['name' => 'reembolso parcial'],
+            ['name' => 'parcialmente_reembolsada'],
             ['name' => 'reembolsada'],
             ['name' => 'cancelada'],
         ];

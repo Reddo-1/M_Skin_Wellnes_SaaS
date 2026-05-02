@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('center_id', 'fk_users_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
         });
     }
 

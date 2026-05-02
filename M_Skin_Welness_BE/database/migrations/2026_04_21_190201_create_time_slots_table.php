@@ -21,7 +21,9 @@ return new class extends Migration
             $table->unique(['center_id', 'start_time', 'end_time'], 'uq_time_slots_center_times');
 
             $table->foreign('center_id', 'fk_time_slots_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
         });
 
         DB::statement("

@@ -21,8 +21,14 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_machines_id_center');
             $table->unique(['center_id', 'name'], 'uq_machines_center_name');
 
-            $table->foreign(['fixed_room_id', 'center_id'], 'fk_machines_room')
-                ->references(['id', 'center_id'])->on('rooms');
+            $table->foreign('center_id', 'fk_machines_center')
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
+
+            $table->foreign('fixed_room_id', 'fk_machines_room')
+                ->references('id')->on('rooms')
+                ->nullOnDelete();
         });
 
         DB::statement("

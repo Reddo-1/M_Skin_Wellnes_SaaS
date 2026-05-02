@@ -16,10 +16,12 @@ return new class extends Migration
             $table->primary(['skin_evaluation_id', 'variation_id'], 'pk_skin_evaluation_variation');
 
             $table->foreign('skin_evaluation_id', 'fk_skin_eval_var_eval')
-                ->references('id')->on('skin_evaluations');
+                ->references('id')->on('skin_evaluations')
+                ->cascadeOnDelete();
 
             $table->foreign('variation_id', 'fk_skin_eval_var_variation')
-                ->references('id')->on('variations');
+                ->references('id')->on('variations')
+                ->cascadeOnDelete();
         });
     }
 

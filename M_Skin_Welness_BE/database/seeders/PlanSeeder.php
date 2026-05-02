@@ -28,11 +28,11 @@ class PlanSeeder extends Seeder
             [
                 'code'                  => 'professional',
                 'name'                  => 'Professional',
-                'description'           => 'Clientes online, emails automáticos y página pública del centro.',
+                'description'           => 'Clientes online y emails automáticos del centro.',
                 'max_workers'           => 10,
                 'allows_online_clients' => true,
                 'allows_emails'         => true,
-                'allows_public_page'    => true,
+                'allows_public_page'    => false,
                 'allows_custom_domain'  => false,
                 'is_active'             => true,
                 'created_at'            => $now,
@@ -41,7 +41,7 @@ class PlanSeeder extends Seeder
             [
                 'code'                  => 'premium',
                 'name'                  => 'Premium',
-                'description'           => 'Todo Profesional más dominio personalizado y límites ampliados.',
+                'description'           => 'Todo Profesional más página pública del centro y dominio personalizado.',
                 'max_workers'           => 50,
                 'allows_online_clients' => true,
                 'allows_emails'         => true,

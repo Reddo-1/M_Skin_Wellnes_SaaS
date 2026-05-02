@@ -23,13 +23,16 @@ return new class extends Migration
             $table->timestampsTz();
 
             $table->foreign('center_id', 'fk_worker_absences_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['worker_id', 'center_id'], 'fk_worker_absences_worker')
                 ->references(['id', 'center_id'])->on('users');
 
             $table->foreign('absence_type_id', 'fk_worker_absences_type')
-                ->references('id')->on('absence_types');
+                ->references('id')->on('absence_types')
+                ->restrictOnDelete();
 
             $table->index(
                 ['center_id', 'worker_id', 'date', 'start_time', 'end_time'],

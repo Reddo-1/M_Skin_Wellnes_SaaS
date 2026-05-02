@@ -10,12 +10,16 @@ class VariationSeeder extends Seeder
     public function run(): void
     {
         $variations = [
-            ['name' => 'acné'],
-            ['name' => 'piel sensible'],
-            ['name' => 'dermatitis'],
-            ['name' => 'rosácea'],
-            ['name' => 'psoriasis'],
-            ['name' => 'deshidratación profunda'],
+            ['name' => 'acne'],
+            ['name' => 'rosacea'],
+            ['name' => 'manchas'],
+            ['name' => 'arrugas'],
+            ['name' => 'deshidratacion'],
+            ['name' => 'cuperosis'],
+            ['name' => 'cicatrices'],
+            ['name' => 'poros_dilatados'],
+            ['name' => 'flacidez'],
+            ['name' => 'hiperpigmentacion'],
         ];
 
         DB::table('variations')->upsert($variations, ['name']);

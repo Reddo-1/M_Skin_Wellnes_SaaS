@@ -16,13 +16,17 @@ return new class extends Migration
             $table->primary(['machine_id', 'treatment_id'], 'pk_machine_treatment');
 
             $table->foreign('center_id', 'fk_machine_treatment_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['machine_id', 'center_id'], 'fk_machine_treatment_machine')
-                ->references(['id', 'center_id'])->on('machines');
+                ->references(['id', 'center_id'])->on('machines')
+                ->cascadeOnDelete();
 
             $table->foreign(['treatment_id', 'center_id'], 'fk_machine_treatment_treat')
-                ->references(['id', 'center_id'])->on('treatments');
+                ->references(['id', 'center_id'])->on('treatments')
+                ->cascadeOnDelete();
 
             $table->index(['center_id', 'machine_id'], 'idx_machine_treatment_center_machine');
             $table->index(['center_id', 'treatment_id'], 'idx_machine_treatment_center_treat');

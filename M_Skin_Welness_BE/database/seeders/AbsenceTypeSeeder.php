@@ -11,7 +11,7 @@ class AbsenceTypeSeeder extends Seeder
     {
         $types = [
             ['name' => 'justificada'],
-            ['name' => 'remunerada'],
+            ['name' => 'retribuida'],
             ['name' => 'injustificada'],
         ];
 

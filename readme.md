@@ -4,20 +4,20 @@ MSkinWellness es un SaaS de gestión para clínicas estéticas y salones de bell
 
 ## Resumen del funcionamiento
 
-La plataforma parte de una capa global de administración desde la que se crean centros y se les asigna un plan. A partir de ahí, cada centro gestiona su operativa diaria con sus propios datos y permisos.
+La plataforma parte de una capa global de administración desde la que se crean centros y se les asigna un plan. A partir de ahí, cada centro gestiona su operativa diaria con sus propios datos y permisos. Adicionalmente, cualquier visitante puede registrar su propio centro desde la landing pública sin pasar por el superadmin (alta self-service), lo que crea en una sola transacción el centro, su administrador inicial, la asignación del rol y el correo de verificación.
 
 Dentro de cada centro se contempla la gestión de:
 
 - usuarios unificados, tanto trabajadores como clientes
-- roles globales asignados a usuarios
+- roles globales gestionados con `spatie/laravel-permission`
 - horarios, ausencias y disponibilidades extra
 - salas, máquinas y tratamientos
-- sesiones con trabajador principal, cliente principal y ayudantes
-- fichas de cliente, histórico de evaluaciones, variaciones y archivos
+- sesiones (`appointments`) con trabajador principal, cliente principal y ayudantes
+- fichas de cliente, histórico de evaluaciones, variaciones, aptitud y archivos
 - ventas, pagos, facturas e inventario
 - archivos y branding del centro para su página pública
 
-La vista principal para trabajadores estará centrada en la agenda y el calendario de sesiones. Desde ahí podrán acceder al resto de módulos según su rol. Además, se plantea una vista tipo mapa del centro con GridStack para representar salas y ocupación de forma visual.
+La vista principal para trabajadores estará centrada en la agenda y el calendario de sesiones. Desde ahí podrán acceder al resto de módulos según su rol. Además, se plantea una vista tipo mapa del centro con GridStack para representar salas y ocupación de forma visual, persistiendo la disposición en la columna `rooms.grid_position` (JSONB).
 
 El sistema también queda preparado para acceso online de clientes, página pública por centro, correos automáticos, reservas online y pagos con Stripe, aunque algunas de estas partes pueden quedar parciales según el tiempo disponible.
 
@@ -37,14 +37,15 @@ El objetivo es construir un MVP serio y defendible que demuestre:
 
 - Laravel 12
 - PHP 8.2
-- Laravel Sanctum para autenticación
-- Blade para el panel de superadministración
+- Laravel Sanctum (token mode) para la autenticación de la API consumida por Angular
+- `spatie/laravel-permission` (sin teams) para roles y permisos
+- Blade para el panel de superadministración (guard `web`, sesión clásica)
 
 ### Frontend
 
 - Angular 21
 - TypeScript
-- Bootstrap 5 para responsive y maquetación general
+- Bootstrap 5 + SCSS para responsive y maquetación general
 - Reactive Forms
 - Signals, computed y effect cuando proceda
 - guards, interceptores, servicios y consumo de API REST
@@ -54,7 +55,7 @@ El objetivo es construir un MVP serio y defendible que demuestre:
 
 - PostgreSQL
 
-Se ha elegido PostgreSQL por su mejor encaje con un proyecto SaaS multi-centro con muchas relaciones, restricciones de integridad y necesidad de escalabilidad.
+Se ha elegido PostgreSQL por su mejor encaje con un proyecto SaaS multi-centro con muchas relaciones, restricciones de integridad y necesidad de escalabilidad. Se aprovechan tipos como `TIMESTAMPTZ`, `JSONB` (para `rooms.grid_position`, snapshots de facturas y `metadata` de auditoría) y `UUID`.
 
 ### Despliegue
 
@@ -74,52 +75,90 @@ El proyecto sigue una arquitectura separada por capas:
 
 ### Distribución general
 
-- Superadmin: gestión global del SaaS, centros y planes
-- Centro: operativa interna con sus usuarios, sesiones, fichas, ventas e inventario
-- Cliente: acceso online opcional según plan y estado de implantación
+- Superadmin: gestión global del SaaS, centros y planes. Vive en la tabla `users` con `center_id = NULL` y rol `superadmin`.
+- Centro: operativa interna con sus usuarios, sesiones, fichas, ventas e inventario.
+- Cliente: acceso online opcional según plan y estado de implantación.
 
-### Multi-centro
+### Multi-centro y aislamiento
 
-El diseño gira alrededor de `centro_id` como eje de aislamiento lógico. Cada entidad operativa pertenece a un centro, mientras que algunos elementos como roles, planes y tablas lookup son globales.
+El diseño gira alrededor de `center_id` como eje de aislamiento lógico. Cada entidad operativa pertenece a un centro y las claves foráneas relevantes se definen como compuestas (`(id, center_id)`) para impedir cruces entre centros a nivel relacional. Los catálogos globales (`session_statuses`, `payment_methods`, `skin_types`, etc.), `plans` y los archivos de centro son globales o pertenecen a la capa de `centers`.
 
-También se contempla página pública por centro mediante slug, subdominio o ruta equivalente durante el MVP.
+Convención de borrados en cascada:
+
+- `ON DELETE CASCADE ON UPDATE CASCADE` para FKs hacia el centro
+- `ON DELETE CASCADE` para pivots
+- `ON DELETE RESTRICT` para FKs hacia lookups globales
+- `ON DELETE SET NULL` en `audit_logs` para preservar el rastro
+
+### Login dual y subdominios
+
+Cualquier usuario del centro puede autenticarse contra el mismo backend desde dos rutas:
+
+- página global (`mskinwellness.com/login`), siempre disponible
+- página del centro (`centro-x.mskinwellness.com/login`), solo si el plan del centro lo permite
+
+Ambas rutas usan el mismo endpoint de Sanctum. La diferencia es la presentación: la página del centro aplica el branding desde `center_files` y, tras el login, redirige al dashboard del centro al que pertenece el usuario.
+
+### Auditoría
+
+El sistema mantiene una tabla `audit_logs` mínima centrada en el ciclo de vida del centro: alta (`center_create`), cambio de plan (`center_plan_change`) y desactivación (`center_deactivate`). No se utiliza para impersonation, catálogos globales ni eventos del cliente online.
 
 ## Modelo funcional resumido
 
 ### Superadmin
 
-Permite crear centros, asignar planes y administrar la configuración global del SaaS.
+Permite crear centros, asignar planes y administrar la configuración global del SaaS. Puede acceder al panel de un centro como administrador (impersonation) a nivel de aplicación, sin que quede rastro en `audit_logs`.
 
 ### Trabajadores
 
-Acceden a la aplicación principal del centro según sus permisos. Podrán gestionar sesiones, consultar fichas de clientes, revisar agenda, usar el mapa del centro y trabajar con módulos internos según rol.
+Acceden a la aplicación principal del centro según sus roles. Un mismo usuario puede acumular varios roles compatibles (recepcionista + diagnosticador, facialista + especialista en maquinaria, etc.) mediante `assignRole()` de Spatie.
 
 ### Clientes
 
-Podrán tener acceso online cuando el centro lo permita. La arquitectura queda preparada para login, gestión de citas, verificación y posibles reservas online.
+Pueden tener acceso online cuando el plan del centro lo permita. Hay dos vías de alta:
+
+- **Auto-registro online** desde la página pública del centro (planes `professional` y `premium`).
+- **Activación por el centro** de un cliente walk-in existente, mediante correo de activación.
+
+En plan `professional` el cliente consulta sus próximas citas y su histórico; en plan `premium` puede además solicitar y cancelar citas online.
+
+## Roles del sistema
+
+Los roles se cargan desde un seeder y son fijos (los gestiona Spatie sin teams):
+
+- `superadmin` — dueño del SaaS, sin centro
+- `administrador` — gestiona todo dentro de un centro
+- `recepcionista` — agenda, ocupación de salas, alta de clientes
+- `rrhh` — trabajadores, horarios y disponibilidades
+- `diagnosticador` — ficha clínica del cliente
+- `facialista` — tratamientos manuales / faciales
+- `especialista_maquinaria` — tratamientos con maquinaria
+- `cliente` — cliente del centro (acceso online opcional)
 
 ## Planes
 
-El sistema contempla una tabla global `planes` relacionada con `centros.plan_id`. Los planes limitan o habilitan funcionalidades como:
+El sistema contempla una tabla global `plans` relacionada con `centers.plan_id`. Las capacidades se modelan como flags:
 
-- número máximo de trabajadores
-- acceso online de clientes
-- correos automáticos
-- página pública del centro
-- dominio personalizado
+- `max_workers` — límite de trabajadores
+- `allows_online_clients` — acceso online del cliente
+- `allows_emails` — correos automáticos
+- `allows_public_page` — página pública del centro y login por subdominio
+- `allows_custom_domain` — dominio personalizado
+
+Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Professional** y **Premium**.
 
 ## Módulos principales
 
 - gestión de centros y planes
-- usuarios y roles
-- horarios y ausencias
-- salas y máquinas
-- tratamientos
-- sesiones y calendario
-- ficha global de cliente y evaluaciones históricas
-- archivos de cliente
+- usuarios y roles (Spatie)
+- horarios, ausencias y disponibilidades extra
+- salas, máquinas y tratamientos
+- sesiones (`appointments`), ayudantes y calendario
+- ficha clínica, evaluaciones históricas, variaciones, aptitud para tratamientos
+- archivos del cliente y del centro
 - ventas, pagos y facturación
-- inventario y movimientos de stock
+- inventario y movimientos de stock (con consumo automático en sesión)
+- auditoría del ciclo de vida del centro
 
 ## Alcance
 
@@ -128,12 +167,15 @@ El sistema contempla una tabla global `planes` relacionada con `centros.plan_id`
 - multi-centro
 - planes
 - superadmin funcional
-- autenticación y roles
+- autenticación con Sanctum y autorización con Spatie
+- alta self-service del centro
 - gestión interna del centro
 - sesiones y calendario
 - fichas y archivos del cliente
+- mapa del centro con GridStack
 - frontend responsive
 - despliegue funcional en VPS
+- datos demo para defensa
 
 ### Funcionalidades previstas con posible cierre parcial
 
@@ -144,6 +186,13 @@ El sistema contempla una tabla global `planes` relacionada con `centros.plan_id`
 - pagos con Stripe
 - facturación más avanzada
 - inventario funcional ampliado
+
+### Fuera del MVP
+
+- sistema completo de suscripciones recurrentes
+- dominios personalizados totalmente resueltos
+- CMS para páginas públicas
+- automatizaciones avanzadas de negocio
 
 ## Nombre del tablero de planificación
 

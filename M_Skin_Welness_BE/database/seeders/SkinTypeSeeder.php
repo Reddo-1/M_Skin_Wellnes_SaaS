@@ -11,9 +11,11 @@ class SkinTypeSeeder extends Seeder
     {
         $types = [
             ['name' => 'normal'],
-            ['name' => 'oily'],
-            ['name' => 'dry'],
-            ['name' => 'combination'],
+            ['name' => 'seca'],
+            ['name' => 'grasa'],
+            ['name' => 'mixta'],
+            ['name' => 'sensible'],
+            ['name' => 'madura'],
         ];
 
         DB::table('skin_types')->upsert($types, ['name']);

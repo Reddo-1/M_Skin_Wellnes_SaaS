@@ -25,7 +25,9 @@ return new class extends Migration
             );
 
             $table->foreign('center_id', 'fk_worker_schedules_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['worker_id', 'center_id'], 'fk_worker_schedules_worker')
                 ->references(['id', 'center_id'])->on('users');

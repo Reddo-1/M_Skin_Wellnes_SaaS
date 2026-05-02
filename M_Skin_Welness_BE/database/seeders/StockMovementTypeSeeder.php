@@ -11,10 +11,10 @@ class StockMovementTypeSeeder extends Seeder
     {
         $types = [
             ['name' => 'entrada'],
-            ['name' => 'salida por venta'],
-            ['name' => 'uso en sesión'],
-            ['name' => 'ajuste manual'],
-            ['name' => 'devolución'],
+            ['name' => 'salida_venta'],
+            ['name' => 'uso_sesion'],
+            ['name' => 'ajuste_manual'],
+            ['name' => 'devolucion'],
         ];
 
         DB::table('stock_movement_types')->upsert($types, ['name']);

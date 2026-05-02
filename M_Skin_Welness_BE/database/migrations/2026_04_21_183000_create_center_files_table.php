@@ -21,7 +21,9 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_center_files_id_center');
 
             $table->foreign('center_id', 'fk_center_files_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->index(['center_id', 'type'], 'idx_center_files_center_type');
         });

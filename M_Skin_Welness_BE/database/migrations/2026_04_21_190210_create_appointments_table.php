@@ -30,10 +30,13 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_appointments_id_center');
 
             $table->foreign('center_id', 'fk_appointments_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign('status_id', 'fk_appointments_status')
-                ->references('id')->on('session_statuses');
+                ->references('id')->on('session_statuses')
+                ->restrictOnDelete();
 
             $table->foreign(['client_id', 'center_id'], 'fk_appointments_client')
                 ->references(['id', 'center_id'])->on('users');
@@ -47,8 +50,9 @@ return new class extends Migration
             $table->foreign(['room_id', 'center_id'], 'fk_appointments_room')
                 ->references(['id', 'center_id'])->on('rooms');
 
-            $table->foreign(['machine_id', 'center_id'], 'fk_appointments_machine')
-                ->references(['id', 'center_id'])->on('machines');
+            $table->foreign('machine_id', 'fk_appointments_machine')
+                ->references('id')->on('machines')
+                ->nullOnDelete();
 
             $table->index(['center_id', 'starts_at'], 'idx_appointments_center_starts');
             $table->index(['center_id', 'worker_id', 'starts_at'], 'idx_appointments_center_worker');

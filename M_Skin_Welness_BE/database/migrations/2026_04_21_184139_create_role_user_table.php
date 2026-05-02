@@ -15,10 +15,12 @@ return new class extends Migration
             $table->primary(['user_id', 'role_id'], 'pk_role_user');
 
             $table->foreign('user_id', 'fk_role_user_user')
-                ->references('id')->on('users');
+                ->references('id')->on('users')
+                ->cascadeOnDelete();
 
             $table->foreign('role_id', 'fk_role_user_role')
-                ->references('id')->on('roles');
+                ->references('id')->on('roles')
+                ->cascadeOnDelete();
         });
     }
 

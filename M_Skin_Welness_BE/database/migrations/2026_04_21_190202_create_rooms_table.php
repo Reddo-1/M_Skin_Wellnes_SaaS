@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->string('name', 120);
+            $table->json('grid_position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestampTz('created_at')->useCurrent();
 
@@ -19,7 +20,9 @@ return new class extends Migration
             $table->unique(['center_id', 'name'], 'uq_rooms_center_name');
 
             $table->foreign('center_id', 'fk_rooms_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
         });
     }
 

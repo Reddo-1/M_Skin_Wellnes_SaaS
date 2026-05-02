@@ -17,13 +17,17 @@ return new class extends Migration
             $table->primary(['appointment_id', 'user_id'], 'pk_appointment_assistants');
 
             $table->foreign('center_id', 'fk_appt_assistants_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['appointment_id', 'center_id'], 'fk_appt_assistants_appointment')
-                ->references(['id', 'center_id'])->on('appointments');
+                ->references(['id', 'center_id'])->on('appointments')
+                ->cascadeOnDelete();
 
             $table->foreign(['user_id', 'center_id'], 'fk_appt_assistants_user')
-                ->references(['id', 'center_id'])->on('users');
+                ->references(['id', 'center_id'])->on('users')
+                ->cascadeOnDelete();
 
             $table->index(['center_id', 'user_id'], 'idx_appointment_assistants_center_user');
         });

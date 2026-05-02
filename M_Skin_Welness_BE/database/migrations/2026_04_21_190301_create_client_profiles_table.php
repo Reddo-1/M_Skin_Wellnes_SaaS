@@ -22,13 +22,16 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_client_profiles_id_center');
 
             $table->foreign('center_id', 'fk_client_profiles_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['user_id', 'center_id'], 'fk_client_profiles_user')
                 ->references(['id', 'center_id'])->on('users');
 
             $table->foreign('skin_type_id', 'fk_client_profiles_skin_type')
-                ->references('id')->on('skin_types');
+                ->references('id')->on('skin_types')
+                ->restrictOnDelete();
 
             $table->foreign(['updated_by_user_id', 'center_id'], 'fk_client_profiles_updater')
                 ->references(['id', 'center_id'])->on('users');

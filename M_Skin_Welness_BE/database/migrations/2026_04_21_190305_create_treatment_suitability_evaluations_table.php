@@ -24,7 +24,9 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_treat_suit_eval_id_center');
 
             $table->foreign('center_id', 'fk_treat_suit_eval_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['user_id', 'center_id'], 'fk_treat_suit_eval_user')
                 ->references(['id', 'center_id'])->on('users');

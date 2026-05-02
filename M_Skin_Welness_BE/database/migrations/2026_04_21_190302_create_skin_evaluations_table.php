@@ -22,7 +22,9 @@ return new class extends Migration
             $table->unique(['id', 'center_id'], 'uq_skin_evaluations_id_center');
 
             $table->foreign('center_id', 'fk_skin_eval_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->foreign(['user_id', 'center_id'], 'fk_skin_eval_user')
                 ->references(['id', 'center_id'])->on('users');
@@ -31,7 +33,8 @@ return new class extends Migration
                 ->references(['id', 'center_id'])->on('client_profiles');
 
             $table->foreign('skin_type_id', 'fk_skin_eval_skin_type')
-                ->references('id')->on('skin_types');
+                ->references('id')->on('skin_types')
+                ->restrictOnDelete();
 
             $table->foreign(['professional_id', 'center_id'], 'fk_skin_eval_professional')
                 ->references(['id', 'center_id'])->on('users');

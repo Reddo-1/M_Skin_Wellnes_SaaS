@@ -22,7 +22,9 @@ return new class extends Migration
             $table->unique(['center_id', 'name'], 'uq_treatments_center_name');
 
             $table->foreign('center_id', 'fk_treatments_center')
-                ->references('id')->on('centers');
+                ->references('id')->on('centers')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
         });
 
         DB::statement("
