@@ -8,13 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
-
-            $table->unique(['name'], 'uq_roles_name');
-        });
-
         Schema::create('session_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name', 60);
@@ -83,7 +76,6 @@ return new class extends Migration
         Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('absence_types');
         Schema::dropIfExists('session_statuses');
-        Schema::dropIfExists('roles');
     }
 };
 

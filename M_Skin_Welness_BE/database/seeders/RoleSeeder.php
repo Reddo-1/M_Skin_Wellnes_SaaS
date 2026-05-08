@@ -3,23 +3,28 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleSeeder extends Seeder
 {
     public function run(): void
     {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $roles = [
-            ['name' => 'superadmin'],
-            ['name' => 'administrador'],
-            ['name' => 'recepcionista'],
-            ['name' => 'rrhh'],
-            ['name' => 'diagnosticador'],
-            ['name' => 'facialista'],
-            ['name' => 'especialista_maquinaria'],
-            ['name' => 'cliente'],
+            'superadmin',
+            'administrador',
+            'recepcionista',
+            'rrhh',
+            'diagnosticador',
+            'facialista',
+            'especialista_maquinaria',
+            'cliente',
         ];
 
-        DB::table('roles')->upsert($roles, ['name']);
+        foreach ($roles as $name) {
+            Role::findOrCreate($name, 'web');
+        }
     }
 }

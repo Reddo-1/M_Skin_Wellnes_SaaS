@@ -23,7 +23,7 @@ El sistema también queda preparado para acceso online de clientes, página púb
 
 ## Objetivo del proyecto
 
-El objetivo es construir un MVP serio y defendible que demuestre:
+El objetivo es construir un Proyecto Final serio y defendible que demuestre:
 
 - análisis de un problema real del sector
 - diseño de una base de datos relacional amplia y consistente
@@ -39,6 +39,7 @@ El objetivo es construir un MVP serio y defendible que demuestre:
 - PHP 8.2
 - Laravel Sanctum (token mode) para la autenticación de la API consumida por Angular
 - `spatie/laravel-permission` (sin teams) para roles y permisos
+- Laravel Reverb para WebSockets (sincronización en tiempo real del mapa del centro)
 - Blade para el panel de superadministración (guard `web`, sesión clásica)
 
 ### Frontend
@@ -50,6 +51,7 @@ El objetivo es construir un MVP serio y defendible que demuestre:
 - Signals, computed y effect cuando proceda
 - guards, interceptores, servicios y consumo de API REST
 - GridStack para la vista visual del mapa del centro
+- `laravel-echo` como cliente WebSocket para suscribirse a los eventos en tiempo real del centro
 
 ### Base de datos
 
@@ -152,7 +154,7 @@ Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Profes
 - gestión de centros y planes
 - usuarios y roles (Spatie)
 - horarios, ausencias y disponibilidades extra
-- salas, máquinas y tratamientos
+- salas, máquinas y tratamientos (con asignación de roles compatibles por tratamiento)
 - sesiones (`appointments`), ayudantes y calendario
 - ficha clínica, evaluaciones históricas, variaciones, aptitud para tratamientos
 - archivos del cliente y del centro
@@ -162,7 +164,7 @@ Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Profes
 
 ## Alcance
 
-### Núcleo del MVP
+### Núcleo del Proyecto Final
 
 - multi-centro
 - planes
@@ -187,7 +189,7 @@ Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Profes
 - facturación más avanzada
 - inventario funcional ampliado
 
-### Fuera del MVP
+### Fuera del Proyecto Final
 
 - sistema completo de suscripciones recurrentes
 - dominios personalizados totalmente resueltos
@@ -200,4 +202,4 @@ Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Profes
 
 ## Estado del proyecto
 
-Se trata del proyecto final del ciclo, enfocado a construir una base técnica sólida y con proyección realista de crecimiento. La prioridad es cerrar un MVP coherente, bien defendido y alineado con una necesidad real del sector.
+Se trata del proyecto final del ciclo, enfocado a construir una base técnica sólida y con proyección realista de crecimiento. La prioridad es cerrar un Proyecto Final coherente, bien defendido y alineado con una necesidad real del sector.

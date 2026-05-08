@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestampsTz();
 
-            $table->unique(['center_id', 'email'], 'uq_users_center_email');
+            $table->unique(['email'], 'uq_users_email');
             $table->unique(['id', 'center_id'], 'uq_users_id_center');
         });
 

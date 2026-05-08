@@ -113,7 +113,7 @@ CREATE TABLE users (
     is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uq_users_center_email      UNIQUE (center_id, email),
+    CONSTRAINT uq_users_email             UNIQUE (email),
     CONSTRAINT uq_users_id_center         UNIQUE (id, center_id),
     CONSTRAINT chk_users_registration_src CHECK (
         registration_source IS NULL
@@ -124,15 +124,27 @@ CREATE TABLE users (
 );
 
 CREATE TABLE time_slots (
-    id         SERIAL PRIMARY KEY,
-    center_id  INT         NOT NULL,
-    name       VARCHAR(50),
-    start_time TIME        NOT NULL,
-    end_time   TIME        NOT NULL,
-    is_active  BOOLEAN     NOT NULL DEFAULT TRUE,
+    id          SERIAL PRIMARY KEY,
+    center_id   INT         NOT NULL,
+    name        VARCHAR(50),
+    start_time  TIME        NOT NULL,
+    end_time    TIME        NOT NULL,
+    break_start TIME,
+    break_end   TIME,
+    is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
     CONSTRAINT uq_time_slots_id_center        UNIQUE (id, center_id),
     CONSTRAINT uq_time_slots_center_times     UNIQUE (center_id, start_time, end_time),
     CONSTRAINT chk_time_slots_end             CHECK (end_time > start_time),
+    CONSTRAINT chk_time_slots_break           CHECK (
+        (break_start IS NULL AND break_end IS NULL)
+        OR (
+            break_start IS NOT NULL
+            AND break_end IS NOT NULL
+            AND start_time <= break_start
+            AND break_start < break_end
+            AND break_end <= end_time
+        )
+    ),
     CONSTRAINT fk_time_slots_center           FOREIGN KEY (center_id)
         REFERENCES centers (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -255,6 +267,21 @@ CREATE TABLE machine_treatment (
 );
 CREATE INDEX idx_machine_treatment_center_machine ON machine_treatment (center_id, machine_id);
 CREATE INDEX idx_machine_treatment_center_treat   ON machine_treatment (center_id, treatment_id);
+
+CREATE TABLE role_treatment (
+    center_id    INT NOT NULL,
+    role_id      INT NOT NULL,
+    treatment_id INT NOT NULL,
+    CONSTRAINT pk_role_treatment         PRIMARY KEY (role_id, treatment_id),
+    CONSTRAINT fk_role_treatment_center  FOREIGN KEY (center_id)
+        REFERENCES centers (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_role_treatment_role    FOREIGN KEY (role_id)
+        REFERENCES roles (id) ON DELETE CASCADE,
+    CONSTRAINT fk_role_treatment_treat   FOREIGN KEY (treatment_id, center_id)
+        REFERENCES treatments (id, center_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_role_treatment_center_treat ON role_treatment (center_id, treatment_id);
+CREATE INDEX idx_role_treatment_center_role  ON role_treatment (center_id, role_id);
 
 CREATE TABLE client_profiles (
     id                 SERIAL PRIMARY KEY,
