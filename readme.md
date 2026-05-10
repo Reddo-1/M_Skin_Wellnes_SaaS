@@ -113,7 +113,7 @@ Permite crear centros, asignar planes y administrar la configuración global del
 
 ### Trabajadores
 
-Acceden a la aplicación principal del centro según sus roles. Un mismo usuario puede acumular varios roles compatibles (recepcionista + diagnosticador, facialista + especialista en maquinaria, etc.) mediante `assignRole()` de Spatie.
+Acceden a la aplicación principal del centro según sus roles. Un mismo usuario puede acumular varios roles compatibles (recepcionista + diagnosticador, dermo_esteticien + fisioterapeuta, etc.) mediante `assignRole()` de Spatie.
 
 ### Clientes
 
@@ -133,8 +133,9 @@ Los roles se cargan desde un seeder y son fijos (los gestiona Spatie sin teams):
 - `recepcionista` — agenda, ocupación de salas, alta de clientes
 - `rrhh` — trabajadores, horarios y disponibilidades
 - `diagnosticador` — ficha clínica del cliente
-- `facialista` — tratamientos manuales / faciales
-- `especialista_maquinaria` — tratamientos con maquinaria
+- `dermo_esteticien` — tratamientos manuales / faciales
+- `fisioterapeuta` — tratamientos con maquinaria
+- `manicurista` — tratamientos de manicura / pedicura
 - `cliente` — cliente del centro (acceso online opcional)
 
 ## Planes

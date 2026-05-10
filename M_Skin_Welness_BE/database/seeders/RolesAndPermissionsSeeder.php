@@ -21,8 +21,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'appointments.change_status',
         ];
 
+        $treatmentsPermissions = [
+            'treatments.view',
+            'treatments.create',
+            'treatments.update',
+            'treatments.delete',
+        ];
+
         $permissions = array_merge(
-                            $appointmentsPermissions
+                            $appointmentsPermissions,
+                            $treatmentsPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -30,34 +38,40 @@ class RolesAndPermissionsSeeder extends Seeder
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        $staffPermissions = [
+            'appointments.view',
+            'appointments.change_status',
+            'treatments.view',
+        ];
+
         $rolesWithPermissions = [
+            
             'superadmin' => $permissions,
+
             'administrador' => $permissions,
+
             'recepcionista' => [
                 'appointments.view',
                 'appointments.create',
                 'appointments.update',
                 'appointments.change_status',
+                'treatments.view',
             ],
+
             'rrhh' => [
                 'appointments.view',
+                'treatments.view',
             ],
-            'diagnosticador' => [
-                'appointments.view',
-                'appointments.change_status',
-            ],
-            'facialista' => [
-                'appointments.view',
-                'appointments.change_status',
-            ],
-            'especialista_maquinaria' => [
-                'appointments.view',
-                'appointments.change_status',
-            ],
+
+            'diagnosticador' => $staffPermissions,
+            'dermo_esteticien' => $staffPermissions,
+            'fisioterapeuta' => $staffPermissions,
+            'manicurista' => $staffPermissions,
             'cliente' => [
                 'appointments.view',
                 'appointments.create',
                 'appointments.change_status',
+                'treatments.view',
             ],
         ];
 

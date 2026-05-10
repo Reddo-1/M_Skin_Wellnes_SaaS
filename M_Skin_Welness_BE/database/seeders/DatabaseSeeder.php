@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            //lookups y catálogos globales
             RolesAndPermissionsSeeder::class,
             SessionStatusSeeder::class,
             AbsenceTypeSeeder::class,
@@ -19,7 +20,21 @@ class DatabaseSeeder extends Seeder
             SkinTypeSeeder::class,
             VariationSeeder::class,
             PlanSeeder::class,
+
+            //tenant
+            CenterSeeder::class,
             UserSeeder::class,
+            RoomSeeder::class,
+            MachineSeeder::class,
+            TimeSlotSeeder::class,
+            TreatmentSeeder::class,
+            WorkerScheduleSeeder::class,
+            AppointmentSeeder::class,
+            ProductSeeder::class,
+            ProductStockSeeder::class,
+            ClientProfileSeeder::class,
+            SkinEvaluationSeeder::class,
+            SaleSeeder::class,
         ]);
     }
 }
