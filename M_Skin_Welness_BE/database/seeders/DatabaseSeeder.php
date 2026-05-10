@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             SkinTypeSeeder::class,
             VariationSeeder::class,
             PlanSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
