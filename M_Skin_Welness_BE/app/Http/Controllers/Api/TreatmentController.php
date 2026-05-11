@@ -27,7 +27,6 @@ class TreatmentController extends Controller
         $query = Treatment::query()
             ->forCenter($centerId)
             ->with(['machines', 'authorizedRoles'])
-            ->when($request->filled('name'), fn ($q) => $q->where('name', 'ilike', '%'.$request->string('name').'%'))
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name');
 

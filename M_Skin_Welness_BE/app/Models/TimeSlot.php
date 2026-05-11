@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Machine extends Model
+class TimeSlot extends Model
 {
     use HasFactory;
 
@@ -18,17 +17,15 @@ class Machine extends Model
     protected $fillable = [
         'center_id',
         'name',
+        'start_time',
+        'end_time',
         'is_active',
-        'is_mobile',
-        'fixed_room_id',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
-            'is_mobile' => 'boolean',
-            'created_at' => 'datetime',
         ];
     }
 
@@ -42,19 +39,8 @@ class Machine extends Model
         return $this->belongsTo(Center::class);
     }
 
-    public function fixedRoom(): BelongsTo
+    public function workerSchedules(): HasMany
     {
-        return $this->belongsTo(Room::class, 'fixed_room_id');
-    }
-
-    public function treatments(): BelongsToMany
-    {
-        return $this->belongsToMany(Treatment::class, 'machine_treatment')
-            ->withPivot(['center_id']);
-    }
-
-    public function appointments(): HasMany
-    {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(WorkerSchedule::class);
     }
 }

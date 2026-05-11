@@ -19,6 +19,6 @@ class SessionStatus extends Model
     public static function idFor(string $name): int
     {
         return static::query()->where('name', $name)->value('id')
-            ?? throw new \RuntimeException("session_status '{$name}' is not seeded");
+            ?? throw new \RuntimeException("El estado de sesión '{$name}' no está disponible.");
     }
 }

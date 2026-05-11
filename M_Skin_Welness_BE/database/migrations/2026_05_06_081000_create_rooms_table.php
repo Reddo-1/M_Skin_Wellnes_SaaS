@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->string('name', 120);
-            $table->json('grid_position')->nullable();
+            $table->json('grid_position');
             $table->boolean('is_active')->default(true);
             $table->timestampTz('created_at')->useCurrent();
 

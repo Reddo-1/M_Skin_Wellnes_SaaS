@@ -28,9 +28,33 @@ class RolesAndPermissionsSeeder extends Seeder
             'treatments.delete',
         ];
 
+        $roomsPermissions = [
+            'rooms.view',
+            'rooms.create',
+            'rooms.update',
+            'rooms.delete',
+        ];
+
+        $machinesPermissions = [
+            'machines.view',
+            'machines.create',
+            'machines.update',
+            'machines.delete',
+        ];
+
+        $timeSlotsPermissions = [
+            'time_slots.view',
+            'time_slots.create',
+            'time_slots.update',
+            'time_slots.delete',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
-                            $treatmentsPermissions
+                            $treatmentsPermissions,
+                            $roomsPermissions,
+                            $machinesPermissions,
+                            $timeSlotsPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -42,6 +66,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'appointments.view',
             'appointments.change_status',
             'treatments.view',
+            'rooms.view',
+            'machines.view',
+            'time_slots.view',
         ];
 
         $rolesWithPermissions = [
@@ -56,11 +83,17 @@ class RolesAndPermissionsSeeder extends Seeder
                 'appointments.update',
                 'appointments.change_status',
                 'treatments.view',
+                'rooms.view',
+                'machines.view',
+                'time_slots.view',
             ],
 
             'rrhh' => [
                 'appointments.view',
                 'treatments.view',
+                'rooms.view',
+                'machines.view',
+                'time_slots.view',
             ],
 
             'diagnosticador' => $staffPermissions,
@@ -72,6 +105,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'appointments.create',
                 'appointments.change_status',
                 'treatments.view',
+                'rooms.view',
             ],
         ];
 

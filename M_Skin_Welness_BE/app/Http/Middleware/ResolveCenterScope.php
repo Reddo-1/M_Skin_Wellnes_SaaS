@@ -16,7 +16,7 @@ class ResolveCenterScope
         $user = $request->user();
 
         if ($user === null) {
-            throw new HttpException(401, 'Unauthenticated.');
+            throw new HttpException(401, 'No has iniciado sesión.');
         }
 
         if ($user->center_id !== null) {
@@ -26,19 +26,19 @@ class ResolveCenterScope
         }
 
         if (! $user->hasRole('superadmin')) {
-            throw new HttpException(403, 'User has no center assigned.');
+            throw new HttpException(403, 'No tienes un centro asignado.');
         }
 
         $rawCenterId = $request->input('center_id') ?? $request->query('center_id');
 
         if ($rawCenterId === null || !ctype_digit((string) $rawCenterId)) {
-            throw new HttpException(422, 'Superadmin must provide center_id for impersonation.');
+            throw new HttpException(422, 'Indica el centro sobre el que quieres operar.');
         }
 
         $centerId = (int) $rawCenterId;
 
         if (!Center::query()->whereKey($centerId)->exists()) {
-            throw new HttpException(422, "Center {$centerId} does not exist.");
+            throw new HttpException(422, 'El centro indicado no existe.');
         }
 
         $request->attributes->set('center_id', $centerId);
