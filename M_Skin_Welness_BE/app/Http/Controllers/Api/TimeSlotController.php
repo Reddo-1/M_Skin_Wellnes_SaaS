@@ -14,6 +14,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TimeSlotController extends Controller
 {
+    //inyecta el service de franjas horarias
     public function __construct(private readonly TimeSlotService $service)
     {
     }
@@ -25,8 +26,10 @@ class TimeSlotController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = TimeSlot::query()
+            //solo del centro actual
             ->forCenter($centerId)
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
+            //orden por hora de inicio
             ->orderBy('start_time');
 
         return TimeSlotResource::collection($query->paginate(50));
@@ -60,6 +63,7 @@ class TimeSlotController extends Controller
     {
         $this->authorize('delete', $timeSlot);
 
+        //el service lanza 422 si la franja está asignada a algún horario
         $this->service->delete($timeSlot);
 
         return response()->json(status: 204);

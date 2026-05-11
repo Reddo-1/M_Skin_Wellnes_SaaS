@@ -14,6 +14,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TreatmentController extends Controller
 {
+    //inyecta el service de tratamientos
     public function __construct(private readonly TreatmentService $service)
     {
     }
@@ -25,8 +26,11 @@ class TreatmentController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = Treatment::query()
+            //solo del centro actual
             ->forCenter($centerId)
+            //carga máquinas y roles autorizados
             ->with(['machines', 'authorizedRoles'])
+            //filtro opcional por activos/inactivos
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name');
 
@@ -47,6 +51,7 @@ class TreatmentController extends Controller
     {
         $this->authorize('view', $treatment);
 
+        //carga relaciones para devolver el detalle completo
         return TreatmentResource::make(
             $treatment->load(['machines', 'authorizedRoles'])
         );
@@ -63,6 +68,7 @@ class TreatmentController extends Controller
     {
         $this->authorize('delete', $treatment);
 
+        //el service lanza 422 si tiene citas asociadas
         $this->service->delete($treatment);
 
         return response()->json(status: 204);

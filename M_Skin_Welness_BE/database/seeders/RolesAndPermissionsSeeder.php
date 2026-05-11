@@ -49,12 +49,36 @@ class RolesAndPermissionsSeeder extends Seeder
             'time_slots.delete',
         ];
 
+        $workerSchedulesPermissions = [
+            'worker_schedules.view',
+            'worker_schedules.create',
+            'worker_schedules.update',
+            'worker_schedules.delete',
+        ];
+
+        $workerAbsencesPermissions = [
+            'worker_absences.view',
+            'worker_absences.create',
+            'worker_absences.update',
+            'worker_absences.delete',
+        ];
+
+        $workerExtraAvailabilitiesPermissions = [
+            'worker_extra_availabilities.view',
+            'worker_extra_availabilities.create',
+            'worker_extra_availabilities.update',
+            'worker_extra_availabilities.delete',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
                             $treatmentsPermissions,
                             $roomsPermissions,
                             $machinesPermissions,
-                            $timeSlotsPermissions
+                            $timeSlotsPermissions,
+                            $workerSchedulesPermissions,
+                            $workerAbsencesPermissions,
+                            $workerExtraAvailabilitiesPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -88,13 +112,18 @@ class RolesAndPermissionsSeeder extends Seeder
                 'time_slots.view',
             ],
 
-            'rrhh' => [
-                'appointments.view',
-                'treatments.view',
-                'rooms.view',
-                'machines.view',
-                'time_slots.view',
-            ],
+            'rrhh' => array_merge(
+                [
+                    'appointments.view',
+                    'treatments.view',
+                    'rooms.view',
+                    'machines.view',
+                    'time_slots.view',
+                ],
+                $workerSchedulesPermissions,
+                $workerAbsencesPermissions,
+                $workerExtraAvailabilitiesPermissions,
+            ),
 
             'diagnosticador' => $staffPermissions,
             'dermo_esteticien' => $staffPermissions,

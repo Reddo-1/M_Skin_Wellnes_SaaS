@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\TimeSlotController;
 use App\Http\Controllers\Api\TreatmentController;
+use App\Http\Controllers\Api\WorkerAbsenceController;
+use App\Http\Controllers\Api\WorkerExtraAvailabilityController;
+use App\Http\Controllers\Api\WorkerScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
@@ -22,5 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('rooms', RoomController::class);
         Route::apiResource('machines', MachineController::class);
         Route::apiResource('time-slots', TimeSlotController::class)->parameters(['time-slots' => 'time_slot']);
+        Route::apiResource('worker-schedules', WorkerScheduleController::class)->parameters(['worker-schedules' => 'worker_schedule']);
+        Route::apiResource('worker-absences', WorkerAbsenceController::class)->parameters(['worker-absences' => 'worker_absence']);
+        Route::apiResource('worker-extra-availabilities', WorkerExtraAvailabilityController::class)->parameters(['worker-extra-availabilities' => 'worker_extra_availability']);
     });
 });

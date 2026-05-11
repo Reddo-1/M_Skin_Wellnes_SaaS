@@ -8,33 +8,18 @@ use Illuminate\Validation\ValidationException;
 
 class TimeSlotService
 {
-    //Evita que haya franjas con la misma hora de comienzo/finalización en el mismo centro.
-    private function guardAgainstDuplicate(int $centerId, string $startTime, string $endTime, ?int $ignoreId = null): void
-    {
-        $query = TimeSlot::query()
-            ->where('center_id', $centerId)
-            ->where('start_time', $startTime)
-            ->where('end_time', $endTime);
-
-        if ($ignoreId !== null) {
-            $query->where('id', '!=', $ignoreId);
-        }
-
-        if ($query->exists()) {
-            throw ValidationException::withMessages([
-                'start_time' => ['Ya existe una franja horaria con esos mismos tiempos.'],
-            ]);
-        }
-    }
-
     public function create(int $centerId, array $data): TimeSlot
     {
         return DB::transaction(function () use ($centerId, $data) {
-            $this->guardAgainstDuplicate(
-                centerId: $centerId,
-                startTime: $data['start_time'],
-                endTime: $data['end_time'],
-            );
+            $exists = TimeSlot::query()
+                ->where('start_time', $data['start_time'])
+                ->exists();
+
+            if ($exists) {
+                throw ValidationException::withMessages([
+                    'start_time' => ['Ya existe una franja con esa hora de inicio.'],
+                ]);
+            }
 
             return TimeSlot::create([
                 'center_id' => $centerId,
@@ -49,15 +34,18 @@ class TimeSlotService
     public function update(TimeSlot $timeSlot, array $data): TimeSlot
     {
         return DB::transaction(function () use ($timeSlot, $data) {
-            $startTime = $data['start_time'] ?? $timeSlot->start_time;
-            $endTime = $data['end_time'] ?? $timeSlot->end_time;
+            if (array_key_exists('start_time', $data)) {
+                $exists = TimeSlot::query()
+                    ->where('start_time', $data['start_time'])
+                    ->where('id', '!=', $timeSlot->id)
+                    ->exists();
 
-            $this->guardAgainstDuplicate(
-                centerId: $timeSlot->center_id,
-                startTime: $startTime,
-                endTime: $endTime,
-                ignoreId: $timeSlot->id,
-            );
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'start_time' => ['Ya existe una franja con esa hora de inicio.'],
+                    ]);
+                }
+            }
 
             $timeSlot->fill($data)->save();
 
