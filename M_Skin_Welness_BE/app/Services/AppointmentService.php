@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Models\SessionStatus;
+use App\Models\WorkerSchedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -53,6 +54,39 @@ class AppointmentService
         }
     }
 
+    //comprueba si la cita cae dentro del descanso interno (break_start..break_end) del trabajador
+    private function guardAgainstWorkerBreak(int $centerId, CarbonImmutable $startsAt, CarbonImmutable $endsAt, int $workerId): void
+    {
+        //ISO 8601: 1=lunes ... 7=domingo (coincide con worker_schedules.weekday)
+        $weekday = $startsAt->dayOfWeekIso;
+        $date = $startsAt->toDateString();
+        $apptStart = $startsAt->format('H:i:s');
+        $apptEnd = $endsAt->format('H:i:s');
+
+        //busca un schedule vigente del trabajador para ese día cuyo time_slot tenga un break que se solape con la cita
+        $hasBreakConflict = WorkerSchedule::query()
+            ->forCenter($centerId)
+            ->where('worker_id', $workerId)
+            ->where('weekday', $weekday)
+            ->where('start_date', '<=', $date)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', $date);
+            })
+            ->whereHas('timeSlot', function ($q) use ($apptStart, $apptEnd) {
+                $q->whereNotNull('break_start')
+                  ->whereNotNull('break_end')
+                  ->where('break_start', '<', $apptEnd)
+                  ->where('break_end', '>', $apptStart);
+            })
+            ->exists();
+
+        if ($hasBreakConflict) {
+            throw ValidationException::withMessages([
+                'starts_at' => ['La cita coincide con el descanso del trabajador.'],
+            ]);
+        }
+    }
+
     public function create(int $centerId, array $data): Appointment
     {
         return DB::transaction(function () use ($centerId, $data) {
@@ -66,6 +100,13 @@ class AppointmentService
                 workerId: (int) $data['worker_id'],
                 roomId: (int) $data['room_id'],
                 machineId: isset($data['machine_id']) ? (int) $data['machine_id'] : null,
+            );
+
+            $this->guardAgainstWorkerBreak(
+                centerId: $centerId,
+                startsAt: $startsAt,
+                endsAt: $endsAt,
+                workerId: (int) $data['worker_id'],
             );
 
             $appointment = Appointment::create([
@@ -118,6 +159,13 @@ class AppointmentService
                 ignoreId: $appointment->id,
             );
 
+            $this->guardAgainstWorkerBreak(
+                centerId: $appointment->center_id,
+                startsAt: $startsAt,
+                endsAt: $endsAt,
+                workerId: (int) ($data['worker_id'] ?? $appointment->worker_id),
+            );
+
             //pone los valores en el objeto en memoria
             $appointment->fill($data);
 
@@ -136,17 +184,20 @@ class AppointmentService
         });
     }
 
-    //cambiar el estado de una sesión enviando la sesión y el estado al que quieres cambiar en texto
-    public function changeStatus(Appointment $appointment, string $targetStatus): Appointment
+    //cambia el estado de la cita; el id del estado llega directamente del FE
+    public function changeStatus(Appointment $appointment, int $statusId): Appointment
     {
-        return DB::transaction(function () use ($appointment, $targetStatus) {
-            $appointment->status_id = SessionStatus::idFor($targetStatus);
+        return DB::transaction(function () use ($appointment, $statusId) {
+            $appointment->status_id = $statusId;
 
-            if ($targetStatus === 'cancelada') {
+            //leemos el nombre solo para decidir los side effects (cancelada/realizada)
+            $statusName = SessionStatus::query()->whereKey($statusId)->value('name');
+
+            if ($statusName === 'cancelada') {
                 $appointment->cancelled_at = now();
             }
 
-            if ($targetStatus === 'realizada' && $appointment->actual_duration_minutes === null) {
+            if ($statusName === 'realizada' && $appointment->actual_duration_minutes === null) {
                 $appointment->actual_duration_minutes = max(0, (int) round(
                     $appointment->starts_at->diffInMinutes(now(), absolute: false)
                 ));

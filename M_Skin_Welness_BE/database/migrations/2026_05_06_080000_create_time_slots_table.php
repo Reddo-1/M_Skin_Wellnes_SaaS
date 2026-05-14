@@ -15,6 +15,9 @@ return new class extends Migration
             $table->string('name', 50)->nullable();
             $table->time('start_time');
             $table->time('end_time');
+            //descanso interno opcional (comer, etc.). Si la jornada es partida real son 2 franjas distintas
+            $table->time('break_start')->nullable();
+            $table->time('break_end')->nullable();
             $table->boolean('is_active')->default(true);
 
             $table->unique(['id', 'center_id'], 'uq_time_slots_id_center');
@@ -29,6 +32,20 @@ return new class extends Migration
         DB::statement("
             ALTER TABLE time_slots
             ADD CONSTRAINT chk_time_slots_end CHECK (end_time > start_time)
+        ");
+
+        DB::statement("
+            ALTER TABLE time_slots
+            ADD CONSTRAINT chk_time_slots_break CHECK (
+                (break_start IS NULL AND break_end IS NULL)
+                OR (
+                    break_start IS NOT NULL
+                    AND break_end IS NOT NULL
+                    AND start_time <= break_start
+                    AND break_start < break_end
+                    AND break_end <= end_time
+                )
+            )
         ");
     }
 

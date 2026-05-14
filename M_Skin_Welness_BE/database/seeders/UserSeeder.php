@@ -31,13 +31,13 @@ class UserSeeder extends Seeder
         }
 
         $staff = [
-            ['admin@demo.test',      'Admin Demo',          'administrador'],
-            ['recepcion@demo.test',  'Lucía Recepción',     'recepcionista'],
-            ['rrhh@demo.test',       'Marta RRHH',          'rrhh'],
-            ['diagno@demo.test',     'Pablo Diagnóstico',   'diagnosticador'],
-            ['dermo@demo.test',      'Carla Dermo',         'dermo_esteticien'],
-            ['fisio@demo.test',      'Iván Fisio',          'fisioterapeuta'],
-            ['mani@demo.test',       'Sofía Manicura',      'manicurista'],
+            ['eljefazomaximo@gmail.com',      'Admin',          'administrador'],
+            ['recepcionista@gmail.com',  'Sheila Recepción',     'recepcionista'],
+            ['recursos.humanos@gmail.com',       'María RRHH',          'rrhh'],
+            ['marc@gmail.com',     'Marc',   'diagnosticador'],
+            ['raquel@gmail.com',      'Raquel ',         'dermo_esteticien'],
+            ['ivan@gmail.com',      'Iván Fisio',          'fisioterapeuta'],
+            ['mari@gmail.com',       'Mari Manicura',      'manicurista'],
         ];
 
         foreach ($staff as [$email, $name, $role]) {
@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
         }
 
         $clients = [
-            ['cliente1@demo.test', 'Ana López',     '+34611111111', '1990-04-12'],
+            ['alexsanchezgradomedio@gmail.com', 'Alehandro',     '+34666666666', '1350-04-12'],
             ['cliente2@demo.test', 'Carlos Pérez',  '+34622222222', '1985-08-21'],
             ['cliente3@demo.test', 'Beatriz Ruiz',  '+34633333333', '1995-01-30'],
             ['cliente4@demo.test', 'David Castro',  '+34644444444', '1978-11-09'],

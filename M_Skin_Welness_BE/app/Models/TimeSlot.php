@@ -19,6 +19,8 @@ class TimeSlot extends Model
         'name',
         'start_time',
         'end_time',
+        'break_start',
+        'break_end',
         'is_active',
     ];
 

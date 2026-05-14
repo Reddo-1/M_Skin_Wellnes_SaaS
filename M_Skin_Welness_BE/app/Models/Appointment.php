@@ -13,7 +13,6 @@ class Appointment extends Model
     /** @use HasFactory<\Database\Factories\AppointmentFactory> */
     use HasFactory;
 
-    public const SOURCES = ['staff', 'online_client'];
 
     protected $fillable = [
         'center_id',

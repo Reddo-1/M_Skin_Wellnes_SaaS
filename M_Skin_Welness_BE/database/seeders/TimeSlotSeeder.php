@@ -16,10 +16,11 @@ class TimeSlotSeeder extends Seeder
             return;
         }
 
+        //Completo es jornada continua con descanso para comer
         $slots = [
-            ['name' => 'Mañana',   'start_time' => '09:00:00', 'end_time' => '14:00:00'],
-            ['name' => 'Tarde',    'start_time' => '16:00:00', 'end_time' => '20:00:00'],
-            ['name' => 'Completo', 'start_time' => '09:00:00', 'end_time' => '20:00:00'],
+            ['name' => 'Mañana',   'start_time' => '09:00:00', 'end_time' => '14:00:00', 'break_start' => null,       'break_end' => null],
+            ['name' => 'Tarde',    'start_time' => '16:00:00', 'end_time' => '20:00:00', 'break_start' => null,       'break_end' => null],
+            ['name' => 'Completo', 'start_time' => '09:00:00', 'end_time' => '20:00:00', 'break_start' => '14:00:00', 'break_end' => '16:00:00'],
         ];
 
         foreach ($slots as $s) {
@@ -31,6 +32,8 @@ class TimeSlotSeeder extends Seeder
                 ],
                 [
                     'name' => $s['name'],
+                    'break_start' => $s['break_start'],
+                    'break_end' => $s['break_end'],
                     'is_active' => true,
                 ]
             );

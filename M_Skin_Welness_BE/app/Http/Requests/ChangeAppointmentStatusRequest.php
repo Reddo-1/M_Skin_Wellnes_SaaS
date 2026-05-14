@@ -14,7 +14,8 @@ class ChangeAppointmentStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', 'exists:session_statuses,name'],
+            //el FE manda directamente el id del estado seleccionado
+            'status_id' => ['required', 'integer', 'exists:session_statuses,id'],
         ];
     }
 }

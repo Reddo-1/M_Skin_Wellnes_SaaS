@@ -51,10 +51,16 @@ class AppointmentController extends Controller
 
     public function store(StoreAppointmentRequest $request): AppointmentResource
     {
-        //el FormRequest ya autorizó y validó
+        $data = $request->validated();
+
+        //si la cita la crea un cliente desde su portal, el origen siempre es 'online'
+        if ($request->user()->hasRole('cliente')) {
+            $data['booking_source'] = 'online';
+        }
+
         $appointment = $this->service->create(
             centerId: (int) $request->attributes->get('center_id'),
-            data: $request->validated(),
+            data: $data,
         );
 
         return AppointmentResource::make($appointment);
@@ -92,7 +98,7 @@ class AppointmentController extends Controller
     public function changeStatus(ChangeAppointmentStatusRequest $request, Appointment $appointment): AppointmentResource
     {
         return AppointmentResource::make(
-            $this->service->changeStatus($appointment, $request->validated('status'))
+            $this->service->changeStatus($appointment, (int) $request->validated('status_id'))
         );
     }
 }
