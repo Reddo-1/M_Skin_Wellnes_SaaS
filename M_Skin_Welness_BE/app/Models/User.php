@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -38,5 +39,15 @@ class User extends Authenticatable
             'failed_attempts' => 'integer',
             'locked_until' => 'datetime',
         ];
+    }
+
+    public function scopeForCenter(Builder $query, int $centerId): Builder
+    {
+        return $query->where('center_id', $centerId);
+    }
+
+    public function scopeActive(Builder $query, bool $active = true): Builder
+    {
+        return $query->where('is_active', $active);
     }
 }

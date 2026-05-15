@@ -70,6 +70,26 @@ class RolesAndPermissionsSeeder extends Seeder
             'worker_extra_availabilities.delete',
         ];
 
+        $usersPermissions = [
+            'users.view',
+            'users.create_staff',
+            'users.create_client',
+            'users.update',
+            'users.deactivate',
+        ];
+
+        $clientProfilesPermissions = [
+            'client_profiles.view',
+            'client_profiles.create',
+            'client_profiles.update',
+        ];
+
+        $skinEvaluationsPermissions = [
+            'skin_evaluations.view',
+            'skin_evaluations.create',
+            'skin_evaluations.update',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
                             $treatmentsPermissions,
@@ -78,7 +98,10 @@ class RolesAndPermissionsSeeder extends Seeder
                             $timeSlotsPermissions,
                             $workerSchedulesPermissions,
                             $workerAbsencesPermissions,
-                            $workerExtraAvailabilitiesPermissions
+                            $workerExtraAvailabilitiesPermissions,
+                            $usersPermissions,
+                            $clientProfilesPermissions,
+                            $skinEvaluationsPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -110,6 +133,12 @@ class RolesAndPermissionsSeeder extends Seeder
                 'rooms.view',
                 'machines.view',
                 'time_slots.view',
+                'users.view',
+                'users.create_client',
+                'users.update',
+                'users.deactivate',
+                'client_profiles.view',
+                'skin_evaluations.view',
             ],
 
             'rrhh' => array_merge(
@@ -119,16 +148,28 @@ class RolesAndPermissionsSeeder extends Seeder
                     'rooms.view',
                     'machines.view',
                     'time_slots.view',
+                    'users.view',
+                    'users.create_staff',
+                    'users.update',
+                    'users.deactivate',
                 ],
                 $workerSchedulesPermissions,
                 $workerAbsencesPermissions,
                 $workerExtraAvailabilitiesPermissions,
             ),
 
-            'diagnosticador' => $staffPermissions,
-            'dermo_esteticien' => $staffPermissions,
-            'fisioterapeuta' => $staffPermissions,
-            'manicurista' => $staffPermissions,
+            'diagnosticador' => array_merge(
+                $staffPermissions,
+                [
+                    'client_profiles.view',
+                    'client_profiles.create',
+                    'client_profiles.update',
+                ],
+                $skinEvaluationsPermissions,
+            ),
+            'dermo_esteticien' => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
+            'fisioterapeuta'   => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
+            'manicurista'      => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
             'cliente' => [
                 'appointments.view',
                 'appointments.create',

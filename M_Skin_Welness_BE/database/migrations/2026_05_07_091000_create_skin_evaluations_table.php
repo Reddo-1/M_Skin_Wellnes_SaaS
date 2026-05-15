@@ -17,7 +17,8 @@ return new class extends Migration
             $table->date('evaluation_date')->useCurrent();
             $table->foreignId('professional_id');
             $table->text('general_notes')->nullable();
-            $table->timestampTz('created_at')->useCurrent();
+            //timestamps completos: las evaluaciones se pueden corregir tras crearlas
+            $table->timestampsTz();
 
             $table->unique(['id', 'center_id'], 'uq_skin_evaluations_id_center');
 

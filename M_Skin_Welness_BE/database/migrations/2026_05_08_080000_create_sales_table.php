@@ -18,6 +18,10 @@ return new class extends Migration
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
             $table->foreignId('status_id');
+            //metodo de cobro: datafono o efectivo. nulo si la venta aun esta pendiente
+            $table->unsignedBigInteger('payment_method_id')->nullable();
+            //momento en que se cobro la venta. nulo mientras siga pendiente
+            $table->timestampTz('paid_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestampsTz();
 
@@ -40,6 +44,10 @@ return new class extends Migration
 
             $table->foreign('status_id', 'fk_sales_status')
                 ->references('id')->on('sale_statuses')
+                ->restrictOnDelete();
+
+            $table->foreign('payment_method_id', 'fk_sales_payment_method')
+                ->references('id')->on('payment_methods')
                 ->restrictOnDelete();
 
             $table->index(['center_id', 'client_id'], 'idx_sales_center_client');

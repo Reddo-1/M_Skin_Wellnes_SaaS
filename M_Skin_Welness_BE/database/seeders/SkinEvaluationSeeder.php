@@ -17,9 +17,17 @@ class SkinEvaluationSeeder extends Seeder
             return;
         }
 
-        $diagnoId = User::query()->where('email', 'diagno@demo.test')->value('id');
+        $diagnoId = User::query()
+            ->where('email', 'marc@gmail.com')
+            ->value('id');
 
         if ($diagnoId === null) {
+            return;
+        }
+
+        $skinTypeId = DB::table('skin_types')->where('name', 'mixta')->value('id');
+
+        if ($skinTypeId === null) {
             return;
         }
 
@@ -28,20 +36,22 @@ class SkinEvaluationSeeder extends Seeder
             ->get();
 
         foreach ($profiles as $profile) {
-            DB::table('skin_evaluations')->updateOrInsert(
-                [
-                    'center_id' => $centerId,
-                    'client_profile_id' => $profile->id,
-                    'evaluation_date' => now()->subDays(7)->toDateString(),
-                ],
-                [
-                    'user_id' => $profile->user_id,
-                    'skin_type_id' => $profile->skin_type_id,
-                    'professional_id' => $diagnoId,
-                    'general_notes' => 'Evaluación inicial. Se observa estado general adecuado.',
-                    'created_at' => now(),
-                ]
-            );
+            $evaluationId = DB::table('skin_evaluations')->insertGetId([
+                'center_id' => $centerId,
+                'user_id' => $profile->user_id,
+                'client_profile_id' => $profile->id,
+                'skin_type_id' => $skinTypeId,
+                'evaluation_date' => now()->subDays(7)->toDateString(),
+                'professional_id' => $diagnoId,
+                'general_notes' => 'Evaluacion inicial. Estado general adecuado.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            //marcamos esa evaluacion como vigente para el perfil
+            DB::table('client_profiles')
+                ->where('id', $profile->id)
+                ->update(['current_skin_evaluation_id' => $evaluationId, 'updated_at' => now()]);
         }
     }
 }
