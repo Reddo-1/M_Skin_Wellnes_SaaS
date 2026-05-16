@@ -22,6 +22,16 @@ class UserResource extends JsonResource
             'registration_source' => $this->registration_source,
             'roles' => $this->getRoleNames(),
             'permissions' => $this->getAllPermissions()->pluck('name'),
+            'center' => $this->whenLoaded('center', function () {
+                return [
+                    'id' => $this->center->id,
+                    'name' => $this->center->name,
+                    'slug' => $this->center->slug,
+                    'plan' => $this->center->relationLoaded('plan') && $this->center->plan !== null
+                        ? PlanResource::make($this->center->plan)
+                        : null,
+                ];
+            }),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
@@ -28,5 +29,10 @@ class Plan extends Model
             'allows_custom_domain' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function centers(): HasMany
+    {
+        return $this->hasMany(Center::class);
     }
 }

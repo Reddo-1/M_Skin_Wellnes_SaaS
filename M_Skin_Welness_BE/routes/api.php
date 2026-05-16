@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\MachineController;
+use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductStockController;
 use App\Http\Controllers\Api\RoomController;
@@ -35,6 +36,9 @@ Route::get('user-files/{user_file}/file', [UserFileController::class, 'file'])
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
+
+    //planes: catalogo global, no van bajo center.scope
+    Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
 
     Route::middleware('center.scope')->group(function () {
         Route::post('appointments/{appointment}/status', [AppointmentController::class, 'changeStatus']);

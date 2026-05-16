@@ -82,7 +82,9 @@ class AuthController extends Controller
 
     public function me(Request $request): UserResource
     {
-        return UserResource::make($request->user());
+        $user = $request->user()->load('center.plan');
+
+        return UserResource::make($user);
     }
 
     //envia el correo de recuperacion con un link que apunta al FE
