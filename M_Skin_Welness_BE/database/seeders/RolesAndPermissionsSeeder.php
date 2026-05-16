@@ -207,6 +207,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'skin_evaluations.view',
                 'treatment_consents.view',
                 'client_consents.view',
+                'client_consents.create',
+                'client_consents.update',
                 'products.view',
                 'product_stocks.view',
                 'stock_movements.view',
@@ -237,14 +239,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
             'diagnosticador' => array_merge(
                 $staffPermissions,
-                [
-                    'client_profiles.view',
-                    'client_profiles.create',
-                    'client_profiles.update',
-                ],
-                $skinEvaluationsPermissions,
-                $treatmentConsentsPermissions,
-                $userFilesPermissions,
+                $practitionerExtraPermissions,
+                ['client_profiles.create', 'client_profiles.update'],
+                ['skin_evaluations.create', 'skin_evaluations.update'],
+                ['treatment_consents.create', 'treatment_consents.update'],
+                ['user_files.upload', 'user_files.delete'],
             ),
             'dermo_esteticien' => array_merge($staffPermissions, $practitionerExtraPermissions),
             'fisioterapeuta'   => array_merge($staffPermissions, $practitionerExtraPermissions),

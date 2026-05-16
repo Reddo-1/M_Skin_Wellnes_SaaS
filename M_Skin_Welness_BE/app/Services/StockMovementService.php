@@ -54,13 +54,25 @@ class StockMovementService
         return DB::transaction(function () use ($centerId, $actorId, $productId, $typeName, $quantity, $reason, $referenceType, $referenceId) {
             $type = StockMovementType::query()
                 ->where('name', $typeName)
-                ->firstOrFail();
+                ->first();
+
+            if ($type === null) {
+                throw ValidationException::withMessages([
+                    'type' => ["No se reconoce el tipo de movimiento '{$typeName}'."],
+                ]);
+            }
 
             $stock = ProductStock::query()
                 ->forCenter($centerId)
                 ->where('product_id', $productId)
                 ->lockForUpdate()
-                ->firstOrFail();
+                ->first();
+
+            if ($stock === null) {
+                throw ValidationException::withMessages([
+                    'product_id' => ['Este producto no tiene stock inicializado. Avisa al administrador del centro.'],
+                ]);
+            }
 
             $previous = (float) $stock->current_quantity;
             $new = $previous + $quantity;
