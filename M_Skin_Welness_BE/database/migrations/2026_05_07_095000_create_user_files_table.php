@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,11 +13,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->foreignId('user_id');
+            //null cuando es foto_perfil; las fotos clinicas van vinculadas a una evaluacion
             $table->unsignedBigInteger('skin_evaluation_id')->nullable();
-            $table->string('type', 30);
             $table->string('category', 40);
             $table->string('path', 255);
-            $table->string('mime_type', 100)->nullable();
             $table->text('notes')->nullable();
             $table->timestampTz('created_at')->useCurrent();
 
@@ -36,6 +36,20 @@ return new class extends Migration
             $table->index(['center_id', 'user_id'], 'idx_user_files_center_user');
             $table->index(['center_id', 'skin_evaluation_id'], 'idx_user_files_center_skin_eval');
         });
+
+        //una sola foto por categoria dentro de una misma evaluacion (no aplica cuando skin_evaluation_id es null)
+        DB::statement("
+            CREATE UNIQUE INDEX uq_user_files_eval_category
+            ON user_files (skin_evaluation_id, category)
+            WHERE skin_evaluation_id IS NOT NULL
+        ");
+
+        //un usuario tiene un solo avatar por centro
+        DB::statement("
+            CREATE UNIQUE INDEX uq_user_files_avatar
+            ON user_files (center_id, user_id)
+            WHERE category = 'foto_perfil'
+        ");
     }
 
     public function down(): void

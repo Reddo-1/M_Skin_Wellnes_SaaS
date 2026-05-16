@@ -90,6 +90,41 @@ class RolesAndPermissionsSeeder extends Seeder
             'skin_evaluations.update',
         ];
 
+        $treatmentConsentsPermissions = [
+            'treatment_consents.view',
+            'treatment_consents.create',
+            'treatment_consents.update',
+        ];
+
+        $clientConsentsPermissions = [
+            'client_consents.view',
+            'client_consents.create',
+            'client_consents.update',
+        ];
+
+        $productsPermissions = [
+            'products.view',
+            'products.create',
+            'products.update',
+            'products.delete',
+        ];
+
+        $productStocksPermissions = [
+            'product_stocks.view',
+            'product_stocks.adjust',
+        ];
+
+        $stockMovementsPermissions = [
+            'stock_movements.view',
+            'stock_movements.create',
+        ];
+
+        $userFilesPermissions = [
+            'user_files.view',
+            'user_files.upload',
+            'user_files.delete',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
                             $treatmentsPermissions,
@@ -101,7 +136,13 @@ class RolesAndPermissionsSeeder extends Seeder
                             $workerExtraAvailabilitiesPermissions,
                             $usersPermissions,
                             $clientProfilesPermissions,
-                            $skinEvaluationsPermissions
+                            $skinEvaluationsPermissions,
+                            $treatmentConsentsPermissions,
+                            $clientConsentsPermissions,
+                            $productsPermissions,
+                            $productStocksPermissions,
+                            $stockMovementsPermissions,
+                            $userFilesPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -116,6 +157,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'rooms.view',
             'machines.view',
             'time_slots.view',
+            'products.view',
+            'product_stocks.view',
+        ];
+
+        $practitionerExtraPermissions = [
+            'client_profiles.view',
+            'skin_evaluations.view',
+            'treatment_consents.view',
+            'client_consents.view',
+            'user_files.view',
         ];
 
         $rolesWithPermissions = [
@@ -139,6 +190,13 @@ class RolesAndPermissionsSeeder extends Seeder
                 'users.deactivate',
                 'client_profiles.view',
                 'skin_evaluations.view',
+                'treatment_consents.view',
+                'client_consents.view',
+                'products.view',
+                'product_stocks.view',
+                'stock_movements.view',
+                'stock_movements.create',
+                'user_files.view',
             ],
 
             'rrhh' => array_merge(
@@ -166,10 +224,12 @@ class RolesAndPermissionsSeeder extends Seeder
                     'client_profiles.update',
                 ],
                 $skinEvaluationsPermissions,
+                $treatmentConsentsPermissions,
+                $userFilesPermissions,
             ),
-            'dermo_esteticien' => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
-            'fisioterapeuta'   => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
-            'manicurista'      => array_merge($staffPermissions, ['client_profiles.view', 'skin_evaluations.view']),
+            'dermo_esteticien' => array_merge($staffPermissions, $practitionerExtraPermissions),
+            'fisioterapeuta'   => array_merge($staffPermissions, $practitionerExtraPermissions),
+            'manicurista'      => array_merge($staffPermissions, $practitionerExtraPermissions),
             'cliente' => [
                 'appointments.view',
                 'appointments.create',

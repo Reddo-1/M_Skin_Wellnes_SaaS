@@ -2,13 +2,19 @@
 
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\MachineController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductStockController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SkinEvaluationController;
+use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\TimeSlotController;
+use App\Http\Controllers\Api\TreatmentConsentController;
 use App\Http\Controllers\Api\TreatmentController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserFileController;
 use App\Http\Controllers\Api\WorkerAbsenceController;
 use App\Http\Controllers\Api\WorkerExtraAvailabilityController;
 use App\Http\Controllers\Api\WorkerScheduleController;
@@ -16,6 +22,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
+Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
+
+Route::get('user-files/{user_file}/file', [UserFileController::class, 'file'])
+    ->middleware('signed')
+    ->name('user-files.file');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -27,6 +39,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('treatments', TreatmentController::class);
         Route::apiResource('rooms', RoomController::class);
         Route::apiResource('machines', MachineController::class);
+        Route::apiResource('products', ProductController::class);
+
+        //stock solo lectura; las modificaciones pasan por StockMovement
+        Route::post('product-stocks/{product_stock}/adjust', [ProductStockController::class, 'adjust']);
+        Route::apiResource('product-stocks', ProductStockController::class)
+            ->parameters(['product-stocks' => 'product_stock'])
+            ->only(['index', 'show']);
+
+        //movimientos de stock: solo entradas y devoluciones manuales; salidas se generan internamente desde ventas/sesiones
+        Route::apiResource('stock-movements', StockMovementController::class)
+            ->parameters(['stock-movements' => 'stock_movement'])
+            ->only(['index', 'show', 'store']);
         Route::apiResource('time-slots', TimeSlotController::class)->parameters(['time-slots' => 'time_slot']);
         Route::apiResource('worker-schedules', WorkerScheduleController::class)->parameters(['worker-schedules' => 'worker_schedule']);
         Route::apiResource('worker-absences', WorkerAbsenceController::class)->parameters(['worker-absences' => 'worker_absence']);
@@ -46,5 +70,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('skin-evaluations', SkinEvaluationController::class)
             ->parameters(['skin-evaluations' => 'skin_evaluation'])
             ->except(['destroy']);
+
+        //aptitud + consent específico por tratamiento; sin firma (la firma va en client-consents)
+        Route::apiResource('treatment-consents', TreatmentConsentController::class)
+            ->parameters(['treatment-consents' => 'treatment_consent'])
+            ->except(['destroy']);
+
+        //consents RGPD generales del paciente con el centro + firma; sin destroy (registro legal)
+        Route::apiResource('client-consents', ClientConsentController::class)
+            ->parameters(['client-consents' => 'client_consent'])
+            ->except(['destroy']);
+
+        //fotos clinicas y avatars; no hay update (se borra y se sube de nuevo)
+        Route::apiResource('user-files', UserFileController::class)
+            ->parameters(['user-files' => 'user_file'])
+            ->except(['update']);
     });
 });

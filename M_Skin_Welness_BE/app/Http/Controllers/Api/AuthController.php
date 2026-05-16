@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -80,5 +83,40 @@ class AuthController extends Controller
     public function me(Request $request): UserResource
     {
         return UserResource::make($request->user());
+    }
+
+    //envia el correo de recuperacion con un link que apunta al FE
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        Password::sendResetLink($request->only('email'));
+
+        //respuesta generica a proposito: no revelamos si el email existe en BD
+        return response()->json([
+            'message' => 'Si la cuenta existe, recibiras un correo con instrucciones para recuperar la contrasena.',
+        ]);
+    }
+
+    //cambia la contrasena usando el token recibido por correo
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => $password,
+                ])->save();
+
+                //por seguridad, revocamos todos los tokens activos tras un reset
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => [trans($status)],
+            ]);
+        }
+
+        return response()->json(['message' => 'Contrasena actualizada correctamente.']);
     }
 }

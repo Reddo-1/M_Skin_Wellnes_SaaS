@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -49,5 +50,11 @@ class User extends Authenticatable
     public function scopeActive(Builder $query, bool $active = true): Builder
     {
         return $query->where('is_active', $active);
+    }
+
+    //usamos la notification propia para que el correo salga en espanol con tono de MSkinWellness
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

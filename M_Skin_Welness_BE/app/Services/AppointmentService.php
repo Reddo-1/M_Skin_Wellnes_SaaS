@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Models\ClientConsent;
 use App\Models\SessionStatus;
+use App\Models\TreatmentConsent;
 use App\Models\WorkerSchedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +53,43 @@ class AppointmentService
 
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
+        }
+    }
+
+    //bloquea la cita si el paciente no tiene firmado el consentimiento general del centro
+    //o no tiene una valoración vigente apta y consentida para este tratamiento
+    private function guardAgainstMissingConsent(int $centerId, int $clientId, int $treatmentId): void
+    {
+        $hasGeneralConsent = ClientConsent::query()
+            ->forCenter($centerId)
+            ->where('user_id', $clientId)
+            ->where('is_active', true)
+            ->exists();
+
+        if (! $hasGeneralConsent) {
+            throw ValidationException::withMessages([
+                'client_id' => ['El paciente no ha firmado el consentimiento general del centro. Recoge la firma antes de programar la cita.'],
+            ]);
+        }
+
+        $treatmentConsent = TreatmentConsent::query()
+            ->forCenter($centerId)
+            ->where('user_id', $clientId)
+            ->where('treatment_id', $treatmentId)
+            ->where('is_active', true)
+            ->first();
+
+        if ($treatmentConsent === null) {
+            throw ValidationException::withMessages([
+                'treatment_id' => ['El paciente no ha sido valorado para este tratamiento. El diagnosticador debe valorarlo antes de programar la cita.'],
+            ]);
+        }
+
+        //is_suitable=false NO bloquea: el paciente puede insistir bajo su responsabilidad si consintió igual
+        if (! $treatmentConsent->treatment_consent) {
+            throw ValidationException::withMessages([
+                'treatment_id' => ['El paciente no ha consentido este tratamiento.'],
+            ]);
         }
     }
 
@@ -109,6 +148,12 @@ class AppointmentService
                 workerId: (int) $data['worker_id'],
             );
 
+            $this->guardAgainstMissingConsent(
+                centerId: $centerId,
+                clientId: (int) $data['client_id'],
+                treatmentId: (int) $data['treatment_id'],
+            );
+
             $appointment = Appointment::create([
                 'center_id' => $centerId,
                 'treatment_id' => $data['treatment_id'],
@@ -165,6 +210,15 @@ class AppointmentService
                 endsAt: $endsAt,
                 workerId: (int) ($data['worker_id'] ?? $appointment->worker_id),
             );
+
+            //solo re-validamos consentimiento si cambia el paciente o el tratamiento
+            if (array_key_exists('client_id', $data) || array_key_exists('treatment_id', $data)) {
+                $this->guardAgainstMissingConsent(
+                    centerId: $appointment->center_id,
+                    clientId: (int) ($data['client_id'] ?? $appointment->client_id),
+                    treatmentId: (int) ($data['treatment_id'] ?? $appointment->treatment_id),
+                );
+            }
 
             //pone los valores en el objeto en memoria
             $appointment->fill($data);
