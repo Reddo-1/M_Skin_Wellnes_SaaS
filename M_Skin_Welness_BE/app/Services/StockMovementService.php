@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\StockMovement;
 use App\Models\StockMovementType;
@@ -10,6 +11,36 @@ use Illuminate\Validation\ValidationException;
 
 class StockMovementService
 {
+    //variante para flujos en paquetes (entradas de proveedor, devoluciones, venta presencial).
+    public function registerByPackages(
+        int $centerId,
+        int $actorId,
+        int $productId,
+        string $typeName,
+        float $packageQuantity,
+        ?string $reason = null,
+        ?string $referenceType = null,
+        ?int $referenceId = null,
+    ): StockMovement {
+        $product = Product::query()
+            ->forCenter($centerId)
+            ->whereKey($productId)
+            ->firstOrFail();
+
+        $doses = $packageQuantity * (int) $product->doses_per_package;
+
+        return $this->register(
+            centerId: $centerId,
+            actorId: $actorId,
+            productId: $productId,
+            typeName: $typeName,
+            quantity: $doses,
+            reason: $reason,
+            referenceType: $referenceType,
+            referenceId: $referenceId,
+        );
+    }
+
     public function register(
         int $centerId,
         int $actorId,

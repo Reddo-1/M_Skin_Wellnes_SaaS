@@ -19,6 +19,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'appointments.update',
             'appointments.delete',
             'appointments.change_status',
+            'appointments.attach_products',
         ];
 
         $treatmentsPermissions = [
@@ -119,6 +120,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'stock_movements.create',
         ];
 
+        $salesPermissions = [
+            'sales.view',
+            'sales.create',
+            'sales.change_status',
+        ];
+
+        $invoicesPermissions = [
+            'invoices.view',
+        ];
+
         $userFilesPermissions = [
             'user_files.view',
             'user_files.upload',
@@ -142,6 +153,8 @@ class RolesAndPermissionsSeeder extends Seeder
                             $productsPermissions,
                             $productStocksPermissions,
                             $stockMovementsPermissions,
+                            $salesPermissions,
+                            $invoicesPermissions,
                             $userFilesPermissions
         );
         foreach ($permissions as $name) {
@@ -153,6 +166,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $staffPermissions = [
             'appointments.view',
             'appointments.change_status',
+            'appointments.attach_products',
             'treatments.view',
             'rooms.view',
             'machines.view',
@@ -180,6 +194,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'appointments.create',
                 'appointments.update',
                 'appointments.change_status',
+                'appointments.attach_products',
                 'treatments.view',
                 'rooms.view',
                 'machines.view',
@@ -196,6 +211,10 @@ class RolesAndPermissionsSeeder extends Seeder
                 'product_stocks.view',
                 'stock_movements.view',
                 'stock_movements.create',
+                'sales.view',
+                'sales.create',
+                'sales.change_status',
+                'invoices.view',
                 'user_files.view',
             ],
 

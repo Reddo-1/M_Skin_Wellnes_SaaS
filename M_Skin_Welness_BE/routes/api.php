@@ -1,13 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\AppointmentProductController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductStockController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SkinEvaluationController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\TimeSlotController;
@@ -35,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('center.scope')->group(function () {
         Route::post('appointments/{appointment}/status', [AppointmentController::class, 'changeStatus']);
+        Route::get('appointments/{appointment}/products', [AppointmentProductController::class, 'index']);
+        Route::post('appointments/{appointment}/products', [AppointmentProductController::class, 'store']);
+        Route::delete('appointments/{appointment}/products/{product}', [AppointmentProductController::class, 'destroy']);
         Route::apiResource('appointments', AppointmentController::class);
         Route::apiResource('treatments', TreatmentController::class);
         Route::apiResource('rooms', RoomController::class);
@@ -51,6 +57,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('stock-movements', StockMovementController::class)
             ->parameters(['stock-movements' => 'stock_movement'])
             ->only(['index', 'show', 'store']);
+
+        //ventas presenciales: sin update (las lineas son inmutables) ni destroy (queda para auditoria, se cancela con changeStatus)
+        Route::post('sales/{sale}/status', [SaleController::class, 'changeStatus']);
+        Route::apiResource('sales', SaleController::class)
+            ->only(['index', 'show', 'store']);
+
+        //facturas: solo lectura; las emite automaticamente el SaleService al cobrar
+        Route::apiResource('invoices', InvoiceController::class)
+            ->only(['index', 'show']);
         Route::apiResource('time-slots', TimeSlotController::class)->parameters(['time-slots' => 'time_slot']);
         Route::apiResource('worker-schedules', WorkerScheduleController::class)->parameters(['worker-schedules' => 'worker_schedule']);
         Route::apiResource('worker-absences', WorkerAbsenceController::class)->parameters(['worker-absences' => 'worker_absence']);

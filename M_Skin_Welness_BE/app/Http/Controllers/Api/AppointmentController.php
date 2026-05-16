@@ -98,7 +98,7 @@ class AppointmentController extends Controller
     public function changeStatus(ChangeAppointmentStatusRequest $request, Appointment $appointment): AppointmentResource
     {
         return AppointmentResource::make(
-            $this->service->changeStatus($appointment, (int) $request->validated('status_id'))
+            $this->service->changeStatus($appointment, (int) $request->validated('status_id'), $request->user()->id)
         );
     }
 }

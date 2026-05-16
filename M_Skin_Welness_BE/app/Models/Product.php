@@ -13,9 +13,9 @@ class Product extends Model
         'center_id',
         'name',
         'description',
-        'measurement_unit',
         'sale_price',
         'cost_price',
+        'doses_per_package',
         'minimum_stock',
         'is_sellable',
         'is_active',
@@ -26,6 +26,7 @@ class Product extends Model
         return [
             'sale_price' => 'decimal:2',
             'cost_price' => 'decimal:2',
+            'doses_per_package' => 'integer',
             'minimum_stock' => 'decimal:3',
             'is_sellable' => 'boolean',
             'is_active' => 'boolean',

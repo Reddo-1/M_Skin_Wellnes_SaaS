@@ -13,9 +13,10 @@ return new class extends Migration
             $table->foreignId('center_id');
             $table->string('name', 120);
             $table->text('description')->nullable();
-            $table->string('measurement_unit', 20)->default('unit');
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
+            //numero de dosis que rinde un paquete; 1 para productos donde 1 paquete = 1 dosis (mascarillas individuales)
+            $table->integer('doses_per_package')->default(1);
             $table->decimal('minimum_stock', 10, 3)->default(0);
             $table->boolean('is_sellable')->default(true);
             $table->boolean('is_active')->default(true);

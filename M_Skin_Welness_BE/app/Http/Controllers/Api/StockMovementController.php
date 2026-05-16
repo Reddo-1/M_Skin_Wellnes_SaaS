@@ -39,12 +39,12 @@ class StockMovementController extends Controller
     {
         $data = $request->validated();
 
-        $movement = $this->service->register(
+        $movement = $this->service->registerByPackages(
             centerId: (int) $request->attributes->get('center_id'),
             actorId: $request->user()->id,
             productId: (int) $data['product_id'],
             typeName: $data['type'],
-            quantity: (float) $data['quantity'],
+            packageQuantity: (float) $data['package_quantity'],
             reason: $data['reason'] ?? null,
         );
 

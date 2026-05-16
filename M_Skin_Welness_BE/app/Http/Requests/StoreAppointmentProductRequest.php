@@ -2,15 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\StockMovement;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreStockMovementRequest extends FormRequest
+class StoreAppointmentProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', StockMovement::class);
+        return $this->user()->can('attachProducts', $this->route('appointment'));
     }
 
     public function rules(): array
@@ -22,9 +21,7 @@ class StoreStockMovementRequest extends FormRequest
                 'required',
                 Rule::exists('products', 'id')->where('center_id', $centerId),
             ],
-            'type' => ['required', 'string', Rule::in(['entrada', 'devolucion'])],
-            'package_quantity' => ['required', 'integer', 'min:1'],
-            'reason' => ['nullable', 'string', 'max:200'],
+            'quantity' => ['required', 'numeric', 'min:0.001'],
         ];
     }
 }

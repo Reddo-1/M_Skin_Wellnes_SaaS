@@ -27,7 +27,6 @@ class StockMovementResource extends JsonResource
                 return [
                     'id' => $this->product->id,
                     'name' => $this->product->name,
-                    'measurement_unit' => $this->product->measurement_unit,
                 ];
             }),
             'type' => $this->whenLoaded('type', function () {

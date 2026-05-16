@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Appointment;
 use App\Models\Center;
+use App\Models\Sale;
 use App\Models\Treatment;
 use App\Models\User;
+use App\Services\InvoiceService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -33,12 +34,9 @@ class SaleSeeder extends Seeder
         $serumProductId = DB::table('products')->where('center_id', $centerId)->where('name', 'Sérum vitamina C')->value('id');
 
         $saleStatusPaid = DB::table('sale_statuses')->where('name', 'pagada')->value('id');
-        $paymentStatusDone = DB::table('payment_statuses')->where('name', 'completado')->value('id');
         $paymentMethodCard = DB::table('payment_methods')->where('name', 'tarjeta')->value('id');
 
-        $center = DB::table('centers')->where('id', $centerId)->first();
-
-        if ($reception === null || $saleStatusPaid === null || $paymentStatusDone === null || $paymentMethodCard === null) {
+        if ($reception === null || $saleStatusPaid === null || $paymentMethodCard === null) {
             return;
         }
 
@@ -64,8 +62,6 @@ class SaleSeeder extends Seeder
                 ],
             ],
         ];
-
-        $invoiceCounter = 1;
 
         foreach ($sales as $sale) {
             $clientId = $clients[$sale['client_email']] ?? null;
@@ -98,6 +94,8 @@ class SaleSeeder extends Seeder
                 'discount' => 0,
                 'total' => $total,
                 'status_id' => $saleStatusPaid,
+                'payment_method_id' => $paymentMethodCard,
+                'paid_at' => now(),
                 'notes' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -121,47 +119,11 @@ class SaleSeeder extends Seeder
                 ]);
             }
 
-            DB::table('payments')->insert([
-                'center_id' => $centerId,
-                'sale_id' => $saleId,
-                'payment_method_id' => $paymentMethodCard,
-                'status_id' => $paymentStatusDone,
-                'amount' => $total,
-                'currency' => 'EUR',
-                'stripe_payment_intent_id' => null,
-                'stripe_charge_id' => null,
-                'stripe_metadata' => null,
-                'processed_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $vatPercentage = 21;
-            $vatAmount = round($subtotal * $vatPercentage / (100 + $vatPercentage), 2);
-            $invoiceNumber = sprintf('FAC-%04d', $invoiceCounter++);
-
-            DB::table('invoices')->insert([
-                'center_id' => $centerId,
-                'sale_id' => $saleId,
-                'client_id' => $clientId,
-                'invoice_number' => $invoiceNumber,
-                'issued_date' => now()->toDateString(),
-                'subtotal' => $subtotal - $vatAmount,
-                'vat_percentage' => $vatPercentage,
-                'vat_amount' => $vatAmount,
-                'total' => $total,
-                'client_snapshot' => json_encode([
-                    'name' => User::query()->find($clientId)?->name,
-                    'email' => $sale['client_email'],
-                ]),
-                'center_snapshot' => json_encode([
-                    'name' => $center?->name,
-                    'slug' => $center?->slug,
-                ]),
-                'pdf_path' => null,
-                'issued_by_user_id' => $reception,
-                'created_at' => now(),
-            ]);
+            //emite la factura asociada (las ventas seed nacen pagadas)
+            $saleModel = Sale::query()->whereKey($saleId)->first();
+            if ($saleModel !== null) {
+                app(InvoiceService::class)->issueForSale($saleModel, $reception);
+            }
         }
     }
 }

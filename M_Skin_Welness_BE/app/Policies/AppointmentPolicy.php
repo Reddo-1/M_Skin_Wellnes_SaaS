@@ -62,4 +62,10 @@ class AppointmentPolicy
 
         return true;
     }
+
+    public function attachProducts(User $user, Appointment $appointment): bool
+    {
+        return $user->center_id === $appointment->center_id
+            && $user->can('appointments.attach_products');
+    }
 }

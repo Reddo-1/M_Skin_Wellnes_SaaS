@@ -2,29 +2,28 @@
 
 namespace App\Http\Resources;
 
-use App\Models\ProductStock;
+use App\Models\AppointmentProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin ProductStock */
-class ProductStockResource extends JsonResource
+/** @mixin AppointmentProduct */
+class AppointmentProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
             'center_id' => $this->center_id,
+            'appointment_id' => $this->appointment_id,
             'product_id' => $this->product_id,
-            'current_quantity' => $this->current_quantity,
+            'quantity' => $this->quantity,
             'product' => $this->whenLoaded('product', function () {
                 return [
                     'id' => $this->product->id,
                     'name' => $this->product->name,
-                    'minimum_stock' => $this->product->minimum_stock,
                 ];
             }),
             'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

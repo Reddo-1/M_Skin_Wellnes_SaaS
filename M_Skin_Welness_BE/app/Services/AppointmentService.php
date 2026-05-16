@@ -13,6 +13,11 @@ use Illuminate\Validation\ValidationException;
 
 class AppointmentService
 {
+    public function __construct(private readonly AppointmentProductService $appointmentProducts)
+    {
+    }
+
+
     //funcion para validar si algo ya está en uso o ocupado al intentar hacer la inserción.
     private function guardAgainstConflicts(
         int $centerId,
@@ -239,13 +244,13 @@ class AppointmentService
     }
 
     //cambia el estado de la cita; el id del estado llega directamente del FE
-    public function changeStatus(Appointment $appointment, int $statusId): Appointment
+    public function changeStatus(Appointment $appointment, int $statusId, int $actorId): Appointment
     {
-        return DB::transaction(function () use ($appointment, $statusId) {
-            $appointment->status_id = $statusId;
-
-            //leemos el nombre solo para decidir los side effects (cancelada/realizada)
+        return DB::transaction(function () use ($appointment, $statusId, $actorId) {
+            $previousStatusName = SessionStatus::query()->whereKey($appointment->status_id)->value('name');
             $statusName = SessionStatus::query()->whereKey($statusId)->value('name');
+
+            $appointment->status_id = $statusId;
 
             if ($statusName === 'cancelada') {
                 $appointment->cancelled_at = now();
@@ -258,6 +263,11 @@ class AppointmentService
             }
 
             $appointment->save();
+
+            //consumo de stock solo al pasar A 'realizada' por primera vez
+            if ($statusName === 'realizada' && $previousStatusName !== 'realizada') {
+                $this->appointmentProducts->applyStockConsumption($appointment, $actorId);
+            }
 
             return $appointment->load(['status', 'treatment', 'room', 'machine', 'client', 'worker', 'assistants']);
         });
