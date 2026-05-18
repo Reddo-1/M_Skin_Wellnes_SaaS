@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AppointmentProductController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CenterController;
+use App\Http\Controllers\Api\CenterFileController;
 use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -40,12 +42,21 @@ Route::middleware('auth:sanctum')->group(function () {
     //planes: catalogo global, no van bajo center.scope
     Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
 
+    //centros: el admin solo puede leer y actualizar el suyo. Index/store/destroy viven en Blade del superadmin
+    Route::apiResource('centers', CenterController::class)->only(['show', 'update']);
+
     Route::middleware('center.scope')->group(function () {
         Route::post('appointments/{appointment}/status', [AppointmentController::class, 'changeStatus']);
         Route::get('appointments/{appointment}/products', [AppointmentProductController::class, 'index']);
         Route::post('appointments/{appointment}/products', [AppointmentProductController::class, 'store']);
         Route::delete('appointments/{appointment}/products/{product}', [AppointmentProductController::class, 'destroy']);
         Route::apiResource('appointments', AppointmentController::class);
+
+        //branding del centro (logo/header/avatar por defecto); sin update, se sube nuevo y reemplaza
+        Route::apiResource('center-files', CenterFileController::class)
+            ->parameters(['center-files' => 'center_file'])
+            ->only(['index', 'show', 'store', 'destroy']);
+
         Route::apiResource('treatments', TreatmentController::class);
         Route::apiResource('rooms', RoomController::class);
         Route::apiResource('machines', MachineController::class);

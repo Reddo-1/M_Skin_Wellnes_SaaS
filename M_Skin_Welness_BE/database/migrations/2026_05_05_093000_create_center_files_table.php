@@ -14,8 +14,6 @@ return new class extends Migration
             $table->string('type', 30);
             $table->string('path', 255);
             $table->string('mime_type', 100)->nullable();
-            $table->integer('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
             $table->timestampTz('created_at')->useCurrent();
 
             $table->unique(['id', 'center_id'], 'uq_center_files_id_center');

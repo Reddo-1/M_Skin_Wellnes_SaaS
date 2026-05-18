@@ -140,6 +140,17 @@ class RolesAndPermissionsSeeder extends Seeder
             'plans.view',
         ];
 
+        $centersPermissions = [
+            'centers.view',
+            'centers.update',
+        ];
+
+        $centerFilesPermissions = [
+            'center_files.view',
+            'center_files.upload',
+            'center_files.delete',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
                             $treatmentsPermissions,
@@ -160,7 +171,9 @@ class RolesAndPermissionsSeeder extends Seeder
                             $salesPermissions,
                             $invoicesPermissions,
                             $userFilesPermissions,
-                            $plansPermissions
+                            $plansPermissions,
+                            $centersPermissions,
+                            $centerFilesPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
@@ -178,6 +191,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'time_slots.view',
             'products.view',
             'product_stocks.view',
+            'center_files.view',
         ];
 
         $practitionerExtraPermissions = [
@@ -223,6 +237,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'sales.change_status',
                 'invoices.view',
                 'user_files.view',
+                'center_files.view',
             ],
 
             'rrhh' => array_merge(
@@ -236,6 +251,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'users.create_staff',
                     'users.update',
                     'users.deactivate',
+                    'center_files.view',
                 ],
                 $workerSchedulesPermissions,
                 $workerAbsencesPermissions,
@@ -259,6 +275,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'appointments.change_status',
                 'treatments.view',
                 'rooms.view',
+                'center_files.view',
             ],
         ];
 
