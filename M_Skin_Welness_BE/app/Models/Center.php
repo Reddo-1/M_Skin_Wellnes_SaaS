@@ -15,6 +15,7 @@ class Center extends Model
         'custom_domain',
         'is_domain_verified',
         'plan_id',
+        'billing_user_id',
         'is_active',
     ];
 
@@ -29,6 +30,11 @@ class Center extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function billingUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'billing_user_id');
     }
 
     public function users(): HasMany

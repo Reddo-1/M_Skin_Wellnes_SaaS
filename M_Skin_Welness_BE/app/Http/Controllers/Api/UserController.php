@@ -51,6 +51,7 @@ class UserController extends Controller
     {
         $user = $this->service->create(
             centerId: (int) $request->attributes->get('center_id'),
+            actorUserId: (int) $request->user()->id,
             data: $request->validated(),
         );
 
@@ -72,19 +73,19 @@ class UserController extends Controller
     }
 
     //baja lógica: deja el usuario inactivo pero conserva el histórico
-    public function destroy(User $user): UserResource
+    public function destroy(Request $request, User $user): UserResource
     {
         $this->authorize('deactivate', $user);
 
-        return UserResource::make($this->service->deactivate($user));
+        return UserResource::make($this->service->deactivate($user, (int) $request->user()->id));
     }
 
     //reactiva un usuario previamente desactivado
-    public function activate(User $user): UserResource
+    public function activate(Request $request, User $user): UserResource
     {
         $this->authorize('activate', $user);
 
-        return UserResource::make($this->service->activate($user));
+        return UserResource::make($this->service->activate($user, (int) $request->user()->id));
     }
 
     //cambia la contraseña; el propio usuario puede cambiar la suya y el staff con permiso la de otros

@@ -22,6 +22,7 @@ class PlanSeeder extends Seeder
                 'allows_public_page'    => false,
                 'allows_custom_domain'  => false,
                 'is_active'             => true,
+                'stripe_price_id'       => env('STRIPE_PRICE_STARTER'),
                 'created_at'            => $now,
                 'updated_at'            => $now,
             ],
@@ -35,6 +36,7 @@ class PlanSeeder extends Seeder
                 'allows_public_page'    => false,
                 'allows_custom_domain'  => false,
                 'is_active'             => true,
+                'stripe_price_id'       => env('STRIPE_PRICE_PROFESSIONAL'),
                 'created_at'            => $now,
                 'updated_at'            => $now,
             ],
@@ -48,6 +50,7 @@ class PlanSeeder extends Seeder
                 'allows_public_page'    => true,
                 'allows_custom_domain'  => true,
                 'is_active'             => true,
+                'stripe_price_id'       => env('STRIPE_PRICE_PREMIUM'),
                 'created_at'            => $now,
                 'updated_at'            => $now,
             ],
@@ -65,6 +68,7 @@ class PlanSeeder extends Seeder
                 'allows_public_page',
                 'allows_custom_domain',
                 'is_active',
+                'stripe_price_id',
                 'updated_at',
             ]
         );

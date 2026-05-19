@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('custom_domain', 255)->nullable();
             $table->boolean('is_domain_verified')->default(false);
             $table->foreignId('plan_id');
+            $table->foreignId('billing_user_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestampsTz();
 
@@ -26,6 +27,10 @@ return new class extends Migration
             $table->foreign('plan_id', 'fk_centers_plan')
                 ->references('id')->on('plans')
                 ->restrictOnDelete();
+
+            $table->foreign('billing_user_id', 'fk_centers_billing_user')
+                ->references('id')->on('users')
+                ->nullOnDelete();
         });
     }
 

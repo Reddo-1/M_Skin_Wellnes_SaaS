@@ -151,6 +151,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'center_files.delete',
         ];
 
+        $subscriptionsPermissions = [
+            'subscriptions.view',
+        ];
+
         $permissions = array_merge(
                             $appointmentsPermissions,
                             $treatmentsPermissions,
@@ -173,7 +177,8 @@ class RolesAndPermissionsSeeder extends Seeder
                             $userFilesPermissions,
                             $plansPermissions,
                             $centersPermissions,
-                            $centerFilesPermissions
+                            $centerFilesPermissions,
+                            $subscriptionsPermissions
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');

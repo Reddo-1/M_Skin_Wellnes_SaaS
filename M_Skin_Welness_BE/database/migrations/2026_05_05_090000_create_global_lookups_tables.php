@@ -30,13 +30,6 @@ return new class extends Migration
             $table->unique(['name'], 'uq_payment_methods_name');
         });
 
-        Schema::create('payment_statuses', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
-
-            $table->unique(['name'], 'uq_payment_statuses_name');
-        });
-
         Schema::create('sale_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
@@ -72,7 +65,6 @@ return new class extends Migration
         Schema::dropIfExists('skin_types');
         Schema::dropIfExists('stock_movement_types');
         Schema::dropIfExists('sale_statuses');
-        Schema::dropIfExists('payment_statuses');
         Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('absence_types');
         Schema::dropIfExists('session_statuses');

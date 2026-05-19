@@ -20,9 +20,11 @@ return new class extends Migration
             $table->boolean('allows_public_page')->default(false);
             $table->boolean('allows_custom_domain')->default(false);
             $table->boolean('is_active')->default(true);
+            $table->string('stripe_price_id', 100)->nullable();
             $table->timestampsTz();
 
             $table->unique(['code'], 'uq_plans_code');
+            $table->unique(['stripe_price_id'], 'uq_plans_stripe_price_id');
         });
 
         DB::statement("

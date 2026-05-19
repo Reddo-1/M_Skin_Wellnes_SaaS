@@ -8,9 +8,13 @@ use Spatie\Permission\Models\Role;
 
 class UserService
 {
-    public function create(int $centerId, array $data): User
+    public function __construct(private readonly AuditLogService $auditLogs)
     {
-        return DB::transaction(function () use ($centerId, $data) {
+    }
+
+    public function create(int $centerId, int $actorUserId, array $data): User
+    {
+        return DB::transaction(function () use ($centerId, $actorUserId, $data) {
             $user = User::create([
                 'center_id' => $centerId,
                 'name' => $data['name'],
@@ -24,6 +28,13 @@ class UserService
             ]);
 
             $this->assignRolesById($user, $data['role_ids']);
+
+            $this->auditLogs->record(
+                action: 'user.created',
+                actorUserId: $actorUserId,
+                centerId: $centerId,
+                metadata: ['user_id' => $user->id, 'role_ids' => $data['role_ids']],
+            );
 
             return $user;
         });
@@ -39,21 +50,35 @@ class UserService
     }
 
     //baja logica: marca el usuario como inactivo y revoca sus tokens activos
-    public function deactivate(User $user): User
+    public function deactivate(User $user, int $actorUserId): User
     {
-        return DB::transaction(function () use ($user) {
+        return DB::transaction(function () use ($user, $actorUserId) {
             $user->is_active = false;
             $user->save();
             $user->tokens()->delete();
+
+            $this->auditLogs->record(
+                action: 'user.deactivated',
+                actorUserId: $actorUserId,
+                centerId: $user->center_id,
+                metadata: ['user_id' => $user->id],
+            );
 
             return $user;
         });
     }
 
-    public function activate(User $user): User
+    public function activate(User $user, int $actorUserId): User
     {
         $user->is_active = true;
         $user->save();
+
+        $this->auditLogs->record(
+            action: 'user.reactivated',
+            actorUserId: $actorUserId,
+            centerId: $user->center_id,
+            metadata: ['user_id' => $user->id],
+        );
 
         return $user;
     }

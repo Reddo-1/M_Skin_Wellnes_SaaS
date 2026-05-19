@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AppointmentProductController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\CenterFileController;
+use App\Http\Controllers\Api\CenterRegistrationController;
 use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SkinEvaluationController;
 use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TimeSlotController;
 use App\Http\Controllers\Api\TreatmentConsentController;
 use App\Http\Controllers\Api\TreatmentController;
@@ -31,6 +33,9 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+//alta de centro nuevo: crea checkout session de stripe; el webhook crea center+admin al cobrar
+Route::post('centers/register', [CenterRegistrationController::class, 'register']);
+
 Route::get('user-files/{user_file}/file', [UserFileController::class, 'file'])
     ->middleware('signed')
     ->name('user-files.file');
@@ -44,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //centros: el admin solo puede leer y actualizar el suyo. Index/store/destroy viven en Blade del superadmin
     Route::apiResource('centers', CenterController::class)->only(['show', 'update']);
+
+    //suscripcion del centro: solo accesible por el billing_user (el admin que dio de alta y paga)
+    Route::get('subscription', [SubscriptionController::class, 'show']);
+    Route::post('subscription/portal', [SubscriptionController::class, 'portal']);
 
     Route::middleware('center.scope')->group(function () {
         Route::post('appointments/{appointment}/status', [AppointmentController::class, 'changeStatus']);

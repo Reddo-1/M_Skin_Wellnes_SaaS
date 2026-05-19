@@ -9,6 +9,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly AuditLogService $auditLogs)
+    {
+    }
+
     public function login(LoginRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -61,6 +66,12 @@ class AuthController extends Controller
             ]);
 
             $user->assignRole('cliente');
+
+            $this->auditLogs->record(
+                action: 'user.created',
+                centerId: $user->center_id,
+                metadata: ['user_id' => $user->id, 'role' => 'cliente', 'source' => 'self_registration'],
+            );
 
             return $user;
         });

@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
             SessionStatusSeeder::class,
             AbsenceTypeSeeder::class,
             PaymentMethodSeeder::class,
-            PaymentStatusSeeder::class,
             SaleStatusSeeder::class,
             StockMovementTypeSeeder::class,
             SkinTypeSeeder::class,

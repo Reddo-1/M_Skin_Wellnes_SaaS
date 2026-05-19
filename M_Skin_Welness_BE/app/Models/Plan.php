@@ -17,6 +17,7 @@ class Plan extends Model
         'allows_public_page',
         'allows_custom_domain',
         'is_active',
+        'stripe_price_id',
     ];
 
     protected function casts(): array
