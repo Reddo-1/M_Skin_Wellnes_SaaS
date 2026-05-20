@@ -19,7 +19,8 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:150', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'max:255'],
+            //password opcional: si el admin no la indica, generamos una temporal y el usuario la configura por correo
+            'password' => ['sometimes', 'nullable', 'string', 'min:8', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'birth_date' => ['nullable', 'date', 'before:today'],
             //un usuario puede tener varios roles a la vez (ej: recepcionista + diagnosticador)

@@ -16,10 +16,12 @@ class CenterRegistrationService
 
         return Cashier::stripe()->checkout->sessions->create([
             'mode' => 'subscription',
+            //Productos de linea-solo va a ser 1
             'line_items' => [[
                 'price' => $plan->stripe_price_id,
                 'quantity' => 1,
             ]],
+            //vamos a poner el periodo de prueba si o si 14 dias.
             'subscription_data' => [
                 'trial_period_days' => 14,
                 'metadata' => [

@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\CenterFileController;
 use App\Http\Controllers\Api\CenterRegistrationController;
 use App\Http\Controllers\Api\ClientConsentController;
 use App\Http\Controllers\Api\ClientProfileController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ProductController;
@@ -33,6 +35,13 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+//verificacion de email: link firmado del correo + endpoint publico para reenviar
+Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+Route::post('email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:6,1');
+
 //alta de centro nuevo: crea checkout session de stripe; el webhook crea center+admin al cobrar
 Route::post('centers/register', [CenterRegistrationController::class, 'register']);
 
@@ -40,12 +49,15 @@ Route::get('user-files/{user_file}/file', [UserFileController::class, 'file'])
     ->middleware('signed')
     ->name('user-files.file');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum','verified'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
 
     //planes: catalogo global, no van bajo center.scope
     Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
+
+    //lookups globales (combos del FE): se cargan una vez al iniciar
+    Route::get('lookups', [LookupController::class, 'index']);
 
     //centros: el admin solo puede leer y actualizar el suyo. Index/store/destroy viven en Blade del superadmin
     Route::apiResource('centers', CenterController::class)->only(['show', 'update']);

@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class UserService
@@ -15,17 +17,22 @@ class UserService
     public function create(int $centerId, int $actorUserId, array $data): User
     {
         return DB::transaction(function () use ($centerId, $actorUserId, $data) {
+            $hasPassword = !empty($data['password']);
+
             $user = User::create([
                 'center_id' => $centerId,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
-                'password' => $data['password'],
+                'password' => $hasPassword ? $data['password'] : Str::password(32),
                 //alta desde panel: el origen siempre es 'staff'. El auto-registro online va por otro flujo
                 'registration_source' => 'staff',
                 'is_active' => $data['is_active'] ?? true,
             ]);
+
+            //el admin confia en el email que ha introducido; verificacion implicita
+            $user->forceFill(['email_verified_at' => now()])->save();
 
             $this->assignRolesById($user, $data['role_ids']);
 
@@ -35,6 +42,11 @@ class UserService
                 centerId: $centerId,
                 metadata: ['user_id' => $user->id, 'role_ids' => $data['role_ids']],
             );
+
+            //si el admin no fijo password, el usuario la establece desde un correo
+            if (!$hasPassword) {
+                Password::sendResetLink(['email' => $user->email]);
+            }
 
             return $user;
         });

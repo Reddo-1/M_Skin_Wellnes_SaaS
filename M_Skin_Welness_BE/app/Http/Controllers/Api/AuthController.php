@@ -10,6 +10,7 @@ use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuditLogService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,12 @@ class AuthController extends Controller
         if (!$user->is_active) {
             throw ValidationException::withMessages([
                 'email' => ['La cuenta no existe o se encuentra desactivada.'],
+            ]);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => ['Verifica tu correo para poder acceder.'],
             ]);
         }
 
@@ -76,11 +83,10 @@ class AuthController extends Controller
             return $user;
         });
 
-        $token = $user->createToken($request->userAgent() ?? 'api')->plainTextToken;
+        event(new Registered($user));
 
         return response()->json([
-            'token' => $token,
-            'user' => UserResource::make($user),
+            'message' => 'Cuenta creada. Revisa tu correo para verificarla antes de iniciar sesión.',
         ], 201);
     }
 

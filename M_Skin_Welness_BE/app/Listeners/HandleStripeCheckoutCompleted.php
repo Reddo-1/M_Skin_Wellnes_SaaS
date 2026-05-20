@@ -2,13 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Models\Center;
-use App\Models\Plan;
-use App\Models\User;
+use App\Models\{Center, Plan, User};
 use App\Services\AuditLogService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\{DB, Log};
 use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Events\WebhookReceived;
 
@@ -20,16 +18,12 @@ class HandleStripeCheckoutCompleted
 
     public function handle(WebhookReceived $event): void
     {
-        if (($event->payload['type'] ?? null) !== 'checkout.session.completed') {
-            return;
-        }
+        if (($event->payload['type'] ?? null) !== 'checkout.session.completed')return;
 
         $session = $event->payload['data']['object'] ?? [];
         $metadata = $session['metadata'] ?? [];
 
-        if (!isset($metadata['pending_admin_email'], $metadata['pending_center_slug'])) {
-            return;
-        }
+        if (!isset($metadata['pending_admin_email'], $metadata['pending_center_slug'])) return;
 
         $stripeCustomerId = $session['customer'] ?? null;
         $stripeSubscriptionId = $session['subscription'] ?? null;
@@ -68,6 +62,7 @@ class HandleStripeCheckoutCompleted
                 'is_active' => true,
             ]);
 
+            //stripe_id no esta en $fillable (es columna añadida por Cashier); forceFill obligatorio
             $user->forceFill(['stripe_id' => $stripeCustomerId])->save();
 
             $center->billing_user_id = $user->id;
@@ -76,6 +71,8 @@ class HandleStripeCheckoutCompleted
             $user->assignRole('administrador');
 
             $this->syncSubscription($user, $stripeSubscriptionId);
+
+            $user->sendEmailVerificationNotification();
 
             $this->auditLogs->record(
                 action: 'center.created',
