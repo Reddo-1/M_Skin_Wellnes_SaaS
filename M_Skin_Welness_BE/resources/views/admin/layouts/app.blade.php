@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Panel') · MSkinWellness</title>
+    @vite(['resources/css/app.css', 'resources/css/admin/dashboard.css', 'resources/js/app.js'])
+    @stack('head')
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100 p-2 p-md-3">
+
+<div class="sa-app rounded-4 w-100 d-flex">
+
+    <aside class="sa-sidebar d-flex flex-column align-items-center py-3 gap-1">
+        <div class="sa-brand mb-3">MS</div>
+
+        <a href="{{ route('admin.dashboard') }}"
+           class="sa-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+           title="Dashboard">
+            <i class="bi bi-grid-1x2-fill"></i>
+        </a>
+        <a href="#" class="sa-nav-item" title="Centros (próximamente)">
+            <i class="bi bi-building"></i>
+        </a>
+        <a href="#" class="sa-nav-item" title="Planes (próximamente)">
+            <i class="bi bi-credit-card-2-front"></i>
+        </a>
+        <a href="#" class="sa-nav-item" title="Auditoría (próximamente)">
+            <i class="bi bi-clock-history"></i>
+        </a>
+    </aside>
+
+    <main class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+
+        <header class="sa-topbar d-flex align-items-center justify-content-between px-3 px-md-4 gap-3">
+            <div class="flex-shrink-0">
+                <div class="sa-title">@yield('page-title', 'Mi panel')</div>
+                <div class="sa-subtitle">@yield('page-subtitle', 'Panel de superadministración · MSkinWellness')</div>
+            </div>
+
+            <div class="sa-search d-none d-md-flex align-items-center px-3 flex-grow-1" style="max-width: 320px;">
+                <i class="bi bi-search text-secondary me-2" style="font-size: 13px;"></i>
+                <input type="text" class="flex-grow-1" placeholder="Buscar centros, usuarios, facturas...">
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <div class="sa-icon-btn" title="Notificaciones">
+                    <i class="bi bi-bell"></i>
+                    <span class="sa-bell-dot"></span>
+                </div>
+
+                <div class="dropdown">
+                    <button type="button" class="sa-avatar" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menú de cuenta">
+                        {{ \Illuminate\Support\Str::of(auth()->user()->name)->substr(0, 2)->upper() }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('admin.logout') }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="dropdown-item">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-grow-1 p-3 p-md-4">
+            @yield('content')
+        </div>
+
+    </main>
+</div>
+
+@stack('scripts')
+
+</body>
+</html>

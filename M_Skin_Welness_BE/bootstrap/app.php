@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'center.scope' => \App\Http\Middleware\ResolveCenterScope::class,
         ]);
+
+        //el panel blade es la unica zona web autenticada; si no hay sesion, al login del panel
+        $middleware->redirectGuestsTo(fn () => route('admin.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
