@@ -249,9 +249,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 [
                     'appointments.view',
                     'treatments.view',
-                    'rooms.view',
-                    'machines.view',
                     'time_slots.view',
+                    'time_slots.create',
+                    'time_slots.update',
                     'users.view',
                     'users.create_staff',
                     'users.update',
@@ -279,7 +279,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'appointments.create',
                 'appointments.change_status',
                 'treatments.view',
-                'rooms.view',
+                'products.view',
                 'center_files.view',
             ],
         ];

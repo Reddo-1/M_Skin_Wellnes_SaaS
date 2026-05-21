@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('code', 30);
             $table->string('name', 60);
             $table->text('description')->nullable();
+            $table->float('monthly_price')->default(0);
             $table->integer('max_workers')->default(3);
             $table->boolean('allows_online_clients')->default(false);
             $table->boolean('allows_emails')->default(false);

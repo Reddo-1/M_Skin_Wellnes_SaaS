@@ -11,6 +11,7 @@ class Plan extends Model
         'code',
         'name',
         'description',
+        'monthly_price',
         'max_workers',
         'allows_online_clients',
         'allows_emails',
@@ -23,6 +24,7 @@ class Plan extends Model
     protected function casts(): array
     {
         return [
+            'monthly_price' => 'float',
             'max_workers' => 'integer',
             'allows_online_clients' => 'boolean',
             'allows_emails' => 'boolean',

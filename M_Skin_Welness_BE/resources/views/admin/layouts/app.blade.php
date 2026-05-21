@@ -20,13 +20,19 @@
            title="Dashboard">
             <i class="bi bi-grid-1x2-fill"></i>
         </a>
-        <a href="#" class="sa-nav-item" title="Centros (próximamente)">
+        <a href="{{ route('admin.centers.index') }}"
+           class="sa-nav-item {{ request()->routeIs('admin.centers.*') ? 'active' : '' }}"
+           title="Centros">
             <i class="bi bi-building"></i>
         </a>
-        <a href="#" class="sa-nav-item" title="Planes (próximamente)">
+        <a href="{{ route('admin.plans.index') }}"
+           class="sa-nav-item {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}"
+           title="Planes">
             <i class="bi bi-credit-card-2-front"></i>
         </a>
-        <a href="#" class="sa-nav-item" title="Auditoría (próximamente)">
+        <a href="{{ route('admin.audit-logs.index') }}"
+           class="sa-nav-item {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}"
+           title="Auditoría">
             <i class="bi bi-clock-history"></i>
         </a>
     </aside>
@@ -39,22 +45,20 @@
                 <div class="sa-subtitle">@yield('page-subtitle', 'Panel de superadministración · MSkinWellness')</div>
             </div>
 
-            <div class="sa-search d-none d-md-flex align-items-center px-3 flex-grow-1" style="max-width: 320px;">
-                <i class="bi bi-search text-secondary me-2" style="font-size: 13px;"></i>
-                <input type="text" class="flex-grow-1" placeholder="Buscar centros, usuarios, facturas...">
-            </div>
 
             <div class="d-flex align-items-center gap-2">
-                <div class="sa-icon-btn" title="Notificaciones">
-                    <i class="bi bi-bell"></i>
-                    <span class="sa-bell-dot"></span>
-                </div>
 
                 <div class="dropdown">
                     <button type="button" class="sa-avatar" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menú de cuenta">
-                        {{ \Illuminate\Support\Str::of(auth()->user()->name)->substr(0, 2)->upper() }}
+                        {{ mb_strtoupper(mb_substr(auth()->user()->name ?? '?', 0, 1)) }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('admin.account.edit') }}" class="dropdown-item">
+                                <i class="bi bi-person me-2"></i> Mi cuenta
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('admin.logout') }}" class="m-0">
                                 @csrf

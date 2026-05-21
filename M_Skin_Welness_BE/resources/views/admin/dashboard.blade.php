@@ -21,7 +21,6 @@
         'center.deactivated' => 'Centro desactivado',
     ];
 
-    $planClass = ['starter' => 'starter', 'professional' => 'pro', 'premium' => 'premium'];
     $planSwatchColor = ['starter' => '#6B6C74', 'professional' => '#5B9EEF', 'premium' => '#A78BFA'];
 @endphp
 
@@ -44,8 +43,8 @@
                         @else
                             Sin altas este mes
                         @endif
-                        @if ($metrics['centers']['onboarding'] > 0)
-                            · {{ $metrics['centers']['onboarding'] }} en onboarding
+                        @if ($metrics['centers']['deactivated'] > 0)
+                            · {{ $metrics['centers']['deactivated'] }} desactivados
                         @endif
                     </div>
                 </div>
@@ -77,16 +76,48 @@
                         <div class="sa-metric-icon teal"><i class="bi bi-currency-euro"></i></div>
                         <div class="fw-medium" style="font-size: 13px;">Ingreso mensual</div>
                     </div>
-                    <div class="sa-metric-value mb-2">{{ number_format($metrics['mrr']['value'], 0, ',', '.') }} €</div>
+                    <div class="sa-metric-value mb-2">{{ number_format($metrics['monthly_revenue']['value'], 0, ',', '.') }} €</div>
                     <div class="text-secondary" style="font-size: 12px;">
-                        @if ($metrics['mrr']['changePct'] !== null)
-                            <span class="{{ $metrics['mrr']['changePct'] >= 0 ? 'sa-text-success' : 'sa-text-warn' }} fw-medium">
-                                {{ $metrics['mrr']['changePct'] >= 0 ? '+' : '' }}{{ $metrics['mrr']['changePct'] }} %
+                        @if ($metrics['monthly_revenue']['changePct'] !== null)
+                            <span class="{{ $metrics['monthly_revenue']['changePct'] >= 0 ? 'sa-text-success' : 'sa-text-warn' }} fw-medium">
+                                {{ $metrics['monthly_revenue']['changePct'] >= 0 ? '+' : '' }}{{ $metrics['monthly_revenue']['changePct'] }} %
                             </span>
                             vs mes anterior
                         @else
                             Sin histórico previo
                         @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="sa-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="sa-metric-icon purple"><i class="bi bi-broadcast"></i></div>
+                        <div class="fw-medium" style="font-size: 13px;">Sesiones en curso ahora</div>
+                    </div>
+                    <div class="sa-metric-value mb-2">{{ $metrics['sessions_in_progress'] }}</div>
+                    <div class="text-secondary" style="font-size: 12px;">
+                        @if ($metrics['sessions_in_progress'] > 0)
+                            En todos los centros activos
+                        @else
+                            No hay sesiones en este momento
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="sa-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="sa-metric-icon blue"><i class="bi bi-lightning-charge"></i></div>
+                        <div class="fw-medium" style="font-size: 13px;">Usuarios conectados</div>
+                    </div>
+                    <div class="sa-metric-value mb-2">{{ $metrics['online_users'] }}</div>
+                    <div class="text-secondary" style="font-size: 12px;">
+                        Actividad en los últimos 15 minutos
                     </div>
                 </div>
             </div>
@@ -101,33 +132,6 @@
                         data-labels='@json(array_column($growth, "label"))'
                         data-values='@json(array_column($growth, "value"))'></canvas>
             </div>
-        </div>
-
-        <div class="sa-card overflow-hidden">
-            <div class="d-flex align-items-center justify-content-between p-3 px-md-4 border-bottom sa-activity-border">
-                <div class="sa-card-title">Centros activos</div>
-            </div>
-
-            @forelse ($centers as $i => $center)
-                <div class="sa-center-row d-flex align-items-center gap-3 px-3 px-md-4 py-3">
-                    <div class="sa-center-logo c{{ ($i % 5) + 1 }}">{{ $center['initials'] }}</div>
-                    <div class="flex-grow-1" style="min-width: 0;">
-                        <div class="fw-medium text-truncate" style="font-size: 13px;">{{ $center['name'] }}</div>
-                        <div class="text-secondary" style="font-size: 11px;">
-                            {{ $center['workers'] }} {{ $center['workers'] === 1 ? 'usuario' : 'usuarios' }}
-                        </div>
-                    </div>
-                    <span class="sa-plan-pill {{ $planClass[$center['plan']['code']] ?? 'starter' }}">
-                        {{ $center['plan']['name'] }}
-                    </span>
-                    <span class="sa-status-dot"></span>
-                    <div class="sa-center-mrr">{{ $center['mrr'] }} €</div>
-                </div>
-            @empty
-                <div class="text-center text-secondary py-4" style="font-size: 13px;">
-                    No hay centros activos todavía.
-                </div>
-            @endforelse
         </div>
 
     </div>

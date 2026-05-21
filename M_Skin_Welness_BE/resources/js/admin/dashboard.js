@@ -3,9 +3,10 @@ import {
     LineController,
     LineElement,
     PointElement,
+    //eje Y
     LinearScale,
+    //eje X
     CategoryScale,
-    Filler,
     Tooltip,
 } from 'chart.js';
 
@@ -15,22 +16,19 @@ Chart.register(
     PointElement,
     LinearScale,
     CategoryScale,
-    Filler,
     Tooltip
 );
 
+//Grafica de crecimiento de centros con los datos en data
 const canvas = document.getElementById('growthChart');
 
 if (canvas) {
+    //texto de abajo
     const labels = JSON.parse(canvas.dataset.labels);
+    //valores de cada label(cada més)
     const values = JSON.parse(canvas.dataset.values);
 
-    const ctx = canvas.getContext('2d');
-    const fill = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight);
-    fill.addColorStop(0, 'rgba(167, 139, 250, 0.35)');
-    fill.addColorStop(1, 'rgba(167, 139, 250, 0)');
-
-    new Chart(ctx, {
+    new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
             labels,
@@ -38,8 +36,6 @@ if (canvas) {
                 data: values,
                 borderColor: '#A78BFA',
                 borderWidth: 2.2,
-                backgroundColor: fill,
-                fill: true,
                 tension: 0.35,
                 pointBackgroundColor: '#0F1014',
                 pointBorderColor: '#A78BFA',

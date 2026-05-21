@@ -3,22 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
-use App\Models\Center;
-use App\Models\Plan;
-use App\Models\User;
+use App\Models\{Appointment, AuditLog, Center, Plan, SessionStatus, User};
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    //precio mensual en euros, fuente real en stripe; mirror local para UI sin pegar al API
-    private const PLAN_PRICES_EUR = [
-        'starter' => 49,
-        'professional' => 49,
-        'premium' => 99,
-    ];
-
+    //Recoje todos los distintos datos de las funciones y los muestra
     public function index(): View
     {
         $now = CarbonImmutable::now();
@@ -30,7 +22,7 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->where('created_at', '>=', $startOfMonth)
             ->count();
-        $centersInOnboarding = Center::query()->where('is_active', false)->count();
+        $centersDeactivated = Center::query()->where('is_active', false)->count();
 
         $totalUsers = User::query()->count();
         $usersLastMonth = User::query()->where('created_at', '<', $startOfMonth)->count();
@@ -38,10 +30,10 @@ class DashboardController extends Controller
             ? round((($totalUsers - $usersLastMonth) / $usersLastMonth) * 100, 1)
             : null;
 
-        $mrr = $this->computeMrr();
-        $mrrLastMonth = $this->computeMrrAt($startOfLastMonth);
-        $mrrChangePct = $mrrLastMonth > 0
-            ? round((($mrr - $mrrLastMonth) / $mrrLastMonth) * 100, 1)
+        $monthlyRevenue = $this->computeMonthlyRevenue();
+        $monthlyRevenueLastMonth = $this->computeMonthlyRevenue($startOfLastMonth);
+        $monthlyRevenueChangePercentage = $monthlyRevenueLastMonth > 0
+            ? round((($monthlyRevenue - $monthlyRevenueLastMonth) / $monthlyRevenueLastMonth) * 100, 1)
             : null;
 
         return view('admin.dashboard', [
@@ -49,76 +41,60 @@ class DashboardController extends Controller
                 'centers' => [
                     'value' => $activeCenters,
                     'newThisMonth' => $centersNewThisMonth,
-                    'onboarding' => $centersInOnboarding,
+                    'deactivated' => $centersDeactivated,
                 ],
                 'users' => [
                     'value' => $totalUsers,
                     'changePct' => $usersChangePct,
                 ],
-                'mrr' => [
-                    'value' => $mrr,
-                    'changePct' => $mrrChangePct,
+                'monthly_revenue' => [
+                    'value' => $monthlyRevenue,
+                    'changePct' => $monthlyRevenueChangePercentage,
                 ],
+                'sessions_in_progress' => $this->countSessionsInProgress($now),
+                'online_users' => $this->countOnlineUsers($now),
             ],
             'growth' => $this->buildGrowthSeries(),
-            'centers' => $this->buildCentersList(),
             'planDistribution' => $this->buildPlanDistribution(),
             'recentActivity' => $this->buildRecentActivity(),
         ]);
     }
 
-    private function computeMrr(): int
+    private function countSessionsInProgress(CarbonImmutable $now): int
     {
-        $byPlan = Center::query()
-            ->where('is_active', true)
-            ->selectRaw('plan_id, count(*) as c')
-            ->groupBy('plan_id')
-            ->pluck('c', 'plan_id');
-
-        if ($byPlan->isEmpty()) {
-            return 0;
-        }
-
-        $planCodes = Plan::query()
-            ->whereIn('id', $byPlan->keys())
-            ->pluck('code', 'id');
-
-        $total = 0;
-        foreach ($byPlan as $planId => $count) {
-            $code = $planCodes[$planId] ?? null;
-            $total += (self::PLAN_PRICES_EUR[$code] ?? 0) * $count;
-        }
-
-        return $total;
+        return Appointment::query()
+            ->where('status_id', SessionStatus::idFor('en_curso'))
+            ->where('starts_at', '<=', $now)
+            ->where('ends_at', '>=', $now)
+            ->count();
     }
 
-    private function computeMrrAt(CarbonImmutable $at): int
+    private function countOnlineUsers(CarbonImmutable $now): int
     {
-        $byPlan = Center::query()
-            ->where('is_active', true)
-            ->where('created_at', '<', $at)
-            ->selectRaw('plan_id, count(*) as c')
-            ->groupBy('plan_id')
-            ->pluck('c', 'plan_id');
+        $threshold = $now->subMinutes(15);
 
-        if ($byPlan->isEmpty()) {
-            return 0;
-        }
-
-        $planCodes = Plan::query()
-            ->whereIn('id', $byPlan->keys())
-            ->pluck('code', 'id');
-
-        $total = 0;
-        foreach ($byPlan as $planId => $count) {
-            $code = $planCodes[$planId] ?? null;
-            $total += (self::PLAN_PRICES_EUR[$code] ?? 0) * $count;
-        }
-
-        return $total;
+        return DB::table('personal_access_tokens')
+            ->where('tokenable_type', User::class)
+            ->where('last_used_at', '>=', $threshold)
+            ->distinct('tokenable_id')
+            ->count('tokenable_id');
     }
 
-    //serie acumulada de centros activos en los ultimos 12 meses
+    //Calculo las ganancias mensuales dependiendo de los centros activos y su plan
+    private function computeMonthlyRevenue(?CarbonImmutable $createdBefore = null): float
+    {
+        $query = Center::query()
+            ->where('centers.is_active', true)
+            ->join('plans', 'centers.plan_id', '=', 'plans.id');
+
+        if ($createdBefore !== null) {
+            $query->where('centers.created_at', '<', $createdBefore);
+        }
+
+        return (float) $query->sum('plans.monthly_price');
+    }
+
+    //Calcular 
     private function buildGrowthSeries(): array
     {
         $months = [];
@@ -127,11 +103,11 @@ class DashboardController extends Controller
         for ($i = 0; $i < 12; $i++) {
             $cutoff = $base->addMonths($i)->endOfMonth();
             $count = Center::query()
-                ->where('is_active', true)
                 ->where('created_at', '<=', $cutoff)
                 ->count();
 
             $months[] = [
+                //mb_convert_case convierte todo a mayusculas incluso si tiene letras como Ñ
                 'label' => mb_convert_case($cutoff->locale('es')->isoFormat('MMM'), MB_CASE_TITLE, 'UTF-8'),
                 'value' => $count,
             ];
@@ -140,32 +116,7 @@ class DashboardController extends Controller
         return $months;
     }
 
-    private function buildCentersList(): array
-    {
-        return Center::query()
-            ->with('plan')
-            ->withCount('users')
-            ->where('is_active', true)
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get()
-            ->map(function (Center $center) {
-                $planCode = $center->plan?->code;
-                return [
-                    'name' => $center->name,
-                    'initials' => $this->initials($center->name),
-                    'workers' => $center->users_count,
-                    'plan' => [
-                        'name' => $center->plan?->name ?? 'Sin plan',
-                        'code' => $planCode,
-                    ],
-                    'mrr' => self::PLAN_PRICES_EUR[$planCode] ?? 0,
-                    'active' => $center->is_active,
-                ];
-            })
-            ->all();
-    }
-
+    //Porcentaje de centros segun del plan
     private function buildPlanDistribution(): array
     {
         $countsByPlan = Center::query()
@@ -192,6 +143,7 @@ class DashboardController extends Controller
             ->all();
     }
 
+    //Obtener datos de la tabla de auditoria
     private function buildRecentActivity(): array
     {
         return AuditLog::query()
@@ -211,16 +163,4 @@ class DashboardController extends Controller
             ->all();
     }
 
-    //primeras dos letras significativas para usar como avatar del centro
-    private function initials(string $name): string
-    {
-        $parts = preg_split('/\s+/', trim($name)) ?: [];
-        $letters = '';
-        foreach ($parts as $part) {
-            if ($part !== '' && mb_strlen($letters) < 2) {
-                $letters .= mb_strtoupper(mb_substr($part, 0, 1));
-            }
-        }
-        return $letters === '' ? '·' : $letters;
-    }
 }
