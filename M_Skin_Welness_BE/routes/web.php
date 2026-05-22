@@ -8,9 +8,7 @@ Route::redirect('/', '/admin/login');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-        Route::post('login', [LoginController::class, 'login'])
-            ->middleware('throttle:10,1')
-            ->name('login.submit');
+        Route::post('login', [LoginController::class, 'login'])->name('login.submit');
     });
 
     Route::middleware(['auth', 'role:superadmin'])->group(function () {
