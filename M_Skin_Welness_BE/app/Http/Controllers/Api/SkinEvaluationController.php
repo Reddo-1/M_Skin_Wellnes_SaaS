@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreSkinEvaluationRequest;
-use App\Http\Requests\UpdateSkinEvaluationRequest;
+use App\Http\Requests\{StoreSkinEvaluationRequest, UpdateSkinEvaluationRequest};
 use App\Http\Resources\SkinEvaluationResource;
 use App\Models\SkinEvaluation;
 use App\Services\SkinEvaluationService;

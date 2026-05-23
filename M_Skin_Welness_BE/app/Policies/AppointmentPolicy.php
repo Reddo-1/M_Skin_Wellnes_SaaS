@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Appointment;
-use App\Models\User;
+use App\Models\{Appointment, User};
 
 class AppointmentPolicy
 {

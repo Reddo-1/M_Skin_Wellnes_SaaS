@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\WorkerExtraAvailability;
+use App\Models\{User, WorkerExtraAvailability};
 
 class WorkerExtraAvailabilityPolicy
 {

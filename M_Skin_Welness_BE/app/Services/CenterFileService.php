@@ -4,8 +4,7 @@ namespace App\Services;
 
 use App\Models\CenterFile;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\{DB, Storage};
 
 class CenterFileService
 {

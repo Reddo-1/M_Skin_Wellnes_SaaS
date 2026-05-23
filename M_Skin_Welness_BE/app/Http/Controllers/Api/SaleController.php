@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ChangeSaleStatusRequest;
-use App\Http\Requests\StoreSaleRequest;
+use App\Http\Requests\{ChangeSaleStatusRequest, StoreSaleRequest};
 use App\Http\Resources\SaleResource;
 use App\Models\Sale;
 use App\Services\SaleService;

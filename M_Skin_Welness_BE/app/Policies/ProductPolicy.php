@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Product;
-use App\Models\User;
+use App\Models\{Product, User};
 
 class ProductPolicy
 {

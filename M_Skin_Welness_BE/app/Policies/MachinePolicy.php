@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Machine;
-use App\Models\User;
+use App\Models\{Machine, User};
 
 class MachinePolicy
 {

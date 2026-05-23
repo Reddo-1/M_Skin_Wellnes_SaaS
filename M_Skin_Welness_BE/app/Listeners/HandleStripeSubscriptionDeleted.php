@@ -4,8 +4,7 @@ namespace App\Listeners;
 
 use App\Models\User;
 use App\Services\AuditLogService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\{DB, Log};
 use Laravel\Cashier\Events\WebhookReceived;
 
 class HandleStripeSubscriptionDeleted

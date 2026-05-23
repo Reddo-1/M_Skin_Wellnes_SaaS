@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ClientProfile;
-use App\Models\SkinEvaluation;
+use App\Models\{ClientProfile, SkinEvaluation};
 use Illuminate\Support\Facades\DB;
 
 class SkinEvaluationService

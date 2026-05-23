@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Models\WorkerAbsence;
-use Carbon\CarbonImmutable;
-use Carbon\CarbonPeriod;
+use Carbon\{CarbonImmutable, CarbonPeriod};
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

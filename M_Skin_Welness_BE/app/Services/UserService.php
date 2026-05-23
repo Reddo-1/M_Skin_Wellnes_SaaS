@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\{DB, Password};
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 

@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ClientConsent;
-use App\Models\UserFile;
+use App\Models\{ClientConsent, UserFile};
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 

@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\ProductStock;
-use App\Models\User;
+use App\Models\{ProductStock, User};
 
 class ProductStockPolicy
 {

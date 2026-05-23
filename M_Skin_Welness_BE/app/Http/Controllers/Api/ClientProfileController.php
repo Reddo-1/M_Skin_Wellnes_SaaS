@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreClientProfileRequest;
-use App\Http\Requests\UpdateClientProfileRequest;
+use App\Http\Requests\{StoreClientProfileRequest, UpdateClientProfileRequest};
 use App\Http\Resources\ClientProfileResource;
 use App\Models\ClientProfile;
 use App\Services\ClientProfileService;

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreClientConsentRequest;
-use App\Http\Requests\UpdateClientConsentRequest;
+use App\Http\Requests\{StoreClientConsentRequest, UpdateClientConsentRequest};
 use App\Http\Resources\ClientConsentResource;
 use App\Models\ClientConsent;
 use App\Services\ClientConsentService;

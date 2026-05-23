@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\URL;
 /** @mixin UserFile */
 class UserFileResource extends JsonResource
 {
-    //duracion de las URLs firmadas; suficiente para que el FE pinte la imagen
-    private const SIGNED_URL_TTL_MINUTES = 10;
-
     public function toArray(Request $request): array
     {
         return [
@@ -21,10 +18,10 @@ class UserFileResource extends JsonResource
             'user_id' => $this->user_id,
             'skin_evaluation_id' => $this->skin_evaluation_id,
             'category' => $this->category,
-            //la URL caduca a los 10 minutos; al recargar el listado se genera otra
+            //URL firmada de 10 min; al recargar el listado se genera otra
             'url' => URL::temporarySignedRoute(
                 'user-files.file',
-                now()->addMinutes(self::SIGNED_URL_TTL_MINUTES),
+                now()->addMinutes(10),
                 ['user_file' => $this->id],
             ),
             'notes' => $this->notes,

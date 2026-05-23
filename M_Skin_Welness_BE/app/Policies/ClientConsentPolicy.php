@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\ClientConsent;
-use App\Models\User;
+use App\Models\{ClientConsent, User};
 
 class ClientConsentPolicy
 {

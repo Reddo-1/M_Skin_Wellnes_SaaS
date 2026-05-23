@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTreatmentConsentRequest;
-use App\Http\Requests\UpdateTreatmentConsentRequest;
+use App\Http\Requests\{StoreTreatmentConsentRequest, UpdateTreatmentConsentRequest};
 use App\Http\Resources\TreatmentConsentResource;
 use App\Models\TreatmentConsent;
 use App\Services\TreatmentConsentService;

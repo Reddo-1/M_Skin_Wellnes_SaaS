@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\TimeSlot;
-use App\Models\User;
+use App\Models\{TimeSlot, User};
 
 class TimeSlotPolicy
 {

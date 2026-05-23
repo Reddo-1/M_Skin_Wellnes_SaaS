@@ -4,8 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\UserFile;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
+use Illuminate\Validation\{Rule, Validator};
 
 class StoreUserFileRequest extends FormRequest
 {

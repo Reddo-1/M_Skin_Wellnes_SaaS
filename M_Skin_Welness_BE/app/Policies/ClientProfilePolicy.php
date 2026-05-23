@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\ClientProfile;
-use App\Models\User;
+use App\Models\{ClientProfile, User};
 
 class ClientProfilePolicy
 {

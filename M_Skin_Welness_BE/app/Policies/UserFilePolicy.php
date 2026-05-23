@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\UserFile;
+use App\Models\{User, UserFile};
 
 class UserFilePolicy
 {

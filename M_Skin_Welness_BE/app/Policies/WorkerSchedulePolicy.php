@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\WorkerSchedule;
+use App\Models\{User, WorkerSchedule};
 
 class WorkerSchedulePolicy
 {

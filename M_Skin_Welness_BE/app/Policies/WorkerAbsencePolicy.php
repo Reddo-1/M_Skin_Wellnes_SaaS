@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\WorkerAbsence;
+use App\Models\{User, WorkerAbsence};
 
 class WorkerAbsencePolicy
 {

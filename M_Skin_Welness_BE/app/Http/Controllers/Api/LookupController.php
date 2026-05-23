@@ -3,13 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AbsenceType;
-use App\Models\PaymentMethod;
-use App\Models\SaleStatus;
-use App\Models\SessionStatus;
-use App\Models\SkinType;
-use App\Models\StockMovementType;
-use App\Models\Variation;
+use App\Models\{AbsenceType, PaymentMethod, SaleStatus, SessionStatus, SkinType, StockMovementType, Variation};
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 

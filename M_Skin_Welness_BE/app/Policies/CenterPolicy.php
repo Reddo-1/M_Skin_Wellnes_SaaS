@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Center;
-use App\Models\User;
+use App\Models\{Center, User};
 
 class CenterPolicy
 {

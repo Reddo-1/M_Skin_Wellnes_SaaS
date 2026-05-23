@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\TreatmentConsent;
-use App\Models\User;
+use App\Models\{TreatmentConsent, User};
 
 class TreatmentConsentPolicy
 {

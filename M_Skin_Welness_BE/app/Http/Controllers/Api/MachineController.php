@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMachineRequest;
-use App\Http\Requests\UpdateMachineRequest;
+use App\Http\Requests\{StoreMachineRequest, UpdateMachineRequest};
 use App\Http\Resources\MachineResource;
 use App\Models\Machine;
 use App\Services\MachineService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MachineController extends Controller

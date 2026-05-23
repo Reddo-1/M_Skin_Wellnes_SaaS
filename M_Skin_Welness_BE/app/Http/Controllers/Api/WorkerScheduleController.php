@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreWorkerScheduleRequest;
-use App\Http\Requests\UpdateWorkerScheduleRequest;
+use App\Http\Requests\{StoreWorkerScheduleRequest, UpdateWorkerScheduleRequest};
 use App\Http\Resources\WorkerScheduleResource;
 use App\Models\WorkerSchedule;
 use App\Services\WorkerScheduleService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class WorkerScheduleController extends Controller

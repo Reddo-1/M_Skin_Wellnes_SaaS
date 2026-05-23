@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreWorkerExtraAvailabilityRequest;
-use App\Http\Requests\UpdateWorkerExtraAvailabilityRequest;
+use App\Http\Requests\{StoreWorkerExtraAvailabilityRequest, UpdateWorkerExtraAvailabilityRequest};
 use App\Http\Resources\WorkerExtraAvailabilityResource;
 use App\Models\WorkerExtraAvailability;
 use App\Services\WorkerExtraAvailabilityService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class WorkerExtraAvailabilityController extends Controller

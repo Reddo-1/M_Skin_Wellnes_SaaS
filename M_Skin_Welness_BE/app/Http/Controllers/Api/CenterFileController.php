@@ -7,8 +7,7 @@ use App\Http\Requests\StoreCenterFileRequest;
 use App\Http\Resources\CenterFileResource;
 use App\Models\CenterFile;
 use App\Services\CenterFileService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CenterFileController extends Controller

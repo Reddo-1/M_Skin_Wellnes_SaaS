@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\SkinEvaluation;
-use App\Models\User;
+use App\Models\{SkinEvaluation, User};
 
 class SkinEvaluationPolicy
 {

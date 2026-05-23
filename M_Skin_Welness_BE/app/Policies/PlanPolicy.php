@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Plan;
-use App\Models\User;
+use App\Models\{Plan, User};
 
 class PlanPolicy
 {

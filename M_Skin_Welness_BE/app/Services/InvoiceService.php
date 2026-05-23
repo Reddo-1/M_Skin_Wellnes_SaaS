@@ -2,10 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Center;
-use App\Models\Invoice;
-use App\Models\Sale;
-use App\Models\User;
+use App\Models\{Center, Invoice, Sale, User};
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService

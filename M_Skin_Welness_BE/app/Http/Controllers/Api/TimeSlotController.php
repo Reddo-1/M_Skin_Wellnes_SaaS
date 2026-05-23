@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTimeSlotRequest;
-use App\Http\Requests\UpdateTimeSlotRequest;
+use App\Http\Requests\{StoreTimeSlotRequest, UpdateTimeSlotRequest};
 use App\Http\Resources\TimeSlotResource;
 use App\Models\TimeSlot;
 use App\Services\TimeSlotService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TimeSlotController extends Controller

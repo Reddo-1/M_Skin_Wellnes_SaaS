@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Sale;
-use App\Models\User;
+use App\Models\{Sale, User};
 
 class SalePolicy
 {

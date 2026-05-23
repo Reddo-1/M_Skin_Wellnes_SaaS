@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\CenterFile;
-use App\Models\User;
+use App\Models\{CenterFile, User};
 
 class CenterFilePolicy
 {
