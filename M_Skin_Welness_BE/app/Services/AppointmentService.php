@@ -2,11 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Appointment;
-use App\Models\ClientConsent;
-use App\Models\SessionStatus;
-use App\Models\TreatmentConsent;
-use App\Models\WorkerSchedule;
+use App\Models\{Appointment, ClientConsent, TreatmentConsent, WorkerSchedule};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -169,7 +165,7 @@ class AppointmentService
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'booking_source' => $data['booking_source'],
-                'status_id' => SessionStatus::idFor('pendiente'),
+                'status_id' => (int) $data['status_id'],
                 'reserved_price' => $data['reserved_price'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
@@ -247,16 +243,17 @@ class AppointmentService
     public function changeStatus(Appointment $appointment, int $statusId, int $actorId): Appointment
     {
         return DB::transaction(function () use ($appointment, $statusId, $actorId) {
-            $previousStatusName = SessionStatus::query()->whereKey($appointment->status_id)->value('name');
-            $statusName = SessionStatus::query()->whereKey($statusId)->value('name');
+            $cancelledId = (int) config('lookups.session_statuses.cancelada');
+            $doneId = (int) config('lookups.session_statuses.realizada');
+            $previousStatusId = (int) $appointment->status_id;
 
             $appointment->status_id = $statusId;
 
-            if ($statusName === 'cancelada') {
+            if ($statusId === $cancelledId) {
                 $appointment->cancelled_at = now();
             }
 
-            if ($statusName === 'realizada' && $appointment->actual_duration_minutes === null) {
+            if ($statusId === $doneId && $appointment->actual_duration_minutes === null) {
                 $appointment->actual_duration_minutes = max(0, (int) round(
                     $appointment->starts_at->diffInMinutes(now(), absolute: false)
                 ));
@@ -265,7 +262,7 @@ class AppointmentService
             $appointment->save();
 
             //consumo de stock solo al pasar A 'realizada' por primera vez
-            if ($statusName === 'realizada' && $previousStatusName !== 'realizada') {
+            if ($statusId === $doneId && $previousStatusId !== $doneId) {
                 $this->appointmentProducts->applyStockConsumption($appointment, $actorId);
             }
 

@@ -2,13 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Appointment;
-use App\Models\Center;
-use App\Models\Machine;
-use App\Models\Room;
-use App\Models\SessionStatus;
-use App\Models\Treatment;
-use App\Models\User;
+use App\Models\{Appointment, Center, Machine, Room, Treatment, User};
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 
@@ -100,7 +94,7 @@ class AppointmentSeeder extends Seeder
                     'machine_id' => $machineId,
                     'ends_at' => $endsAt,
                     'booking_source' => 'staff',
-                    'status_id' => SessionStatus::idFor($statusName),
+                    'status_id' => (int) config('lookups.session_statuses.'.$statusName),
                     'reserved_price' => $treatment->price,
                     'cancelled_at' => $statusName === 'cancelada' ? $startsAt : null,
                     'actual_duration_minutes' => $statusName === 'realizada' ? $treatment->duration_minutes : null,

@@ -28,6 +28,7 @@ class SubscriptionController extends Controller
         }
 
         $stripeSubscription = $subscription->asStripeSubscription();
+        $firstItem = $stripeSubscription->items->data[0] ?? null;
 
         return response()->json([
             'has_subscription' => true,
@@ -37,8 +38,12 @@ class SubscriptionController extends Controller
             'trial_ends_at' => $subscription->trial_ends_at?->toIso8601String(),
             'ends_at' => $subscription->ends_at?->toIso8601String(),
             'cancel_at_period_end' => (bool) $stripeSubscription->cancel_at_period_end,
-            'current_period_start' => Carbon::createFromTimestamp($stripeSubscription->current_period_start)->toIso8601String(),
-            'current_period_end' => Carbon::createFromTimestamp($stripeSubscription->current_period_end)->toIso8601String(),
+            'current_period_start' => $firstItem?->current_period_start
+                ? Carbon::createFromTimestamp($firstItem->current_period_start)->toIso8601String()
+                : null,
+            'current_period_end' => $firstItem?->current_period_end
+                ? Carbon::createFromTimestamp($firstItem->current_period_end)->toIso8601String()
+                : null,
             'plan' => PlanResource::make($user->center->plan),
             'card' => $user->pm_last_four !== null
                 ? ['brand' => $user->pm_type, 'last_four' => $user->pm_last_four]

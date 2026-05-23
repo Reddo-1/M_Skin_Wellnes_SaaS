@@ -27,6 +27,7 @@ class StoreSaleRequest extends FormRequest
                 Rule::exists('appointments', 'id')->where('center_id', $centerId),
             ],
             'discount' => ['sometimes', 'numeric', 'min:0'],
+            'status_id' => ['required', 'integer', Rule::exists('sale_statuses', 'id')],
             'payment_method_id' => ['nullable', 'integer', 'exists:payment_methods,id'],
             'notes' => ['nullable', 'string', 'max:5000'],
 

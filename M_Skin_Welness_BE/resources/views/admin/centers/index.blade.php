@@ -40,19 +40,18 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label sa-input-label">Estado</label>
-                <select name="status" class="form-select sa-input">
-                    <option value="">Todos</option>
-                    <option value="active" @selected(($filters['status'] ?? '') === 'active')>Activos</option>
-                    <option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Desactivados</option>
-                </select>
-            </div>
-            <div class="col-md-1">
-                <label class="form-label sa-input-label">Reiniciar Filtros</label>
-                <a href="{{ route('admin.centers.index') }}" class="btn sa-btn-ghost w-100 sa-input d-flex align-items-center justify-content-center" title="Limpiar filtros">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </a>
+                <div class="d-flex gap-2">
+                    <select name="status" class="form-select sa-input flex-grow-1">
+                        <option value="">Todos</option>
+                        <option value="active" @selected(($filters['status'] ?? '') === 'active')>Activos</option>
+                        <option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Desactivados</option>
+                    </select>
+                    <a href="{{ route('admin.centers.index') }}" class="sa-reset-btn" title="Limpiar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </form>
@@ -92,16 +91,16 @@
                             <td class="text-center" style="font-size: 13px;">{{ $center->users_count }}</td>
                             <td class="text-center">
                                 @if ($center->is_active)
-                                    <span>Activo</span>
+                                    <span class="sa-status-badge is-active">Activo</span>
                                 @else
-                                    <span>Inactivo</span>
+                                    <span class="sa-status-badge is-inactive">Inactivo</span>
                                 @endif
                             </td>
                             <td class="text-secondary" style="font-size: 12px;">
                                 {{ $center->created_at->locale('es')->isoFormat('D MMM YYYY') }}
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('admin.centers.show', $center) }}" class="btn btn-sm sa-btn-ghost" title="Ver">
+                                <a href="{{ route('admin.centers.show', $center) }}" class="btn sa-btn-ghost sa-btn-icon" title="Ver ficha">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </td>

@@ -53,15 +53,14 @@
                 <label class="form-label sa-input-label">Desde</label>
                 <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control sa-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <label class="form-label sa-input-label">Hasta</label>
-                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control sa-input">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label sa-input-label">Reiniciar Filtros</label>
-                <a href="{{ route('admin.audit-logs.index') }}" class="btn sa-btn-ghost w-100 sa-input d-flex align-items-center justify-content-center" title="Limpiar filtros">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </a>
+                <div class="d-flex gap-2">
+                    <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control sa-input flex-grow-1">
+                    <a href="{{ route('admin.audit-logs.index') }}" class="sa-reset-btn" title="Limpiar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </form>

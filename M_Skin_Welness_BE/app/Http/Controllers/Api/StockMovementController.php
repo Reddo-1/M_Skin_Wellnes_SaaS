@@ -43,7 +43,7 @@ class StockMovementController extends Controller
             centerId: (int) $request->attributes->get('center_id'),
             actorId: $request->user()->id,
             productId: (int) $data['product_id'],
-            typeName: $data['type'],
+            typeId: (int) $data['movement_type_id'],
             packageQuantity: (float) $data['package_quantity'],
             reason: $data['reason'] ?? null,
         );

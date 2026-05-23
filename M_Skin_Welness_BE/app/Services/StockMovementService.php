@@ -2,10 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Product;
-use App\Models\ProductStock;
-use App\Models\StockMovement;
-use App\Models\StockMovementType;
+use App\Models\{Product, ProductStock, StockMovement, StockMovementType};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -16,7 +13,7 @@ class StockMovementService
         int $centerId,
         int $actorId,
         int $productId,
-        string $typeName,
+        int $typeId,
         float $packageQuantity,
         ?string $reason = null,
         ?string $referenceType = null,
@@ -33,7 +30,7 @@ class StockMovementService
             centerId: $centerId,
             actorId: $actorId,
             productId: $productId,
-            typeName: $typeName,
+            typeId: $typeId,
             quantity: $doses,
             reason: $reason,
             referenceType: $referenceType,
@@ -45,20 +42,16 @@ class StockMovementService
         int $centerId,
         int $actorId,
         int $productId,
-        string $typeName,
+        int $typeId,
         float $quantity,
         ?string $reason = null,
         ?string $referenceType = null,
         ?int $referenceId = null,
     ): StockMovement {
-        return DB::transaction(function () use ($centerId, $actorId, $productId, $typeName, $quantity, $reason, $referenceType, $referenceId) {
-            $type = StockMovementType::query()
-                ->where('name', $typeName)
-                ->first();
-
-            if ($type === null) {
+        return DB::transaction(function () use ($centerId, $actorId, $productId, $typeId, $quantity, $reason, $referenceType, $referenceId) {
+            if (! StockMovementType::query()->whereKey($typeId)->exists()) {
                 throw ValidationException::withMessages([
-                    'type' => ["No se reconoce el tipo de movimiento '{$typeName}'."],
+                    'movement_type_id' => ['No se reconoce el tipo de movimiento de stock.'],
                 ]);
             }
 
@@ -86,7 +79,7 @@ class StockMovementService
             $movement = StockMovement::create([
                 'center_id' => $centerId,
                 'product_id' => $productId,
-                'movement_type_id' => $type->id,
+                'movement_type_id' => $typeId,
                 'quantity' => $quantity,
                 'previous_quantity' => $previous,
                 'new_quantity' => $new,

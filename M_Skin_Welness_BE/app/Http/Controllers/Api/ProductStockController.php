@@ -49,7 +49,7 @@ class ProductStockController extends Controller
             centerId: $productStock->center_id,
             actorId: $request->user()->id,
             productId: $productStock->product_id,
-            typeName: 'ajuste_manual',
+            typeId: (int) config('lookups.stock_movement_types.ajuste_manual'),
             quantity: $delta,
             reason: $data['reason'],
         );

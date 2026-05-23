@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\{AccountController, AuditLogController, CenterController, DashboardController, LoginController, PlanController};
+use App\Http\Controllers\Admin\{AccountController, AuditLogController, CenterController, DashboardController, LoginController, LookupController, PlanController};
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/admin/login');
@@ -8,7 +8,9 @@ Route::redirect('/', '/admin/login');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-        Route::post('login', [LoginController::class, 'login'])->name('login.submit');
+        Route::post('login', [LoginController::class, 'login'])
+            ->middleware('throttle:10,1')
+            ->name('login.submit');
     });
 
     Route::middleware(['auth', 'role:superadmin'])->group(function () {
@@ -26,5 +28,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('account', [AccountController::class, 'edit'])->name('account.edit');
         Route::put('account', [AccountController::class, 'update'])->name('account.update');
+
+        Route::get('lookups', [LookupController::class, 'index'])->name('lookups.index');
+        Route::post('lookups/{catalog}', [LookupController::class, 'store'])->name('lookups.store');
+        Route::put('lookups/{catalog}/{id}', [LookupController::class, 'update'])->name('lookups.update');
+        Route::delete('lookups/{catalog}/{id}', [LookupController::class, 'destroy'])->name('lookups.destroy');
     });
 });

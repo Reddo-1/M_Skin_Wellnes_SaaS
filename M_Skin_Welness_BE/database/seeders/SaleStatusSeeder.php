@@ -10,13 +10,15 @@ class SaleStatusSeeder extends Seeder
     public function run(): void
     {
         $statuses = [
-            ['name' => 'pendiente'],
-            ['name' => 'pagada'],
-            ['name' => 'parcialmente_reembolsada'],
-            ['name' => 'reembolsada'],
-            ['name' => 'cancelada'],
+            ['id' => 1, 'name' => 'pendiente'],
+            ['id' => 2, 'name' => 'pagada'],
+            ['id' => 3, 'name' => 'parcialmente_reembolsada'],
+            ['id' => 4, 'name' => 'reembolsada'],
+            ['id' => 5, 'name' => 'cancelada'],
         ];
 
-        DB::table('sale_statuses')->upsert($statuses, ['name']);
+        DB::table('sale_statuses')->upsert($statuses, ['id'], ['name']);
+
+        DB::statement("SELECT setval('sale_statuses_id_seq', (SELECT MAX(id) FROM sale_statuses))");
     }
 }

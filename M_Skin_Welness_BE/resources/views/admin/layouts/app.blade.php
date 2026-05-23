@@ -35,6 +35,11 @@
            title="Auditoría">
             <i class="bi bi-clock-history"></i>
         </a>
+        <a href="{{ route('admin.lookups.index') }}"
+           class="sa-nav-item {{ request()->routeIs('admin.lookups.*') ? 'active' : '' }}"
+           title="Catálogos">
+            <i class="bi bi-list-ul"></i>
+        </a>
     </aside>
 
     <main class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
@@ -72,7 +77,7 @@
             </div>
         </header>
 
-        <div class="flex-grow-1 p-3 p-md-4">
+        <div class="sa-content p-3 p-md-4">
             @yield('content')
         </div>
 

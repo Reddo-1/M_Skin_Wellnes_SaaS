@@ -30,17 +30,17 @@ use App\Http\Controllers\Api\WorkerExtraAvailabilityController;
 use App\Http\Controllers\Api\WorkerScheduleController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
-Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('reset-password', [AuthController::class, 'resetPassword']);
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:10,1');
+Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1');
 
 //verificacion de email: link firmado del correo + endpoint publico para reenviar
 Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
+    ->middleware(['signed', 'throttle:10,1'])
     ->name('verification.verify');
 Route::post('email/verification-notification', [EmailVerificationController::class, 'resend'])
-    ->middleware('throttle:6,1');
+    ->middleware('throttle:10,1');
 
 //alta de centro nuevo: crea checkout session de stripe; el webhook crea center+admin al cobrar
 Route::post('centers/register', [CenterRegistrationController::class, 'register']);

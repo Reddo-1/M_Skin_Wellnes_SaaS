@@ -9,9 +9,4 @@ class SaleStatus extends Model
     public $timestamps = false;
 
     protected $fillable = ['name'];
-
-    public static function idFor(string $name): int
-    {
-        return (int) self::query()->where('name', $name)->value('id');
-    }
 }

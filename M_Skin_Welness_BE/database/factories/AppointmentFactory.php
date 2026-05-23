@@ -2,14 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Appointment;
-use App\Models\SessionStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-/**
- * @extends Factory<Appointment>
- */
 class AppointmentFactory extends Factory
 {
     public function definition(): array
@@ -28,8 +23,8 @@ class AppointmentFactory extends Factory
             'machine_id' => null,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
-            'booking_source' => $this->faker->randomElement(Appointment::SOURCES),
-            'status_id' => SessionStatus::idFor('pendiente'),
+            'booking_source' => $this->faker->randomElement(['staff', 'online']),
+            'status_id' => (int) config('lookups.session_statuses.pendiente'),
             'reserved_price' => $this->faker->randomFloat(2, 20, 150),
             'notes' => $this->faker->optional()->sentence(),
         ];
@@ -39,7 +34,7 @@ class AppointmentFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'status_id' => SessionStatus::idFor('confirmada'),
+                'status_id' => (int) config('lookups.session_statuses.confirmada'),
             ];
         });
     }
@@ -48,7 +43,7 @@ class AppointmentFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'status_id' => SessionStatus::idFor('en_curso'),
+                'status_id' => (int) config('lookups.session_statuses.en_curso'),
             ];
         });
     }
@@ -57,7 +52,7 @@ class AppointmentFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'status_id' => SessionStatus::idFor('realizada'),
+                'status_id' => (int) config('lookups.session_statuses.realizada'),
                 'actual_duration_minutes' => $this->faker->numberBetween(25, 95),
             ];
         });
@@ -67,7 +62,7 @@ class AppointmentFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'status_id' => SessionStatus::idFor('cancelada'),
+                'status_id' => (int) config('lookups.session_statuses.cancelada'),
                 'cancelled_at' => now(),
             ];
         });

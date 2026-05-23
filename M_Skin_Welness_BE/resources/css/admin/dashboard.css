@@ -30,12 +30,49 @@ body {
 
 
 .sa-app {
-    height: 100vh;
+    height: calc(100dvh - 1rem);
     background: var(--sa-card);
     border: .5px solid var(--sa-border);
     border-radius: 18px;
     box-shadow: 0 40px 80px rgba(0, 0, 0, .45);
     overflow: hidden;
+    min-height: 0;
+}
+
+@media (min-width: 768px) {
+    .sa-app {
+        height: calc(100dvh - 2rem);
+    }
+}
+
+.sa-app > main {
+    min-width: 0;
+    min-height: 0;
+}
+
+.sa-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sa-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sa-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sa-content::-webkit-scrollbar-thumb {
+    background: var(--sa-border-2);
+    border-radius: 6px;
+    border: 2px solid var(--sa-panel);
+}
+
+.sa-content::-webkit-scrollbar-thumb:hover {
+    background: var(--sa-purple);
 }
 
 /* ---------- Sidebar ---------- */
@@ -79,8 +116,9 @@ body {
 }
 
 .sa-sidebar .sa-nav-item.active {
-    background: var(--sa-purple);
+    background: linear-gradient(135deg, var(--sa-purple), var(--sa-purple-dark));
     color: #fff;
+    box-shadow: 0 6px 14px rgba(167, 139, 250, .28);
 }
 
 @media (max-width: 767.98px) {
@@ -128,6 +166,14 @@ body {
     background: var(--sa-panel);
     border: .5px solid var(--sa-border-2);
     border-radius: 14px;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.sa-card.sa-card-accent {
+    border-color: rgba(167, 139, 250, .35);
+    background:
+        linear-gradient(180deg, rgba(167, 139, 250, .06), transparent 60%),
+        var(--sa-panel);
 }
 
 .sa-card-title {
@@ -158,6 +204,10 @@ body {
     font-weight: 600;
     line-height: 1;
     letter-spacing: -.02em;
+    background: linear-gradient(135deg, #FFFFFF 0%, #C9C4E3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .sa-text-success { color: var(--sa-success) !important; }
@@ -495,4 +545,152 @@ select.sa-input {
     background: var(--sa-card);
     color: var(--sa-dim);
     border-color: var(--sa-border);
+}
+
+/* ---------- Nav tabs (catálogos) ---------- */
+
+.sa-lookup-tabs {
+    border-bottom: .5px solid var(--sa-border);
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.sa-lookup-tabs .nav-link {
+    color: var(--sa-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .01em;
+    background: transparent;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    padding: 8px 14px;
+    margin-bottom: -.5px;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, background-color .15s, border-color .15s;
+}
+
+.sa-lookup-tabs .nav-link:hover {
+    color: var(--sa-text);
+    background: var(--sa-card);
+}
+
+.sa-lookup-tabs .nav-link.active {
+    color: var(--sa-purple);
+    background: var(--sa-card);
+    border-bottom-color: var(--sa-purple);
+}
+
+/* ---------- Form section (cabecera dentro de card) ---------- */
+
+.sa-form-section {
+    background: var(--sa-card);
+    border: .5px dashed var(--sa-border-2);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.sa-form-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--sa-purple);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sa-form-section-hint {
+    color: var(--sa-dim);
+    font-size: 11px;
+}
+
+/* ---------- Botones icon-only y compactos ---------- */
+
+.sa-btn-icon {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.sa-btn-compact {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* ---------- Badges de estado ---------- */
+
+.sa-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    border: .5px solid;
+}
+
+.sa-status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.sa-status-badge.is-active {
+    background: rgba(92, 216, 142, .08);
+    color: var(--sa-success);
+    border-color: rgba(92, 216, 142, .35);
+}
+
+.sa-status-badge.is-active::before {
+    background: var(--sa-success);
+    box-shadow: 0 0 6px rgba(92, 216, 142, .7);
+}
+
+.sa-status-badge.is-inactive {
+    background: rgba(244, 183, 120, .08);
+    color: var(--sa-warn);
+    border-color: rgba(244, 183, 120, .35);
+}
+
+.sa-status-badge.is-inactive::before {
+    background: var(--sa-warn);
+}
+
+/* ---------- Reset button (filtro) ---------- */
+
+.sa-reset-btn {
+    height: 38px;
+    width: 38px;
+    border-radius: 10px;
+    background: var(--sa-card);
+    border: .5px solid var(--sa-border-2);
+    color: var(--sa-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: color .15s, border-color .15s, background-color .15s;
+    flex-shrink: 0;
+}
+
+.sa-reset-btn:hover {
+    color: var(--sa-purple);
+    border-color: var(--sa-purple);
+    background: var(--sa-panel);
 }

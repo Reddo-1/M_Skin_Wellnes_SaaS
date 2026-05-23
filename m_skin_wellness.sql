@@ -284,26 +284,23 @@ CREATE INDEX idx_role_treatment_center_treat ON role_treatment (center_id, treat
 CREATE INDEX idx_role_treatment_center_role  ON role_treatment (center_id, role_id);
 
 CREATE TABLE client_profiles (
-    id                 SERIAL PRIMARY KEY,
-    center_id          INT         NOT NULL,
-    user_id            INT         NOT NULL,
-    skin_type_id       INT         NOT NULL,
-    last_review_date   DATE        NOT NULL DEFAULT CURRENT_DATE,
-    updated_by_user_id INT         NOT NULL,
-    general_notes      TEXT,
-    is_active          BOOLEAN     NOT NULL DEFAULT TRUE,
-    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uq_client_profiles_id_center UNIQUE (id, center_id),
-    CONSTRAINT fk_client_profiles_center    FOREIGN KEY (center_id)
+    id                          SERIAL PRIMARY KEY,
+    center_id                   INT         NOT NULL,
+    user_id                     INT         NOT NULL,
+    body_type                   VARCHAR(20) NOT NULL,
+    current_skin_evaluation_id  INT,
+    general_notes               TEXT,
+    created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_client_profiles_id_center   UNIQUE (id, center_id),
+    CONSTRAINT uq_client_profiles_user_body   UNIQUE (center_id, user_id, body_type),
+    CONSTRAINT chk_client_profiles_body_type  CHECK (body_type IN ('facial', 'corporal')),
+    CONSTRAINT fk_client_profiles_center      FOREIGN KEY (center_id)
         REFERENCES centers (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_client_profiles_user      FOREIGN KEY (user_id, center_id)           REFERENCES users (id, center_id),
-    CONSTRAINT fk_client_profiles_skin_type FOREIGN KEY (skin_type_id)
-        REFERENCES skin_types (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_client_profiles_updater   FOREIGN KEY (updated_by_user_id, center_id) REFERENCES users (id, center_id)
+    CONSTRAINT fk_client_profiles_user        FOREIGN KEY (user_id, center_id) REFERENCES users (id, center_id)
+    --la FK hacia skin_evaluations se anade en migracion posterior por dependencia
 );
 CREATE INDEX idx_client_profiles_center_user ON client_profiles (center_id, user_id);
-CREATE INDEX idx_client_profiles_skin_type   ON client_profiles (skin_type_id);
 
 CREATE TABLE skin_evaluations (
     id                SERIAL PRIMARY KEY,
@@ -315,6 +312,7 @@ CREATE TABLE skin_evaluations (
     professional_id   INT         NOT NULL,
     general_notes     TEXT,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT uq_skin_evaluations_id_center UNIQUE (id, center_id),
     CONSTRAINT fk_skin_eval_center           FOREIGN KEY (center_id)
         REFERENCES centers (id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -336,13 +334,10 @@ CREATE TABLE skin_evaluation_variation (
     CONSTRAINT fk_skin_eval_var_variation    FOREIGN KEY (variation_id)       REFERENCES variations (id) ON DELETE CASCADE
 );
 
-CREATE TABLE client_profile_variation (
-    client_profile_id INT NOT NULL,
-    variation_id      INT NOT NULL,
-    CONSTRAINT pk_client_profile_variation   PRIMARY KEY (client_profile_id, variation_id),
-    CONSTRAINT fk_client_prof_var_profile    FOREIGN KEY (client_profile_id) REFERENCES client_profiles (id) ON DELETE CASCADE,
-    CONSTRAINT fk_client_prof_var_variation  FOREIGN KEY (variation_id)      REFERENCES variations (id) ON DELETE CASCADE
-);
+ALTER TABLE client_profiles
+    ADD CONSTRAINT fk_client_profiles_current_skin_eval
+    FOREIGN KEY (current_skin_evaluation_id, center_id)
+    REFERENCES skin_evaluations (id, center_id) ON DELETE SET NULL;
 
 CREATE TABLE treatment_suitability_evaluations (
     id                   SERIAL PRIMARY KEY,
@@ -373,10 +368,8 @@ CREATE TABLE user_files (
     center_id          INT          NOT NULL,
     user_id            INT          NOT NULL,
     skin_evaluation_id INT,
-    type               VARCHAR(30)  NOT NULL,
     category           VARCHAR(40)  NOT NULL,
     path               VARCHAR(255) NOT NULL,
-    mime_type          VARCHAR(100),
     notes              TEXT,
     created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uq_user_files_id_center       UNIQUE (id, center_id),
@@ -387,6 +380,10 @@ CREATE TABLE user_files (
 );
 CREATE INDEX idx_user_files_center_user      ON user_files (center_id, user_id);
 CREATE INDEX idx_user_files_center_skin_eval ON user_files (center_id, skin_evaluation_id);
+CREATE UNIQUE INDEX uq_user_files_eval_category ON user_files (skin_evaluation_id, category)
+    WHERE skin_evaluation_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_user_files_avatar ON user_files (center_id, user_id)
+    WHERE category = 'foto_perfil';
 
 CREATE TABLE appointments (
     id                      SERIAL PRIMARY KEY,
@@ -450,18 +447,22 @@ CREATE TABLE sales (
     discount           DECIMAL(10, 2) NOT NULL DEFAULT 0,
     total              DECIMAL(10, 2) NOT NULL,
     status_id          INT            NOT NULL,
+    payment_method_id  INT,
+    paid_at            TIMESTAMPTZ,
     notes              TEXT,
     created_at         TIMESTAMPTZ    NOT NULL DEFAULT now(),
     updated_at         TIMESTAMPTZ    NOT NULL DEFAULT now(),
-    CONSTRAINT uq_sales_id_center      UNIQUE (id, center_id),
-    CONSTRAINT fk_sales_center         FOREIGN KEY (center_id)
+    CONSTRAINT uq_sales_id_center        UNIQUE (id, center_id),
+    CONSTRAINT fk_sales_center           FOREIGN KEY (center_id)
         REFERENCES centers (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_sales_client         FOREIGN KEY (client_id, center_id)        REFERENCES users (id, center_id),
-    CONSTRAINT fk_sales_appointment    FOREIGN KEY (appointment_id)
+    CONSTRAINT fk_sales_client           FOREIGN KEY (client_id, center_id)          REFERENCES users (id, center_id),
+    CONSTRAINT fk_sales_appointment      FOREIGN KEY (appointment_id)
         REFERENCES appointments (id) ON DELETE SET NULL,
-    CONSTRAINT fk_sales_creator        FOREIGN KEY (created_by_user_id, center_id) REFERENCES users (id, center_id),
-    CONSTRAINT fk_sales_status         FOREIGN KEY (status_id)
-        REFERENCES sale_statuses (id) ON DELETE RESTRICT
+    CONSTRAINT fk_sales_creator          FOREIGN KEY (created_by_user_id, center_id) REFERENCES users (id, center_id),
+    CONSTRAINT fk_sales_status           FOREIGN KEY (status_id)
+        REFERENCES sale_statuses (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_sales_payment_method   FOREIGN KEY (payment_method_id)
+        REFERENCES payment_methods (id) ON DELETE RESTRICT
 );
 CREATE INDEX idx_sales_center_client      ON sales (center_id, client_id);
 CREATE INDEX idx_sales_center_appointment ON sales (center_id, appointment_id);
@@ -482,30 +483,6 @@ CREATE TABLE sale_lines (
     CONSTRAINT fk_sale_lines_sale  FOREIGN KEY (sale_id, center_id) REFERENCES sales (id, center_id)
 );
 CREATE INDEX idx_sale_lines_center_sale ON sale_lines (center_id, sale_id);
-
-CREATE TABLE payments (
-    id                       SERIAL PRIMARY KEY,
-    center_id                INT            NOT NULL,
-    sale_id                  INT            NOT NULL,
-    payment_method_id        INT            NOT NULL,
-    status_id                INT            NOT NULL,
-    amount                   DECIMAL(10, 2) NOT NULL,
-    currency                 CHAR(3)        NOT NULL DEFAULT 'EUR',
-    stripe_payment_intent_id VARCHAR(100),
-    stripe_charge_id         VARCHAR(100),
-    stripe_metadata          JSONB,
-    processed_at             TIMESTAMPTZ,
-    created_at               TIMESTAMPTZ    NOT NULL DEFAULT now(),
-    updated_at               TIMESTAMPTZ    NOT NULL DEFAULT now(),
-    CONSTRAINT uq_payments_id_center     UNIQUE (id, center_id),
-    CONSTRAINT uq_payments_stripe_intent UNIQUE (stripe_payment_intent_id),
-    CONSTRAINT fk_payments_sale          FOREIGN KEY (sale_id, center_id)  REFERENCES sales (id, center_id),
-    CONSTRAINT fk_payments_method        FOREIGN KEY (payment_method_id)
-        REFERENCES payment_methods (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_payments_status        FOREIGN KEY (status_id)
-        REFERENCES payment_statuses (id) ON DELETE RESTRICT
-);
-CREATE INDEX idx_payments_center_sale ON payments (center_id, sale_id);
 
 CREATE TABLE invoices (
     id                SERIAL PRIMARY KEY,

@@ -80,7 +80,10 @@ class AdminCenterService
         //Aqui es donde coje los datos de stripe y los devuelve o no si esta caida la api y/o no tiene subscripción
         try {
             $stripeSubscription = $subscription->asStripeSubscription();
-            $summary['current_period_end'] = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
+            $firstItem = $stripeSubscription->items->data[0] ?? null;
+            $summary['current_period_end'] = $firstItem?->current_period_end
+                ? Carbon::createFromTimestamp($firstItem->current_period_end)
+                : null;
             $summary['cancel_at_period_end'] = (bool) $stripeSubscription->cancel_at_period_end;
         } catch (Throwable $e) {
             Log::warning('No se pudo leer la suscripción de Stripe para la ficha del centro', [

@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Appointment;
-use App\Models\AppointmentProduct;
+use App\Models\{Appointment, AppointmentProduct};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -56,7 +55,7 @@ class AppointmentProductService
                 centerId: $appointment->center_id,
                 actorId: $actorId,
                 productId: $line->product_id,
-                typeName: 'uso_sesion',
+                typeId: (int) config('lookups.stock_movement_types.uso_sesion'),
                 quantity: -1 * (float) $line->quantity,
                 reason: null,
                 referenceType: 'appointment',

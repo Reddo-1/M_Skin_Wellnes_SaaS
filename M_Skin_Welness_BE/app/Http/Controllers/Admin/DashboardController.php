@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Appointment, AuditLog, Center, Plan, SessionStatus, User};
+use App\Models\{AuditLog, Center, Plan, User};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -51,22 +51,12 @@ class DashboardController extends Controller
                     'value' => $monthlyRevenue,
                     'changePct' => $monthlyRevenueChangePercentage,
                 ],
-                'sessions_in_progress' => $this->countSessionsInProgress($now),
                 'online_users' => $this->countOnlineUsers($now),
             ],
             'growth' => $this->buildGrowthSeries(),
             'planDistribution' => $this->buildPlanDistribution(),
             'recentActivity' => $this->buildRecentActivity(),
         ]);
-    }
-
-    private function countSessionsInProgress(CarbonImmutable $now): int
-    {
-        return Appointment::query()
-            ->where('status_id', SessionStatus::idFor('en_curso'))
-            ->where('starts_at', '<=', $now)
-            ->where('ends_at', '>=', $now)
-            ->count();
     }
 
     private function countOnlineUsers(CarbonImmutable $now): int

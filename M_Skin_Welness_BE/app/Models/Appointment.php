@@ -102,11 +102,11 @@ class Appointment extends Model
 
     public function scopeNotCancelled(Builder $query): Builder
     {
-        return $query->whereHas(
-            'status',
-            function (Builder $q) {
-                return $q->whereNotIn('name', ['cancelada', 'no_presentada']);
-            }
-        );
+        $excluded = [
+            (int) config('lookups.session_statuses.cancelada'),
+            (int) config('lookups.session_statuses.no_presentada'),
+        ];
+
+        return $query->whereNotIn('status_id', $excluded);
     }
 }

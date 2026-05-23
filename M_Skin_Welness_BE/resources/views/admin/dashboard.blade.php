@@ -92,24 +92,7 @@
         </div>
 
         <div class="row g-3">
-            <div class="col-md-6">
-                <div class="sa-card p-3 h-100">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="sa-metric-icon purple"><i class="bi bi-broadcast"></i></div>
-                        <div class="fw-medium" style="font-size: 13px;">Sesiones en curso ahora</div>
-                    </div>
-                    <div class="sa-metric-value mb-2">{{ $metrics['sessions_in_progress'] }}</div>
-                    <div class="text-secondary" style="font-size: 12px;">
-                        @if ($metrics['sessions_in_progress'] > 0)
-                            En todos los centros activos
-                        @else
-                            No hay sesiones en este momento
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="sa-card p-3 h-100">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <div class="sa-metric-icon blue"><i class="bi bi-lightning-charge"></i></div>

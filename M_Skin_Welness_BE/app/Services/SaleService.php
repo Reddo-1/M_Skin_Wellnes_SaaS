@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Product;
-use App\Models\Sale;
-use App\Models\SaleStatus;
+use App\Models\{Product, Sale};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -60,9 +58,16 @@ class SaleService
                 ]);
             }
 
-            //pagada si llega payment_method_id; pendiente en caso contrario
+            $statusId = (int) $data['status_id'];
+            $paidStatusId = (int) config('lookups.sale_statuses.pagada');
             $paymentMethodId = $data['payment_method_id'] ?? null;
-            $statusName = $paymentMethodId !== null ? 'pagada' : 'pendiente';
+            $isPaid = $statusId === $paidStatusId;
+
+            if ($isPaid && $paymentMethodId === null) {
+                throw ValidationException::withMessages([
+                    'payment_method_id' => ['Indica el método de cobro para marcar la venta como pagada.'],
+                ]);
+            }
 
             $sale = Sale::create([
                 'center_id' => $centerId,
@@ -72,9 +77,9 @@ class SaleService
                 'subtotal' => round($subtotal, 2),
                 'discount' => $discount,
                 'total' => $total,
-                'status_id' => SaleStatus::idFor($statusName),
+                'status_id' => $statusId,
                 'payment_method_id' => $paymentMethodId,
-                'paid_at' => $paymentMethodId !== null ? now() : null,
+                'paid_at' => $isPaid ? now() : null,
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -92,7 +97,7 @@ class SaleService
                     centerId: $centerId,
                     actorId: $actorId,
                     productId: $payload['reference_id'],
-                    typeName: 'salida_venta',
+                    typeId: (int) config('lookups.stock_movement_types.salida_venta'),
                     packageQuantity: -1 * (float) $payload['quantity'],
                     reason: null,
                     referenceType: 'sale',
@@ -101,7 +106,7 @@ class SaleService
             }
 
             //si nace ya pagada, emite la factura en el mismo paso
-            if ($paymentMethodId !== null) {
+            if ($isPaid) {
                 $this->invoices->issueForSale($sale, $actorId);
             }
 
@@ -112,12 +117,12 @@ class SaleService
     public function changeStatus(Sale $sale, int $statusId, ?int $paymentMethodId, int $actorId): Sale
     {
         return DB::transaction(function () use ($sale, $statusId, $paymentMethodId, $actorId) {
-            $statusName = SaleStatus::query()->whereKey($statusId)->value('name');
+            $paidStatusId = (int) config('lookups.sale_statuses.pagada');
 
             $sale->status_id = $statusId;
             $issueInvoice = false;
 
-            if ($statusName === 'pagada' && $sale->paid_at === null) {
+            if ($statusId === $paidStatusId && $sale->paid_at === null) {
                 if ($paymentMethodId === null) {
                     throw ValidationException::withMessages([
                         'payment_method_id' => ['Indica el método de cobro para marcar la venta como pagada.'],

@@ -10,14 +10,16 @@ class SessionStatusSeeder extends Seeder
     public function run(): void
     {
         $statuses = [
-            ['name' => 'pendiente',      'sort_order' => 1],
-            ['name' => 'confirmada',     'sort_order' => 2],
-            ['name' => 'en_curso',       'sort_order' => 3],
-            ['name' => 'realizada',      'sort_order' => 4],
-            ['name' => 'cancelada',      'sort_order' => 5],
-            ['name' => 'no_presentada',  'sort_order' => 6],
+            ['id' => 1, 'name' => 'pendiente',      'sort_order' => 1],
+            ['id' => 2, 'name' => 'confirmada',     'sort_order' => 2],
+            ['id' => 3, 'name' => 'en_curso',       'sort_order' => 3],
+            ['id' => 4, 'name' => 'realizada',      'sort_order' => 4],
+            ['id' => 5, 'name' => 'cancelada',      'sort_order' => 5],
+            ['id' => 6, 'name' => 'no_presentada',  'sort_order' => 6],
         ];
 
-        DB::table('session_statuses')->upsert($statuses, ['name'], ['sort_order']);
+        DB::table('session_statuses')->upsert($statuses, ['id'], ['name', 'sort_order']);
+
+        DB::statement("SELECT setval('session_statuses_id_seq', (SELECT MAX(id) FROM session_statuses))");
     }
 }
