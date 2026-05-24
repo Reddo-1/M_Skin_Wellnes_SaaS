@@ -22,6 +22,12 @@ export const publicOnlyGuard: CanActivateFn & CanMatchFn = () => {
     return true;
   }
 
-  router.navigate(['/panel']);
+  router.navigateByUrl(auth.defaultRouteForRoles(auth.roles()));
   return false;
+};
+
+export const panelIndexRedirect: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return router.createUrlTree([auth.defaultRouteForRoles(auth.roles())]);
 };

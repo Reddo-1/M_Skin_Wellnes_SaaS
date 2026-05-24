@@ -72,6 +72,12 @@ export class AuthService {
     return this.permissions().includes(permission);
   }
 
+  defaultRouteForRoles(roles: UserRole[]): string {
+    if (roles.includes('cliente')) return '/panel/mis-citas';
+    if (roles.includes('administrador')) return '/panel/dashboard';
+    return '/panel/cuadrante';
+  }
+
   startImpersonation(token: string, centerId: number): void {
     localStorage.setItem(TOKEN_AUTH, token);
     localStorage.setItem(IMPERSONATION_CENTER_ID, String(centerId));

@@ -1,0 +1,64 @@
+<aside
+  class="fixed top-0 left-0 z-50 flex h-screen flex-col border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-in-out"
+  [class.w-[290px]]="!sidebar.isDesktopCollapsed() || sidebar.isMobileOpen()"
+  [class.xl:w-[90px]]="sidebar.isDesktopCollapsed()"
+  [class.translate-x-0]="sidebar.isMobileOpen()"
+  [class.-translate-x-full]="!sidebar.isMobileOpen()"
+  [class.xl:translate-x-0]="true"
+>
+  <div
+    class="flex py-8"
+    [class.xl:justify-center]="sidebar.isDesktopCollapsed() && !sidebar.isMobileOpen()"
+    [class.justify-start]="!sidebar.isDesktopCollapsed() || sidebar.isMobileOpen()"
+  >
+    <a routerLink="/panel" class="block text-2xl font-semibold tracking-tight text-brand-500">
+      @if (sidebar.isDesktopCollapsed() && !sidebar.isMobileOpen()) {
+        <span class="xl:inline hidden">MS</span>
+        <span class="xl:hidden">MSkinWellness</span>
+      } @else {
+        MSkinWellness
+      }
+    </a>
+  </div>
+
+  <nav class="flex flex-col gap-6 overflow-y-auto pb-6 no-scrollbar">
+    @for (group of groups(); track group.section) {
+      <div>
+        <h2
+          class="mb-3 flex text-xs font-semibold uppercase tracking-wide text-muted"
+          [class.xl:justify-center]="sidebar.isDesktopCollapsed() && !sidebar.isMobileOpen()"
+          [class.justify-start]="!sidebar.isDesktopCollapsed() || sidebar.isMobileOpen()"
+        >
+          @if (sidebar.isDesktopCollapsed() && !sidebar.isMobileOpen()) {
+            <span class="xl:inline hidden">···</span>
+            <span class="xl:hidden">{{ group.label }}</span>
+          } @else {
+            {{ group.label }}
+          }
+        </h2>
+        <ul class="flex flex-col gap-1">
+          @for (item of group.items; track item.path) {
+            <li>
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="menu-item-active menu-item-icon-active"
+                #active="routerLinkActive"
+                (click)="closeMobile()"
+                class="menu-item group menu-item-icon-size"
+                [class.menu-item-inactive]="!active.isActive"
+                [class.xl:justify-center]="sidebar.isDesktopCollapsed() && !sidebar.isMobileOpen()"
+              >
+                <span class="menu-item-icon-size">
+                  <app-icon [name]="item.icon" />
+                </span>
+                @if (!sidebar.isDesktopCollapsed() || sidebar.isMobileOpen()) {
+                  <span>{{ item.label }}</span>
+                }
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+</aside>
