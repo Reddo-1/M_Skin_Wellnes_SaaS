@@ -1,0 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
+  layer(base);
+
+@import "tailwindcss";
+
+@theme {
+  --font-*: initial;
+  --font-outfit: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  --text-title-2xl: 72px;
+  --text-title-2xl--line-height: 90px;
+  --text-title-xl: 60px;
+  --text-title-xl--line-height: 72px;
+  --text-title-lg: 48px;
+  --text-title-lg--line-height: 60px;
+  --text-title-md: 36px;
+  --text-title-md--line-height: 44px;
+  --text-title-sm: 30px;
+  --text-title-sm--line-height: 38px;
+
+  /* Paleta corporativa MSkinWellness — anchor #E6621F en brand-500 */
+  --color-brand-50: #fef4ee;
+  --color-brand-100: #fde6d3;
+  --color-brand-200: #facaa6;
+  --color-brand-300: #f7a872;
+  --color-brand-400: #f3884b;
+  --color-brand-500: #e6621f;
+  --color-brand-600: #c84c14;
+  --color-brand-700: #a13b10;
+  --color-brand-800: #82310f;
+  --color-brand-900: #6b2b10;
+  --color-brand-950: #391306;
+
+  /* Neutros corporativos */
+  --color-ink: #333333;
+  --color-muted: #898989;
+  --color-surface-alt: #ededee;
+
+  /* Estados (mantenemos paleta neutra para semánticos) */
+  --color-error-25: #fffbfa;
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-200: #fecdca;
+  --color-error-300: #fda29b;
+  --color-error-400: #f97066;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+
+  --color-warning-25: #fffcf5;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-500: #f79009;
+  --color-warning-700: #b54708;
+
+  --color-success-50: #ecfdf3;
+  --color-success-500: #12b76a;
+  --color-success-600: #039855;
+  --color-success-700: #027a48;
+
+  --animate-mandala-spin: mandala-spin 120s linear infinite;
+  --animate-toast-in: toast-in 180ms ease-out;
+}
+
+@keyframes mandala-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  body {
+    @apply font-outfit bg-gray-50 text-ink;
+  }
+}

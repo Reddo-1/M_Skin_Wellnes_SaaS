@@ -1,0 +1,56 @@
+<div class="relative p-6 bg-white z-1 sm:p-0">
+  <div class="relative flex flex-col justify-center w-full h-screen lg:flex-row sm:p-0">
+    <ng-content></ng-content>
+
+    <div
+      class="items-center hidden w-full h-full lg:w-1/2 bg-brand-950 lg:grid relative overflow-hidden"
+    >
+      <div
+        class="absolute bottom-[-200px] right-[-200px] w-[620px] h-[620px] rounded-full border border-white/30"
+        aria-hidden="true"
+      ></div>
+
+      <svg
+        class="absolute bottom-[-180px] right-[-180px] w-[580px] h-[580px] opacity-70 animate-mandala-spin"
+        viewBox="-100 -100 200 200"
+        aria-hidden="true"
+      >
+        <g fill="none" stroke="#ffffff" stroke-width="0.6">
+          <circle r="90" opacity=".5" />
+          <circle r="75" opacity=".4" />
+          <circle r="30" />
+          <circle cx="30" cy="0" r="30" />
+          <circle cx="15" cy="25.98" r="30" />
+          <circle cx="-15" cy="25.98" r="30" />
+          <circle cx="-30" cy="0" r="30" />
+          <circle cx="-15" cy="-25.98" r="30" />
+          <circle cx="15" cy="-25.98" r="30" />
+          <circle cx="60" cy="0" r="30" />
+          <circle cx="30" cy="51.96" r="30" />
+          <circle cx="-30" cy="51.96" r="30" />
+          <circle cx="-60" cy="0" r="30" />
+          <circle cx="-30" cy="-51.96" r="30" />
+          <circle cx="30" cy="-51.96" r="30" />
+          <circle cx="45" cy="25.98" r="30" />
+          <circle cx="0" cy="51.96" r="30" />
+          <circle cx="-45" cy="25.98" r="30" />
+          <circle cx="-45" cy="-25.98" r="30" />
+          <circle cx="0" cy="-51.96" r="30" />
+          <circle cx="45" cy="-25.98" r="30" />
+        </g>
+      </svg>
+
+      <div class="flex items-center justify-center z-1 w-full">
+        <div class="flex flex-col items-center max-w-sm px-6 text-center">
+          <a routerLink="/" class="block mb-6 text-3xl font-semibold tracking-tight text-white">
+            MSkinWellness
+          </a>
+          <p class="text-sm leading-relaxed text-white/70">
+            Software de gestión para clínicas estéticas y salones de belleza.
+            Multi-rol y pensado para el día a día del centro.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
