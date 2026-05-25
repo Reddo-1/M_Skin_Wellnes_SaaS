@@ -44,7 +44,7 @@ class AdminCenterService
 
         $base = rtrim((string) config('app.frontend_url'), '/');
 
-        return $base.'/panel?token='.urlencode($token).'&center_id='.$center->id;
+        return $base.'/impersonate?token='.urlencode($token).'&center_id='.$center->id;
     }
 
     //Obtener todos los datos de la subscripción

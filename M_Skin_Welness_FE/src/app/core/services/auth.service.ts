@@ -51,9 +51,12 @@ export class AuthService {
     }
   }
 
-  //    /me
+  //    /me — el back devuelve UserResource::make() directamente, asi que llega envuelto en {data: ...}
   async fetchMe(): Promise<User> {
-    const user = await firstValueFrom(this.http.get<User>(`${this.apiUrl}/me`));
+    const response = await firstValueFrom(
+      this.http.get<{ data: User }>(`${this.apiUrl}/me`),
+    );
+    const user = response.data;
     localStorage.setItem(USER, JSON.stringify(user));
     this.user.set(user);
     return user;
@@ -74,7 +77,7 @@ export class AuthService {
 
   defaultRouteForRoles(roles: UserRole[]): string {
     if (roles.includes('cliente')) return '/panel/mis-citas';
-    if (roles.includes('administrador')) return '/panel/dashboard';
+    if (roles.includes('administrador') || roles.includes('superadmin')) return '/panel/dashboard';
     return '/panel/cuadrante';
   }
 

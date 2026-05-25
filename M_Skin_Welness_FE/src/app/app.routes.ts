@@ -23,6 +23,13 @@ export const routes: Routes = [
       import('./features/welcome/welcome.component').then((m) => m.WelcomeComponent),
   },
   {
+    path: 'impersonate',
+    loadComponent: () =>
+      import('./features/impersonation/impersonation.component').then(
+        (m) => m.ImpersonationComponent,
+      ),
+  },
+  {
     path: 'panel',
     canMatch: [authGuard],
     loadComponent: () =>

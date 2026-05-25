@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'password' => '1234',
                 'registration_source' => null,
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
         $superadmin->syncRoles(['superadmin']);

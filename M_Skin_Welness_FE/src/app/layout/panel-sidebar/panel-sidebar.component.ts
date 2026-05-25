@@ -165,9 +165,12 @@ export class PanelSidebarComponent {
 
   protected readonly groups = computed<NavGroup[]>(() => {
     const roles = this.auth.roles();
-    //revisa que el loggeado tenga alguno de los roles necesarios para el tab del nav.
-    const visible = ALL_ITEMS.filter((item) =>
-      item.allowedRoles.some((role) => roles.includes(role)),
+    const impersonatingAsSuperadmin =
+      this.auth.isImpersonating() && roles.includes('superadmin');
+    const visible = ALL_ITEMS.filter(
+      (item) =>
+        impersonatingAsSuperadmin ||
+        item.allowedRoles.some((role) => roles.includes(role)),
     );
     //Array de todas las secciones con sus respectivos tabs
     return SECTIONS.map(({ section, label }) => ({
