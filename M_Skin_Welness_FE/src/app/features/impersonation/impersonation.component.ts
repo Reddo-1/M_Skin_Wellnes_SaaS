@@ -1,11 +1,13 @@
-import { Component, OnInit, effect, inject, input } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LoadingOverlayComponent } from '../../shared/ui/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-impersonation',
   standalone: true,
+  imports: [LoadingOverlayComponent],
   templateUrl: './impersonation.component.html',
 })
 export class ImpersonationComponent{
@@ -22,14 +24,11 @@ export class ImpersonationComponent{
       const rawCenterId = this.center_id();
       const centerId = rawCenterId !== undefined ? Number(rawCenterId) : NaN;
 
-      // 1. Validación de los parámetros reactivos
       if (!token || !Number.isInteger(centerId) || centerId <= 0) {
         this.notifications.toast.error('El enlace de impersonación no es válido.');
         this.router.navigateByUrl('/login');
         return;
       }
-
-      // 2. Proceso de impersonación (Side-effect asíncrono)
       this.auth.startImpersonation(token, centerId);
 
       try {

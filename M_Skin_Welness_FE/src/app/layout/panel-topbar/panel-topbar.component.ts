@@ -3,11 +3,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
+import { LoadingOverlayComponent } from '../../shared/ui/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-panel-topbar',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, LoadingOverlayComponent],
   templateUrl: './panel-topbar.component.html',
 })
 export class PanelTopbarComponent {
@@ -31,6 +32,7 @@ export class PanelTopbarComponent {
   });
 
   protected readonly dropdownOpen = signal(false);
+  protected readonly loadingMessage = signal<string | null>(null);
 
   protected toggleSidebar(): void {
     if (window.innerWidth >= 1280) {
@@ -65,6 +67,7 @@ export class PanelTopbarComponent {
 
   async logout(): Promise<void> {
     this.dropdownOpen.set(false);
+    this.loadingMessage.set('Cerrando sesión…');
     try {
       await this.auth.logout();
     } finally {
@@ -74,6 +77,7 @@ export class PanelTopbarComponent {
 
   async exitImpersonation(): Promise<void> {
     const centerId = this.impersonationCenterId();
+    this.loadingMessage.set('Saliendo del centro…');
     try {
       await this.auth.logout();
     } finally {
