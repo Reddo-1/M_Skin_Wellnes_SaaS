@@ -38,9 +38,12 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', canActivate: [panelIndexRedirect], children: [] },
       {
         path: 'dashboard',
-        canActivate: [roleGuard(['administrador', 'recepcionista', 'rrhh'])],
+        canActivate: [roleGuard(['administrador'])],
         data: { title: 'Dashboard' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
       },
       {
         path: 'cuadrante',

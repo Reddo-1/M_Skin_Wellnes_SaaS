@@ -2,7 +2,7 @@
   <app-loading-overlay [message]="message" />
 }
 
-@if (isImpersonating()) {
+@if (auth.isImpersonating()) {
   <div class="flex items-center justify-between gap-3 bg-warning-50 border-b border-warning-200 px-4 py-2 text-sm text-warning-700">
     <span>
       Estás dentro como administrador de <strong>{{ impersonationCenterName() }}</strong>.
@@ -38,14 +38,14 @@
       [attr.aria-expanded]="dropdownOpen()"
     >
       <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-brand-50 text-brand-500">
-        @if (user()?.avatar_url; as avatarUrl) {
+        @if (auth.user()?.avatar_url; as avatarUrl) {
           <img [src]="avatarUrl" alt="Avatar" class="h-full w-full object-cover" />
         } @else {
           <app-icon name="user" />
         }
       </span>
       <span class="hidden text-left sm:block">
-        <span class="block text-sm font-semibold text-ink">{{ user()?.name }}</span>
+        <span class="block text-sm font-semibold text-ink">{{ auth.user()?.name }}</span>
         <span class="block text-xs text-muted">{{ primaryRoleLabel() }}</span>
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" class="text-gray-400 transition-transform" [class.rotate-180]="dropdownOpen()">
@@ -60,20 +60,22 @@
         role="menu"
       >
         <div class="border-b border-gray-100 pb-3">
-          <p class="text-sm font-semibold text-ink">{{ user()?.name }}</p>
-          <p class="text-xs text-muted">{{ user()?.email }}</p>
+          <p class="text-sm font-semibold text-ink">{{ auth.user()?.name }}</p>
+          <p class="text-xs text-muted">{{ auth.user()?.email }}</p>
         </div>
         <ul class="mt-2 flex flex-col gap-1">
-          <li>
-            <a
-              routerLink="/panel/mi-perfil"
-              (click)="closeDropdown()"
-              class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50"
-              role="menuitem"
-            >
-              Mi perfil
-            </a>
-          </li>
+          @if (!auth.isImpersonating()) {
+            <li>
+              <a
+                routerLink="/panel/mi-perfil"
+                (click)="closeDropdown()"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50"
+                role="menuitem"
+              >
+                Mi perfil
+              </a>
+            </li>
+          }
           <li>
             <button
               type="button"

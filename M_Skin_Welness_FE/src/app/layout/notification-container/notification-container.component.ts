@@ -31,10 +31,7 @@ const VARIANT_BUTTON: Record<AlertVariant, string> = {
   templateUrl: './notification-container.component.html',
 })
 export class NotificationContainerComponent {
-  private readonly notifications = inject(NotificationService);
-
-  protected readonly toasts = this.notifications.toasts;
-  protected readonly activeModal = this.notifications.activeModal;
+  protected readonly notifications = inject(NotificationService);
 
   protected dismissToast(id: number): void {
     this.notifications.dismissToast(id);

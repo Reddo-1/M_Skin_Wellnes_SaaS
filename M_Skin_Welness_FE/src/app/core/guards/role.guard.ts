@@ -13,11 +13,8 @@ export function roleGuard(allowed: UserRole[]): CanActivateFn {
       return false;
     }
 
-    if (auth.isImpersonating() && auth.hasRole('superadmin')) {
-      return true;
-    }
-
-    if (auth.hasAnyRole(allowed)) {
+    const effective = auth.effectiveRoles();
+    if (allowed.some((role) => effective.includes(role))) {
       return true;
     }
 

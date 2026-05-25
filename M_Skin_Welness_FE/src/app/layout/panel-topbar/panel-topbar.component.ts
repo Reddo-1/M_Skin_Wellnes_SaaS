@@ -12,23 +12,19 @@ import { LoadingOverlayComponent } from '../../shared/ui/loading-overlay/loading
   templateUrl: './panel-topbar.component.html',
 })
 export class PanelTopbarComponent {
-  private readonly auth = inject(AuthService);
-  private readonly sidebar = inject(SidebarService);
+  protected readonly auth = inject(AuthService);
+  protected readonly sidebar = inject(SidebarService);
   private readonly router = inject(Router);
 
-  protected readonly user = this.auth.user;
-  protected readonly isImpersonating = this.auth.isImpersonating;
-  protected readonly impersonationCenterId = this.auth.impersonationCenterId;
-
   protected readonly primaryRoleLabel = computed(() => {
-    const roles = this.user()?.roles ?? [];
+    const roles = this.auth.user()?.roles ?? [];
     if (roles.length === 0) return '';
     return ROLE_LABELS[roles[0]] ?? roles[0];
   });
 
   protected readonly impersonationCenterName = computed(() => {
-    if (!this.isImpersonating()) return '';
-    return this.user()?.center?.name ?? `Centro #${this.impersonationCenterId()}`;
+    if (!this.auth.isImpersonating()) return '';
+    return this.auth.user()?.center?.name ?? `Centro #${this.auth.impersonationCenterId()}`;
   });
 
   protected readonly dropdownOpen = signal(false);
@@ -76,7 +72,7 @@ export class PanelTopbarComponent {
   }
 
   async exitImpersonation(): Promise<void> {
-    const centerId = this.impersonationCenterId();
+    const centerId = this.auth.impersonationCenterId();
     this.loadingMessage.set('Saliendo del centro…');
     try {
       await this.auth.logout();

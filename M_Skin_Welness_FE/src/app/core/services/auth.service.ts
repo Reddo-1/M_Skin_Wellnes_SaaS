@@ -27,6 +27,13 @@ export class AuthService {
     () => this.impersonationCenterId() ?? this.user()?.center_id ?? null,
   );
   readonly isImpersonating = computed(() => this.impersonationCenterId() !== null);
+  readonly effectiveRoles = computed<UserRole[]>(() => {
+    const own = this.roles();
+    if (this.isImpersonating() && own.includes('superadmin')) {
+      return ['administrador'];
+    }
+    return own;
+  });
   //    /login
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await firstValueFrom(

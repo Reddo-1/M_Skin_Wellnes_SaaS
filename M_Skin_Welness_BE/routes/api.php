@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\CenterFileController;
 use App\Http\Controllers\Api\CenterRegistrationController;
 use App\Http\Controllers\Api\ClientConsentController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -67,6 +68,8 @@ Route::middleware(['auth:sanctum','verified'])->group(function () {
     Route::post('subscription/portal', [SubscriptionController::class, 'portal']);
 
     Route::middleware('center.scope')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index']);
+
         Route::post('appointments/{appointment}/status', [AppointmentController::class, 'changeStatus']);
         Route::get('appointments/{appointment}/products', [AppointmentProductController::class, 'index']);
         Route::post('appointments/{appointment}/products', [AppointmentProductController::class, 'store']);

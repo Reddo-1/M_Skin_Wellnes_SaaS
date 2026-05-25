@@ -24,11 +24,12 @@ class InvoiceService
             $vatAmount = round($total * self::VAT_PERCENTAGE / (100 + self::VAT_PERCENTAGE), 2);
             $subtotal = round($total - $vatAmount, 2);
 
-            return Invoice::create([
+            $invoice = Invoice::create([
                 'center_id' => $sale->center_id,
                 'sale_id' => $sale->id,
                 'client_id' => $sale->client_id,
-                'invoice_number' => $this->nextInvoiceNumber($sale->center_id),
+                //placeholder unico por sale_id; se reemplaza por FAC-{año}-{id} justo despues, ya con el id real
+                'invoice_number' => 'TMP-'.$sale->id,
                 'issued_date' => now()->toDateString(),
                 'subtotal' => $subtotal,
                 'vat_percentage' => self::VAT_PERCENTAGE,
@@ -45,20 +46,12 @@ class InvoiceService
                 'pdf_path' => null,
                 'issued_by_user_id' => $issuerId,
             ]);
+
+            $invoice->update([
+                'invoice_number' => sprintf('FAC-%d-%d', now()->year, $invoice->id),
+            ]);
+
+            return $invoice;
         });
-    }
-
-    //numero correlativo por centro y año: FAC-{año}-{NNNN}
-    private function nextInvoiceNumber(int $centerId): string
-    {
-        $year = (int) now()->format('Y');
-
-        $count = Invoice::query()
-            ->forCenter($centerId)
-            ->whereYear('issued_date', $year)
-            ->lockForUpdate()
-            ->count();
-
-        return sprintf('FAC-%d-%04d', $year, $count + 1);
     }
 }

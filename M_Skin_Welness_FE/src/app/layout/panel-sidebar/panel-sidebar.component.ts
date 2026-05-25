@@ -11,7 +11,7 @@ const ALL_ITEMS: NavItem[] = [
     path: '/panel/dashboard',
     icon: 'dashboard',
     section: 'operativa',
-    allowedRoles: ['administrador', 'recepcionista', 'rrhh'],
+    allowedRoles: ['administrador'],
   },
   {
     label: 'Cuadrante',
@@ -164,14 +164,12 @@ export class PanelSidebarComponent {
   protected readonly sidebar = inject(SidebarService);
 
   protected readonly groups = computed<NavGroup[]>(() => {
-    const roles = this.auth.roles();
-    const impersonatingAsSuperadmin =
-      this.auth.isImpersonating() && roles.includes('superadmin');
-    const visible = ALL_ITEMS.filter(
-      (item) =>
-        impersonatingAsSuperadmin ||
-        item.allowedRoles.some((role) => roles.includes(role)),
-    );
+    const roles = this.auth.effectiveRoles();
+    const isImpersonating = this.auth.isImpersonating();
+    const visible = ALL_ITEMS.filter((item) => {
+      if (isImpersonating && item.section === 'cuenta') return false;
+      return item.allowedRoles.some((role) => roles.includes(role));
+    });
     //Array de todas las secciones con sus respectivos tabs
     return SECTIONS.map(({ section, label }) => ({
       section,

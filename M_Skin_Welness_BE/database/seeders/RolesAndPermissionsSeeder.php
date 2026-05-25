@@ -155,6 +155,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'subscriptions.view',
         ];
 
+        $dashboardPermissions = [
+            'dashboard.view',
+        ];
+
         $permissions = array_merge(
             $appointmentsPermissions,
             $treatmentsPermissions,
@@ -179,6 +183,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $centersPermissions,
             $centerFilesPermissions,
             $subscriptionsPermissions,
+            $dashboardPermissions,
         );
         foreach ($permissions as $name) {
             Permission::findOrCreate($name, 'web');
