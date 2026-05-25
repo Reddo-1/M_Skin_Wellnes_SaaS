@@ -28,6 +28,7 @@ export interface User {
   registration_source: 'staff' | 'online' | null;
   roles: UserRole[];
   permissions: string[];
+  avatar_url: string | null;
   center?: CenterSummary | null;
   created_at: string | null;
   updated_at: string | null;

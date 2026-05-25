@@ -44,6 +44,8 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->userAgent() ?? 'api')->plainTextToken;
 
+        $user->load('latestAvatar');
+
         return response()->json([
             'token' => $token,
             'user' => UserResource::make($user),
@@ -93,7 +95,7 @@ class AuthController extends Controller
 
     public function me(Request $request): UserResource
     {
-        $user = $request->user()->load('center.plan');
+        $user = $request->user()->load(['center.plan', 'latestAvatar']);
 
         return UserResource::make($user);
     }

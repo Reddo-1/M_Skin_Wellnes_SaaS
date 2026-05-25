@@ -2,11 +2,12 @@ import { Component, HostListener, computed, inject, signal } from '@angular/core
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
+import { IconComponent } from '../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-panel-topbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, IconComponent],
   templateUrl: './panel-topbar.component.html',
 })
 export class PanelTopbarComponent {
@@ -17,14 +18,6 @@ export class PanelTopbarComponent {
   protected readonly user = this.auth.user;
   protected readonly isImpersonating = this.auth.isImpersonating;
   protected readonly impersonationCenterId = this.auth.impersonationCenterId;
-
-  protected readonly initials = computed(() => {
-    const name = this.user()?.name ?? '';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '?';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
 
   protected readonly primaryRoleLabel = computed(() => {
     const roles = this.user()?.roles ?? [];

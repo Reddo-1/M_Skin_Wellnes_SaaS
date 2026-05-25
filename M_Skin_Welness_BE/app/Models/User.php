@@ -6,7 +6,7 @@ use App\Notifications\{ResetPasswordNotification, VerifyEmailNotification};
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
@@ -48,6 +48,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(UserFile::class);
+    }
+
+    //avatar vigente del usuario (categoria foto_perfil); ultimo subido gana
+    public function latestAvatar(): HasOne
+    {
+        return $this->hasOne(UserFile::class)
+            ->where('category', UserFile::CATEGORY_AVATAR)
+            ->latestOfMany();
     }
 
     public function scopeForCenter(Builder $query, int $centerId): Builder

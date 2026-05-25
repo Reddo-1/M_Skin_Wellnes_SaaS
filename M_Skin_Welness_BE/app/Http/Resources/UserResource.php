@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\URL;
 
 /** @mixin User */
 class UserResource extends JsonResource
@@ -22,6 +23,7 @@ class UserResource extends JsonResource
             'registration_source' => $this->registration_source,
             'roles' => $this->getRoleNames(),
             'permissions' => $this->getAllPermissions()->pluck('name'),
+            'avatar_url' => $this->avatarUrl(),
             'center' => $this->whenLoaded('center', function () {
                 return [
                     'id' => $this->center->id,
@@ -35,5 +37,18 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
+    }
+
+    private function avatarUrl(): ?string
+    {
+        if (!$this->relationLoaded('latestAvatar') || $this->latestAvatar === null) {
+            return null;
+        }
+
+        return URL::temporarySignedRoute(
+            'user-files.file',
+            now()->addMinutes(120),
+            ['user_file' => $this->latestAvatar->id],
+        );
     }
 }
