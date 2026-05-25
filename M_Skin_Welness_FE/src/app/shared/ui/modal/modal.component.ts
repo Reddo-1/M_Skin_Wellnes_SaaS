@@ -1,4 +1,4 @@
-import { Component, HostListener, effect, input, output } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
@@ -17,17 +17,19 @@ export class ModalComponent {
     effect(() => {
       document.body.style.overflow = this.isOpen() ? 'hidden' : '';
     });
+
+    effect((onCleanup) => {
+      if (!this.isOpen()) return;
+      const closeOnEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') this.close.emit();
+      };
+      document.addEventListener('keydown', closeOnEscape);
+      onCleanup(() => document.removeEventListener('keydown', closeOnEscape));
+    });
   }
 
   protected onBackdropClick(): void {
     if (!this.isFullscreen()) {
-      this.close.emit();
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
-    if (this.isOpen()) {
       this.close.emit();
     }
   }
