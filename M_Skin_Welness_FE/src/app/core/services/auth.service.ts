@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginCredentials, LoginResponse } from '../models/auth.model';
 import { User, UserRole } from '../models/user.model';
+import { ApiService } from './api.service';
 
 //Constantes con nombres para localstorage.
 const TOKEN_AUTH = 'mskin.auth.token';
@@ -12,6 +13,8 @@ const IMPERSONATION_CENTER_ID = 'mskin.impersonation.center_id';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly api = inject(ApiService);
+  //login devuelve { token, user } (no Resource): se queda con http.post directo
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
@@ -34,7 +37,7 @@ export class AuthService {
     }
     return own;
   });
-  //    /login
+
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await firstValueFrom(
       this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials),
@@ -45,25 +48,21 @@ export class AuthService {
     this.user.set(response.user);
     return response;
   }
-  //    /logout
+
   async logout(): Promise<void> {
     if (this.token() === null) {
       this.clearSession();
       return;
     }
     try {
-      await firstValueFrom(this.http.post(`${this.apiUrl}/logout`, {}));
+      await this.api.postNoContent('/logout');
     } finally {
       this.clearSession();
     }
   }
 
-  //    /me — el back devuelve UserResource::make() directamente, asi que llega envuelto en {data: ...}
   async fetchMe(): Promise<User> {
-    const response = await firstValueFrom(
-      this.http.get<{ data: User }>(`${this.apiUrl}/me`),
-    );
-    const user = response.data;
+    const user = await this.api.getResource<User>('/me');
     localStorage.setItem(USER, JSON.stringify(user));
     this.user.set(user);
     return user;
@@ -127,7 +126,7 @@ export class AuthService {
       return null;
     }
     const value = Number(raw);
-    if(!Number.isInteger(value) || value<=0){
+    if (!Number.isInteger(value) || value <= 0) {
       return null;
     }
     return value;

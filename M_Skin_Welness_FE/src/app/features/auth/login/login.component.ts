@@ -33,7 +33,7 @@ export class LoginComponent {
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(4)]],
+    password: ['', [Validators.required]],
   });
 
   togglePassword(): void {

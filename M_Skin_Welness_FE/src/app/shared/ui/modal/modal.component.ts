@@ -14,8 +14,11 @@ export class ModalComponent {
   readonly close = output<void>();
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       document.body.style.overflow = this.isOpen() ? 'hidden' : '';
+      onCleanup(() => {
+        document.body.style.overflow = '';
+      });
     });
 
     effect((onCleanup) => {

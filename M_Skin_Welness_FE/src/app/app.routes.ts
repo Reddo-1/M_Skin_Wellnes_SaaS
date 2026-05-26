@@ -35,6 +35,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layout/panel-layout/panel-layout.component').then((m) => m.PanelLayoutComponent),
     children: [
+      //redirección a su ruta correspondiente dependiendo del rol.
       { path: '', pathMatch: 'full', canActivate: [panelIndexRedirect], children: [] },
       {
         path: 'dashboard',
@@ -165,7 +166,8 @@ export const routes: Routes = [
           ]),
         ],
         data: { title: 'Mi perfil' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/profile/profile.component').then((m) => m.ProfileComponent),
       },
     ],
   },

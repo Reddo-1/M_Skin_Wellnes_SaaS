@@ -2,21 +2,9 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
-import { UserRole } from '../../core/models/user.model';
+import { ROLE_LABELS } from '../../../environments/environment';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { LoadingOverlayComponent } from '../../shared/ui/loading-overlay/loading-overlay.component';
-
-const ROLE_LABELS: { code: UserRole; label: string }[] = [
-  { code: 'superadmin', label: 'Superadmin' },
-  { code: 'administrador', label: 'Administrador' },
-  { code: 'recepcionista', label: 'Recepcionista' },
-  { code: 'rrhh', label: 'RRHH' },
-  { code: 'diagnosticador', label: 'Diagnosticador' },
-  { code: 'dermo_esteticien', label: 'Dermoesteticien' },
-  { code: 'fisioterapeuta', label: 'Fisioterapeuta' },
-  { code: 'manicurista', label: 'Manicurista' },
-  { code: 'cliente', label: 'Cliente' },
-];
 
 @Component({
   selector: 'app-panel-topbar',
