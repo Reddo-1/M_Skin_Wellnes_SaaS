@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'birth_date' => $this->birth_date?->toDateString(),
             'is_active' => $this->is_active,
+            'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'registration_source' => $this->registration_source,
             'roles' => $this->getRoleNames(),
             'permissions' => $this->getAllPermissions()->pluck('name'),

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\{ChangeUserPasswordRequest, StoreUserRequest, SyncUserRolesRequest, UpdateUserRequest};
+use App\Http\Requests\{ActivateOnlineAccessRequest, ChangeUserPasswordRequest, StoreUserRequest, SyncUserRolesRequest, UpdateUserRequest};
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
@@ -91,6 +91,14 @@ class UserController extends Controller
     {
         return UserResource::make(
             $this->service->syncRoles($user, $request->validated('role_ids'))
+        );
+    }
+
+    //manda correo al cliente para que fije contrasena y, al hacerlo, quede como verificado
+    public function activateOnlineAccess(ActivateOnlineAccessRequest $request, User $user): UserResource
+    {
+        return UserResource::make(
+            $this->service->activateOnlineAccess($user, $request->validated('email'))
         );
     }
 }

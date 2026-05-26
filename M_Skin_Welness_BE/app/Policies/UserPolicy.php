@@ -68,4 +68,18 @@ class UserPolicy
 
         return $user->can('users.create_staff') || $user->can('users.create_client');
     }
+
+    //solo se activa el acceso online a clientes del mismo centro que aun no esten verificados
+    public function activateOnlineAccess(User $user, User $target): bool
+    {
+        if ($user->center_id !== $target->center_id) {
+            return false;
+        }
+
+        if (!$target->hasRole('cliente')) {
+            return false;
+        }
+
+        return $user->can('users.activate_online');
+    }
 }

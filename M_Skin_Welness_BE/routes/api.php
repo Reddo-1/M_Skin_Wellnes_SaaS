@@ -111,6 +111,7 @@ Route::middleware(['auth:sanctum','verified'])->group(function () {
         Route::apiResource('worker-extra-availabilities', WorkerExtraAvailabilityController::class)->parameters(['worker-extra-availabilities' => 'worker_extra_availability']);
 
         Route::post('users/{user}/activate', [UserController::class, 'activate']);
+        Route::post('users/{user}/online-access', [UserController::class, 'activateOnlineAccess']);
         Route::post('users/{user}/password', [UserController::class, 'changePassword']);
         Route::post('users/{user}/roles', [UserController::class, 'syncRoles']);
         Route::apiResource('users', UserController::class);

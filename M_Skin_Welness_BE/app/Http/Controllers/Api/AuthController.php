@@ -117,9 +117,14 @@ class AuthController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => $password,
-                ])->save();
+                $payload = ['password' => $password];
+
+                //quien recibe el correo y completa el reset prueba que el email es alcanzable: lo damos por verificado
+                if ($user->email_verified_at === null) {
+                    $payload['email_verified_at'] = now();
+                }
+
+                $user->forceFill($payload)->save();
 
                 //por seguridad, revocamos todos los tokens activos tras un reset
                 $user->tokens()->delete();

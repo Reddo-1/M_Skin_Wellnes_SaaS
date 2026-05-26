@@ -77,6 +77,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'users.create_client',
             'users.update',
             'users.deactivate',
+            'users.activate_online',
         ];
 
         $clientProfilesPermissions = [
@@ -228,6 +229,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'users.create_client',
                     'users.update',
                     'users.deactivate',
+                    'users.activate_online',
                     'client_consents.create',
                     'client_consents.update',
                     'stock_movements.view',

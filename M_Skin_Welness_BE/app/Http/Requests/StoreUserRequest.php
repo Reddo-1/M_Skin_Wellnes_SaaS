@@ -18,7 +18,8 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'string', 'email', 'max:150', 'unique:users,email'],
+            //email opcional para walk-in de cliente; obligatorio para staff (validacion fina en withValidator)
+            'email' => ['nullable', 'string', 'email', 'max:150', 'unique:users,email'],
             //password opcional: si el admin no la indica, generamos una temporal y el usuario la configura por correo
             'password' => ['sometimes', 'nullable', 'string', 'min:8', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
@@ -58,6 +59,19 @@ class StoreUserRequest extends FormRequest
             if ($assigningStaff && !$actor->can('users.create_staff')) {
                 $v->errors()->add('role_ids', 'No tienes permiso para dar de alta a trabajadores.');
             }
+
+            //staff sin email no tiene como iniciar sesion; clientes walk-in si pueden quedarse sin email hasta activar el acceso online
+            if ($assigningStaff && empty($this->input('email'))) {
+                $v->errors()->add('email', 'El correo es obligatorio para usuarios del personal.');
+            }
         });
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.unique' => 'Ya existe un usuario con ese correo.',
+            'email.email' => 'El correo no tiene un formato valido.',
+        ];
     }
 }

@@ -21,17 +21,18 @@ class UserService
             $user = User::create([
                 'center_id' => $centerId,
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'email' => $data['email'] ?? null,
                 'phone' => $data['phone'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
                 'password' => $hasPassword ? $data['password'] : Str::password(32),
-                //alta desde panel: el origen siempre es 'staff'. El auto-registro online va por otro flujo
                 'registration_source' => 'staff',
                 'is_active' => $data['is_active'] ?? true,
             ]);
 
-            //el admin confia en el email que ha introducido; verificacion implicita
-            $user->forceFill(['email_verified_at' => now()])->save();
+            //si el admin fija contrasena, asume el correo como verificado; si no, queda pendiente de activacion online
+            if ($hasPassword) {
+                $user->forceFill(['email_verified_at' => now()])->save();
+            }
 
             $this->assignRolesById($user, $data['role_ids']);
 
@@ -42,8 +43,8 @@ class UserService
                 metadata: ['user_id' => $user->id, 'role_ids' => $data['role_ids']],
             );
 
-            //si el admin no fijo password, el usuario la establece desde un correo
-            if (!$hasPassword) {
+            //si el admin no fijo password y el usuario tiene email, le mandamos el correo para que la establezca
+            if (!$hasPassword && $user->email !== null) {
                 Password::sendResetLink(['email' => $user->email]);
             }
 
@@ -100,6 +101,22 @@ class UserService
         $user->save();
 
         return $user;
+    }
+
+    //activa el acceso online: opcionalmente fija el email y manda correo para que el cliente establezca contrasena
+    public function activateOnlineAccess(User $user, ?string $email): User
+    {
+        return DB::transaction(function () use ($user, $email) {
+            if ($email !== null && $email !== '') {
+                $user->email = $email;
+                $user->save();
+            }
+
+            //al completar el reset el cliente quedara verificado (AuthController::resetPassword)
+            Password::sendResetLink(['email' => $user->email]);
+
+            return $user;
+        });
     }
 
     //reemplaza la lista completa de roles del usuario por los indicados
