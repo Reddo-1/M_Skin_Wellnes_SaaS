@@ -26,6 +26,9 @@ class UserFile extends Model
     //firma manuscrita del paciente para un consentimiento de tratamiento
     public const CATEGORY_CONSENT_SIGNATURE = 'firma_consentimiento';
 
+    //PDF del documento de consentimiento firmado y archivado
+    public const CATEGORY_CONSENT_PDF = 'consent_pdf';
+
     protected $fillable = [
         'center_id',
         'user_id',

@@ -19,7 +19,6 @@ return new class extends Migration
             $table->boolean('allows_online_clients')->default(false);
             $table->boolean('allows_emails')->default(false);
             $table->boolean('allows_public_page')->default(false);
-            $table->boolean('allows_custom_domain')->default(false);
             $table->boolean('is_active')->default(true);
             $table->string('stripe_price_id', 100)->nullable();
             $table->timestampsTz();

@@ -21,11 +21,18 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $centerId = (int) $request->attributes->get('center_id');
+        $actor = $request->user();
+        //quien solo tiene clients.view (profesionales) no puede listar staff: forzamos role=cliente ignorando el query param
+        $restrictToClient = !$actor->can('users.view') && $actor->can('clients.view');
 
         $query = User::query()
             ->forCenter($centerId)
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
-            ->when($request->filled('role'), fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $request->string('role'))))
+            ->when(
+                $restrictToClient,
+                fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', 'cliente')),
+                fn ($q) => $q->when($request->filled('role'), fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $request->string('role')))),
+            )
             ->when($request->filled('search'), function ($q) use ($request) {
                 $term = '%'.$request->string('search').'%';
                 $q->where(function ($qq) use ($term) {
@@ -53,7 +60,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        return UserResource::make($user);
+        return UserResource::make($user->load('latestAvatar'));
     }
 
     public function update(UpdateUserRequest $request, User $user): UserResource

@@ -1,0 +1,102 @@
+import * as _angular_core from '@angular/core';
+import { AfterContentInit, OnDestroy } from '@angular/core';
+import SignaturePad, { Options, PointGroup } from 'signature_pad';
+
+interface NgSignaturePadOptions extends Options {
+    canvasBackground?: string;
+    canvasHeight?: number;
+    canvasWidth?: number;
+}
+declare class SignaturePadComponent implements AfterContentInit, OnDestroy {
+    readonly options: _angular_core.ModelSignal<NgSignaturePadOptions>;
+    readonly drawStart: _angular_core.OutputEmitterRef<MouseEvent | Touch>;
+    readonly drawBeforeUpdate: _angular_core.OutputEmitterRef<MouseEvent | Touch>;
+    readonly drawAfterUpdate: _angular_core.OutputEmitterRef<MouseEvent | Touch>;
+    readonly drawEnd: _angular_core.OutputEmitterRef<MouseEvent | Touch>;
+    readonly drawClear: _angular_core.OutputEmitterRef<void>;
+    private _elementRef;
+    private signaturePad;
+    ngAfterContentInit(): void;
+    ngOnDestroy(): void;
+    getSignaturePad(): SignaturePad;
+    getCanvas(): HTMLCanvasElement;
+    /**
+     * Redraw or Resize canvas, note this will clear data.
+     */
+    redrawCanvas(): void;
+    /**
+     * Change the color of the background dynamically.
+     */
+    changeBackgroundColor(color: string): void;
+    /**
+     * Returns signature image as an array of point groups
+     */
+    toData(): PointGroup[];
+    /**
+     * Draws signature image from an array of point groups
+     */
+    fromData(points: Array<PointGroup>): void;
+    /**
+     * Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible parameters)
+     */
+    toDataURL(imageType?: string, quality?: number): string;
+    /**
+     * Draws signature image from data URL
+     */
+    fromDataURL(dataURL: string, options?: {
+        ratio?: number;
+        width?: number;
+        height?: number;
+    }): Promise<void>;
+    /**
+     * Clears the canvas
+     */
+    clear(redraw?: boolean): void;
+    /**
+     * Returns true if canvas is empty, otherwise returns false
+     */
+    isEmpty(): boolean;
+    /**
+     * Unbinds all event handlers
+     */
+    off(): void;
+    /**
+     * Rebinds all event handlers
+     */
+    on(): void;
+    /**
+     * set an option on the signaturePad - e.g. set('minWidth', 50);
+     * @param option one of SignaturePad to set with value, properties of NgSignaturePadOptions
+     * @param value the value of option
+     */
+    set(option: string, value: any): void;
+    /**
+     * notify subscribers on signature begin
+     */
+    beginStroke(event: MouseEvent | Touch): void;
+    beforeUpdateStroke(event: MouseEvent | Touch): void;
+    afterUpdateStroke(event: MouseEvent | Touch): void;
+    /**
+     * notify subscribers on signature end
+     */
+    endStroke(event: MouseEvent | Touch): void;
+    private initCanvas;
+    private initSignaturePad;
+    /**
+     * To prevent the growing effect when the redrawCanvas is called for the width
+     * @param canvas
+     * @private
+     */
+    private _getWidthFix;
+    /**
+     * To prevent the growing effect when the redrawCanvas is called for the height
+     * @param canvas
+     * @private
+     */
+    private _getHeightFix;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<SignaturePadComponent, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<SignaturePadComponent, "signature-pad", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; }, { "options": "optionsChange"; "drawStart": "drawStart"; "drawBeforeUpdate": "drawBeforeUpdate"; "drawAfterUpdate": "drawAfterUpdate"; "drawEnd": "drawEnd"; "drawClear": "drawClear"; }, never, never, true, never>;
+}
+
+export { SignaturePadComponent };
+export type { NgSignaturePadOptions };

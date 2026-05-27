@@ -73,6 +73,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $usersPermissions = [
             'users.view',
+            'clients.view',
             'users.create_staff',
             'users.create_client',
             'users.update',
@@ -95,13 +96,11 @@ class RolesAndPermissionsSeeder extends Seeder
         $treatmentConsentsPermissions = [
             'treatment_consents.view',
             'treatment_consents.create',
-            'treatment_consents.update',
         ];
 
         $clientConsentsPermissions = [
             'client_consents.view',
             'client_consents.create',
-            'client_consents.update',
         ];
 
         $productsPermissions = [
@@ -206,6 +205,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         $practitionerExtraPermissions = [
+            'clients.view',
             'client_profiles.view',
             'skin_evaluations.view',
             'treatment_consents.view',
@@ -231,7 +231,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'users.deactivate',
                     'users.activate_online',
                     'client_consents.create',
-                    'client_consents.update',
+                    'treatment_consents.create',
                     'stock_movements.view',
                     'stock_movements.create',
                     'sales.view',
@@ -264,7 +264,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 $practitionerExtraPermissions,
                 ['client_profiles.create', 'client_profiles.update'],
                 ['skin_evaluations.create', 'skin_evaluations.update'],
-                ['treatment_consents.create', 'treatment_consents.update'],
+                ['client_consents.create'],
+                ['treatment_consents.create'],
                 ['user_files.upload', 'user_files.delete'],
             ),
             'dermo_esteticien' => array_merge($staffPermissions, $practitionerExtraPermissions),

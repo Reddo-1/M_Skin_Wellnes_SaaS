@@ -16,8 +16,6 @@ class CenterResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             'slug' => $this->slug,
-            'custom_domain' => $this->custom_domain,
-            'is_domain_verified' => $this->is_domain_verified,
             'is_active' => $this->is_active,
             'plan' => $this->whenLoaded('plan', fn () => PlanResource::make($this->plan)),
             'created_at' => $this->created_at?->toIso8601String(),

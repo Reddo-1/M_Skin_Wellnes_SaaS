@@ -28,6 +28,14 @@ class ClientConsentResource extends JsonResource
                     ['user_file' => $this->signature_user_file_id],
                 )
                 : null,
+            'pdf_user_file_id' => $this->pdf_user_file_id,
+            'pdf_url' => $this->pdf_user_file_id !== null
+                ? URL::temporarySignedRoute(
+                    'user-files.file',
+                    now()->addMinutes(10),
+                    ['user_file' => $this->pdf_user_file_id],
+                )
+                : null,
             'signed_at' => $this->signed_at?->toIso8601String(),
             'notes' => $this->notes,
             'is_active' => $this->is_active,

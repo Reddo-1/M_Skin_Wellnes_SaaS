@@ -38,6 +38,21 @@ export class AuthService {
     return own;
   });
 
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return await firstValueFrom(
+      this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email }),
+    );
+  }
+
+  async resetPassword(payload: {
+    token: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<void> {
+    await firstValueFrom(this.http.post(`${this.apiUrl}/reset-password`, payload));
+  }
+
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await firstValueFrom(
       this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials),

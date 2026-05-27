@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { ValidationErrorResponse } from '../../../core/models/auth.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { AuthPageLayoutComponent } from '../../../layout/auth-page-layout/auth-page-layout.component';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
+
+type LoginField = 'email' | 'password';
 
 @Component({
   selector: 'app-login',
@@ -25,10 +27,8 @@ export class LoginComponent {
   readonly sesionExpirada = input<string | undefined>();
 
   protected readonly submitting = signal(false);
-  protected readonly generalError = signal<string | null>(null);
-  protected readonly fieldErrors = signal<Record<string, string[]>>({});
   private readonly dismissed = signal(false);
-  protected readonly showSessionExpired = computed(() => this.sesionExpirada() === '1' && !this.dismissed(),);
+  protected readonly showSessionExpired = computed(() => this.sesionExpirada() === '1' && !this.dismissed());
   protected readonly showPassword = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
@@ -47,8 +47,6 @@ export class LoginComponent {
     }
 
     this.submitting.set(true);
-    this.generalError.set(null);
-    this.fieldErrors.set({});
     this.dismissed.set(true);
 
     try {
@@ -64,42 +62,16 @@ export class LoginComponent {
       this.router.navigateByUrl(this.auth.defaultRouteForRoles(response.user.roles));
     } catch (error) {
       this.submitting.set(false);
-      this.applyBackendError(error as HttpErrorResponse);
+      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
+      this.notifications.toast.error(message);
     }
-  }
-
-  private applyBackendError(error: HttpErrorResponse): void {
-    if (error.status === 422) {
-      const body = error.error as ValidationErrorResponse | undefined;
-      this.fieldErrors.set(body?.errors ?? {});
-      this.generalError.set(null);
-      return;
-    }
-
-    if (error.status === 0) {
-      this.generalError.set(
-        'No se puede contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo.',
-      );
-      return;
-    }
-
-    this.generalError.set('Ha ocurrido un error inesperado. Inténtalo de nuevo en unos segundos.');
-  }
-
-  protected firstError(field: LoginField): string | null {
-    const errors = this.fieldErrors()[field];
-    return errors !== undefined && errors.length > 0 ? errors[0] : null;
   }
 
   protected hasFieldError(field: LoginField): boolean {
-    const control = this.form.controls[field];
-    return control.touched && (control.invalid || this.firstError(field) !== null);
+    return hasFieldError(this.form.controls[field]);
   }
 
-  protected hasValidationError(field: LoginField, errorKey: string): boolean {
-    const control = this.form.controls[field];
-    return control.touched && control.errors?.[errorKey] === true;
+  protected hasValidationError(field: LoginField, key: string): boolean {
+    return hasValidationError(this.form.controls[field], key);
   }
 }
-
-type LoginField = 'email' | 'password';

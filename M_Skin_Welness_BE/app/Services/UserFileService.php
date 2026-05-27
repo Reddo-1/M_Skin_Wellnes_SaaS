@@ -32,6 +32,10 @@ class UserFileService
             return 'consent_signatures';
         }
 
+        if ($category === UserFile::CATEGORY_CONSENT_PDF) {
+            return 'consent_pdfs';
+        }
+
         if ($skinEvaluationId !== null) {
             return "skin_evaluations/{$skinEvaluationId}";
         }
@@ -54,6 +58,31 @@ class UserFileService
                 'user_id' => $data['user_id'],
                 'skin_evaluation_id' => $data['skin_evaluation_id'] ?? null,
                 'category' => $data['category'],
+                'path' => $path,
+                'notes' => $data['notes'] ?? null,
+            ]);
+        });
+    }
+
+    //variante de upload() para bytes en memoria (firma base64, PDF generado): mismo disco privado, misma estructura de paths
+    public function storeBinary(int $centerId, array $data, string $contents, string $extension): UserFile
+    {
+        return DB::transaction(function () use ($centerId, $data, $contents, $extension) {
+            $userId = (int) $data['user_id'];
+            $category = $data['category'];
+
+            $subdir = $this->resolveSubdir($category, $data['skin_evaluation_id'] ?? null);
+            $directory = "centers/{$centerId}/users/{$userId}/{$subdir}";
+            $filename = $category.'_'.now()->format('YmdHis').'.'.$extension;
+            $path = "{$directory}/{$filename}";
+
+            Storage::disk('local')->put($path, $contents);
+
+            return UserFile::create([
+                'center_id' => $centerId,
+                'user_id' => $userId,
+                'skin_evaluation_id' => $data['skin_evaluation_id'] ?? null,
+                'category' => $category,
                 'path' => $path,
                 'notes' => $data['notes'] ?? null,
             ]);

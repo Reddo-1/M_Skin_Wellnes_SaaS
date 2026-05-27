@@ -18,6 +18,22 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'recuperar-password',
+    canMatch: [publicOnlyGuard],
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
+    canMatch: [publicOnlyGuard],
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
+  {
     path: 'bienvenida',
     loadComponent: () =>
       import('./features/welcome/welcome.component').then((m) => m.WelcomeComponent),
@@ -96,7 +112,37 @@ export const routes: Routes = [
           ]),
         ],
         data: { title: 'Clientes' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/clients/clients-list.component').then(
+            (m) => m.ClientsListComponent,
+          ),
+      },
+      {
+        path: 'clientes/:id',
+        canActivate: [
+          roleGuard([
+            'administrador',
+            'recepcionista',
+            'diagnosticador',
+            'dermo_esteticien',
+            'fisioterapeuta',
+            'manicurista',
+          ]),
+        ],
+        data: { title: 'Ficha del cliente' },
+        loadComponent: () =>
+          import('./features/panel/clients/client-detail/client-detail.component').then(
+            (m) => m.ClientDetailComponent,
+          ),
+      },
+      {
+        path: 'clientes/:id/consent/nuevo',
+        canActivate: [roleGuard(['recepcionista', 'diagnosticador', 'administrador'])],
+        data: { title: 'Firmar consentimiento' },
+        loadComponent: () =>
+          import('./features/panel/clients/consent-wizard/consent-wizard.component').then(
+            (m) => m.ConsentWizardComponent,
+          ),
       },
       {
         path: 'mi-consent',

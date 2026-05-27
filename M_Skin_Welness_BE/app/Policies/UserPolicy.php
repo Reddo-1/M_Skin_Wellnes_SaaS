@@ -8,7 +8,7 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('users.view');
+        return $user->can('users.view') || $user->can('clients.view');
     }
 
     public function view(User $user, User $target): bool
@@ -17,8 +17,16 @@ class UserPolicy
             return true;
         }
 
-        return $user->center_id === $target->center_id
-            && $user->can('users.view');
+        if ($user->center_id !== $target->center_id) {
+            return false;
+        }
+
+        //quien solo tiene clients.view (profesionales) accede a la ficha si el target es cliente
+        if ($user->can('users.view')) {
+            return true;
+        }
+
+        return $user->can('clients.view') && $target->hasRole('cliente');
     }
 
     public function create(User $user): bool

@@ -1,27 +1,21 @@
+import { TitleCasePipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
-import { ROLE_LABELS } from '../../../environments/environment';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { LoadingOverlayComponent } from '../../shared/ui/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-panel-topbar',
   standalone: true,
-  imports: [RouterLink, IconComponent, LoadingOverlayComponent],
+  imports: [RouterLink, TitleCasePipe, IconComponent, LoadingOverlayComponent],
   templateUrl: './panel-topbar.component.html',
 })
 export class PanelTopbarComponent {
   protected readonly auth = inject(AuthService);
   protected readonly sidebar = inject(SidebarService);
   private readonly router = inject(Router);
-
-  protected readonly primaryRoleLabel = computed(() => {
-    const primary = this.auth.user()?.roles[0];
-    if (!primary) return '';
-    return ROLE_LABELS.find((entry) => entry.code === primary)?.label ?? primary;
-  });
 
   protected readonly impersonationCenterName = computed(() => {
     if (!this.auth.isImpersonating()) return '';

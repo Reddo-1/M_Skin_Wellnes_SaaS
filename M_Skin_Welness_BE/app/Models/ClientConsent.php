@@ -15,6 +15,7 @@ class ClientConsent extends Model
         'marketing_data_consent',
         'commercial_images_consent',
         'signature_user_file_id',
+        'pdf_user_file_id',
         'signed_at',
         'notes',
         'is_active',
@@ -59,5 +60,10 @@ class ClientConsent extends Model
     public function signatureFile(): BelongsTo
     {
         return $this->belongsTo(UserFile::class, 'signature_user_file_id');
+    }
+
+    public function pdfFile(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class, 'pdf_user_file_id');
     }
 }

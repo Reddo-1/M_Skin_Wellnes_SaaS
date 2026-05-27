@@ -18,8 +18,6 @@ class CenterSeeder extends Seeder
             [
                 'uuid' => Str::uuid(),
                 'name' => 'Centro Demo',
-                'custom_domain' => null,
-                'is_domain_verified' => false,
                 'plan_id' => $premiumPlanId,
                 'is_active' => true,
             ]

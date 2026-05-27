@@ -21,10 +21,11 @@ export interface User {
   id: number;
   center_id: number | null;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   birth_date: string | null;
   is_active: boolean;
+  email_verified_at: string | null;
   registration_source: 'staff' | 'online' | null;
   roles: UserRole[];
   permissions: string[];

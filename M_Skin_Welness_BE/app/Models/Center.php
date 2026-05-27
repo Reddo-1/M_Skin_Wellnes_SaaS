@@ -11,8 +11,6 @@ class Center extends Model
         'uuid',
         'name',
         'slug',
-        'custom_domain',
-        'is_domain_verified',
         'plan_id',
         'billing_user_id',
         'is_active',
@@ -21,7 +19,6 @@ class Center extends Model
     protected function casts(): array
     {
         return [
-            'is_domain_verified' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

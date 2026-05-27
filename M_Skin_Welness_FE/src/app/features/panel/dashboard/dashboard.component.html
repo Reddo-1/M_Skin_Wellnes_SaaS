@@ -24,13 +24,13 @@
       />
       <app-stat-card
         title="Ingresos del día"
-        [value]="formatCurrency(data.revenue.today)"
+        [value]="(data.revenue.today | currency:'EUR':'symbol':'1.2-2') ?? ''"
         icon="shopping-bag"
-        [subtitle]="'Mes en curso: ' + formatCurrency(data.revenue.this_month)"
+        [subtitle]="'Mes en curso: ' + ((data.revenue.this_month | currency:'EUR':'symbol':'1.2-2') ?? '')"
       />
       <app-stat-card
         title="Ingresos del mes"
-        [value]="formatCurrency(data.revenue.this_month)"
+        [value]="(data.revenue.this_month | currency:'EUR':'symbol':'1.2-2') ?? ''"
         icon="shopping-bag"
         [subtitle]="revenueDeltaText()"
         [trend]="revenueDeltaTrend()"
@@ -64,7 +64,7 @@
                   </p>
                 </div>
                 <span class="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600">
-                  {{ formatAppointmentTime(appointment) }}
+                  {{ appointment.starts_at | date:'HH:mm' }} – {{ appointment.ends_at | date:'HH:mm' }}
                 </span>
               </li>
             }

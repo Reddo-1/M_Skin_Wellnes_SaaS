@@ -1,0 +1,63 @@
+<app-modal [isOpen]="client() !== null" (close)="close.emit()" panelClass="m-4">
+  @if (client(); as target) {
+    <div class="w-full max-w-[520px] rounded-3xl bg-white p-6 sm:p-8">
+      <h3 class="text-xl font-semibold text-ink">Activar acceso online</h3>
+      <p class="mt-1 text-sm text-muted">
+        Vamos a enviar a <strong class="text-ink">{{ target.name }}</strong> un correo con un enlace para
+        que fije su contraseña. Cuando complete ese paso, podrá iniciar sesión y su correo quedará verificado.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+        <div>
+          <label for="activate-online-email" class="mb-1.5 block text-sm font-medium text-gray-700">
+            Correo electrónico
+            @if (emailRequired()) {
+              <span class="text-error-500">*</span>
+            }
+          </label>
+          @if (!emailRequired() && target.email !== null) {
+            <p class="mb-2 text-xs text-muted">
+              Correo actual: <span class="font-medium text-ink">{{ target.email }}</span>. Déjalo en blanco
+              para usar este; rellénalo si quieres cambiarlo antes de enviar el correo.
+            </p>
+          }
+          <input
+            id="activate-online-email"
+            type="email"
+            formControlName="email"
+            [placeholder]="emailRequired() ? 'correo@cliente.com' : 'Nuevo correo (opcional)'"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            [class.border-error-500]="hasFieldError()"
+          />
+          @if (hasValidationError('required')) {
+            <p class="mt-1.5 text-xs text-error-500">El correo es obligatorio para activar el acceso.</p>
+          }
+          @if (hasValidationError('email')) {
+            <p class="mt-1.5 text-xs text-error-500">Introduce un correo válido.</p>
+          }
+          @if (hasValidationError('maxlength')) {
+            <p class="mt-1.5 text-xs text-error-500">El correo no puede superar los 150 caracteres.</p>
+          }
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            (click)="close.emit()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+          >
+            {{ submitting() ? 'Enviando…' : 'Enviar correo de activación' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</app-modal>

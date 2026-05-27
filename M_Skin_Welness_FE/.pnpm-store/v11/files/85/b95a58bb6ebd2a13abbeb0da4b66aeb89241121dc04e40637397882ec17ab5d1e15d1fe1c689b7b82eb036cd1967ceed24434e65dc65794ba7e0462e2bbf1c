@@ -1,0 +1,245 @@
+import * as i0 from '@angular/core';
+import { model, output, inject, ElementRef, Component } from '@angular/core';
+import SignaturePad from 'signature_pad';
+
+class SignaturePadComponent {
+    constructor() {
+        this.options = model({}, ...(ngDevMode ? [{ debugName: "options" }] : /* istanbul ignore next */ []));
+        this.drawStart = output();
+        this.drawBeforeUpdate = output();
+        this.drawAfterUpdate = output();
+        this.drawEnd = output();
+        this.drawClear = output();
+        this._elementRef = inject(ElementRef);
+    }
+    ngAfterContentInit() {
+        const canvas = this.initCanvas(this.options());
+        this.initSignaturePad(canvas, this.options());
+        this.redrawCanvas();
+    }
+    ngOnDestroy() {
+        if (this.signaturePad) {
+            this.signaturePad.off();
+        }
+    }
+    // noinspection JSUnusedGlobalSymbols
+    getSignaturePad() {
+        return this.signaturePad;
+    }
+    getCanvas() {
+        return this._elementRef.nativeElement.querySelector('canvas');
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Redraw or Resize canvas, note this will clear data.
+     */
+    redrawCanvas() {
+        const canvas = this.getCanvas();
+        // when zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1, and only part of the canvas is cleared then.
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        // Use explicit dimensions from options if provided, otherwise calculate from DOM
+        const options = this.options();
+        const baseWidth = options.canvasWidth
+            ? options.canvasWidth - 2
+            : this._getWidthFix(canvas);
+        const baseHeight = options.canvasHeight
+            ? options.canvasHeight - 2
+            : this._getHeightFix(canvas);
+        // Set internal canvas size (scaled for high DPI)
+        canvas.width = baseWidth * ratio;
+        canvas.height = baseHeight * ratio;
+        // Set CSS size to match the base dimensions (without ratio scaling)
+        canvas.style.width = baseWidth + 'px';
+        canvas.style.height = baseHeight + 'px';
+        canvas.getContext('2d')?.scale(ratio, ratio);
+        this.changeBackgroundColor(this.signaturePad.backgroundColor);
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Change the color of the background dynamically.
+     */
+    changeBackgroundColor(color) {
+        this.signaturePad.backgroundColor = color;
+        const data = this.signaturePad.toData();
+        this.signaturePad.clear();
+        this.signaturePad.fromData(data);
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Returns signature image as an array of point groups
+     */
+    toData() {
+        if (this.signaturePad) {
+            return this.signaturePad.toData();
+        }
+        else {
+            return [];
+        }
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Draws signature image from an array of point groups
+     */
+    fromData(points) {
+        this.signaturePad.fromData(points);
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible parameters)
+     */
+    toDataURL(imageType, quality) {
+        return this.signaturePad.toDataURL(imageType, quality); // save image as data URL
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Draws signature image from data URL
+     */
+    fromDataURL(dataURL, options = {}) {
+        // set default height and width on read data from URL
+        const optionsValue = this.options();
+        if (!options.hasOwnProperty('height') && optionsValue.canvasHeight) {
+            options.height = optionsValue.canvasHeight;
+        }
+        if (!options.hasOwnProperty('width') && optionsValue.canvasWidth) {
+            options.width = optionsValue.canvasWidth;
+        }
+        return this.signaturePad.fromDataURL(dataURL, options);
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Clears the canvas
+     */
+    clear(redraw = true) {
+        if (redraw) {
+            this.signaturePad.clear();
+            this.redrawCanvas();
+        }
+        else {
+            this.signaturePad.clear();
+        }
+        this.drawClear.emit();
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Returns true if canvas is empty, otherwise returns false
+     */
+    isEmpty() {
+        return this.signaturePad.isEmpty();
+    }
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Unbinds all event handlers
+     */
+    off() {
+        this.signaturePad.off();
+    }
+    /**
+     * Rebinds all event handlers
+     */
+    on() {
+        this.signaturePad.on();
+    }
+    /**
+     * set an option on the signaturePad - e.g. set('minWidth', 50);
+     * @param option one of SignaturePad to set with value, properties of NgSignaturePadOptions
+     * @param value the value of option
+     */
+    set(option, value) {
+        if (option === 'canvasHeight' || option === 'canvasWidth') {
+            // Check if the value is the same in options
+            if (this.options()[option] === value) {
+                // Same value, no need to change and redraw
+                return;
+            }
+            // Update the signal so redrawCanvas will use the new value
+            this.options.update(o => ({ ...o, [option]: value }));
+            this.clear();
+        }
+        else {
+            const pad = this.signaturePad;
+            if (pad[option] === value) {
+                // Same value, no need to change and redraw
+                return;
+            }
+            pad[option] = value;
+        }
+    }
+    /**
+     * notify subscribers on signature begin
+     */
+    beginStroke(event) {
+        this.drawStart.emit(event);
+    }
+    beforeUpdateStroke(event) {
+        this.drawBeforeUpdate.emit(event);
+    }
+    afterUpdateStroke(event) {
+        this.drawAfterUpdate.emit(event);
+    }
+    /**
+     * notify subscribers on signature end
+     */
+    endStroke(event) {
+        this.drawEnd.emit(event);
+    }
+    initCanvas(options) {
+        const canvas = this.getCanvas();
+        if (options.canvasHeight) {
+            canvas.height = options.canvasHeight - 2;
+        }
+        if (options.canvasWidth) {
+            canvas.width = options.canvasWidth - 2;
+        }
+        if (options.canvasBackground) {
+            canvas.style.background = options.canvasBackground;
+        }
+        return canvas;
+    }
+    initSignaturePad(canvas, options) {
+        this.signaturePad = new SignaturePad(canvas, options);
+        this.signaturePad.addEventListener('beginStroke', (event) => this.beginStroke(event.detail));
+        this.signaturePad.addEventListener('beforeUpdateStroke', (event) => this.beforeUpdateStroke(event.detail));
+        this.signaturePad.addEventListener('afterUpdateStroke', (event) => this.afterUpdateStroke(event.detail));
+        this.signaturePad.addEventListener('endStroke', (event) => this.endStroke(event.detail));
+    }
+    /**
+     * To prevent the growing effect when the redrawCanvas is called for the width
+     * @param canvas
+     * @private
+     */
+    _getWidthFix(canvas) {
+        const computedStyle = getComputedStyle(canvas);
+        const extraPadding = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+        const extraBorder = parseFloat(computedStyle.borderLeftWidth) + parseFloat(computedStyle.borderRightWidth);
+        return canvas.offsetWidth - (extraPadding + extraBorder);
+    }
+    /**
+     * To prevent the growing effect when the redrawCanvas is called for the height
+     * @param canvas
+     * @private
+     */
+    _getHeightFix(canvas) {
+        const computedStyle = getComputedStyle(canvas);
+        const extraPadding = parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom);
+        const extraBorder = parseFloat(computedStyle.borderTopWidth) + parseFloat(computedStyle.borderBottomWidth);
+        return canvas.offsetHeight - (extraPadding + extraBorder);
+    }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "21.2.8", ngImport: i0, type: SignaturePadComponent, deps: [], target: i0.ɵɵFactoryTarget.Component }); }
+    static { this.ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "17.1.0", version: "21.2.8", type: SignaturePadComponent, isStandalone: true, selector: "signature-pad", inputs: { options: { classPropertyName: "options", publicName: "options", isSignal: true, isRequired: false, transformFunction: null } }, outputs: { options: "optionsChange", drawStart: "drawStart", drawBeforeUpdate: "drawBeforeUpdate", drawAfterUpdate: "drawAfterUpdate", drawEnd: "drawEnd", drawClear: "drawClear" }, ngImport: i0, template: '<canvas class="signature-pad-canvas"></canvas>', isInline: true, styles: [":host{background:#faebd7;display:flex;align-items:center;justify-content:center}:host .signature-pad-canvas{border:1px solid gray}\n"] }); }
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "21.2.8", ngImport: i0, type: SignaturePadComponent, decorators: [{
+            type: Component,
+            args: [{ template: '<canvas class="signature-pad-canvas"></canvas>', selector: 'signature-pad', standalone: true, styles: [":host{background:#faebd7;display:flex;align-items:center;justify-content:center}:host .signature-pad-canvas{border:1px solid gray}\n"] }]
+        }], propDecorators: { options: [{ type: i0.Input, args: [{ isSignal: true, alias: "options", required: false }] }, { type: i0.Output, args: ["optionsChange"] }], drawStart: [{ type: i0.Output, args: ["drawStart"] }], drawBeforeUpdate: [{ type: i0.Output, args: ["drawBeforeUpdate"] }], drawAfterUpdate: [{ type: i0.Output, args: ["drawAfterUpdate"] }], drawEnd: [{ type: i0.Output, args: ["drawEnd"] }], drawClear: [{ type: i0.Output, args: ["drawClear"] }] } });
+
+/*
+ * Public API Surface of angular-signature-pad
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+export { SignaturePadComponent };
+//# sourceMappingURL=almothafar-angular-signature-pad.mjs.map

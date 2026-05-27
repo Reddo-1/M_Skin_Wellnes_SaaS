@@ -20,7 +20,6 @@ class PlanResource extends JsonResource
             'allows_online_clients' => $this->allows_online_clients,
             'allows_emails' => $this->allows_emails,
             'allows_public_page' => $this->allows_public_page,
-            'allows_custom_domain' => $this->allows_custom_domain,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

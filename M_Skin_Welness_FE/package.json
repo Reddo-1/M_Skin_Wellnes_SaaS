@@ -23,6 +23,7 @@
   "private": true,
   "packageManager": "pnpm@11.1.3",
   "dependencies": {
+    "@almothafar/angular-signature-pad": "^9.0.0",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",

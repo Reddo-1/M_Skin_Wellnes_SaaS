@@ -11,7 +11,6 @@
         'allows_online_clients' => 'Acceso online del cliente',
         'allows_emails' => 'Correos automáticos',
         'allows_public_page' => 'Página pública del centro',
-        'allows_custom_domain' => 'Dominio personalizado',
     ];
 @endphp
 

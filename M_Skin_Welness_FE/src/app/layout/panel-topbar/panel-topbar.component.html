@@ -46,7 +46,7 @@
       </span>
       <span class="hidden text-left sm:block">
         <span class="block text-sm font-semibold text-ink">{{ auth.user()?.name }}</span>
-        <span class="block text-xs text-muted">{{ primaryRoleLabel() }}</span>
+        <span class="block text-xs text-muted">{{ (auth.user()?.roles?.[0] ?? '') | titlecase }}</span>
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" class="text-gray-400 transition-transform" [class.rotate-180]="dropdownOpen()">
         <path d="M4.79 7.4L10 12.6L15.21 7.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />

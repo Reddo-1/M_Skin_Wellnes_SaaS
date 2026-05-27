@@ -10,6 +10,7 @@ use App\Services\UserFileService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -73,6 +74,25 @@ class UserFileController extends Controller
             throw new NotFoundHttpException('El archivo ya no está disponible.');
         }
 
+        //el PDF del consent se descarga con un nombre humano; el resto (avatares, fotos clinicas) se sirve inline
+        if ($userFile->category === UserFile::CATEGORY_CONSENT_PDF) {
+            return response()->download(
+                $disk->path($userFile->path),
+                $this->resolveConsentPdfFilename($userFile),
+            );
+        }
+
         return response()->file($disk->path($userFile->path));
+    }
+
+    private function resolveConsentPdfFilename(UserFile $userFile): string
+    {
+        $userFile->loadMissing('user');
+
+        $name = $userFile->user?->name ?? 'cliente';
+        $slug = Str::slug($name) ?: 'cliente';
+        $date = ($userFile->created_at ?? now())->format('Y-m-d');
+
+        return "consentimiento-{$slug}-{$date}.pdf";
     }
 }

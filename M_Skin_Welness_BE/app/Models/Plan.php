@@ -16,7 +16,6 @@ class Plan extends Model
         'allows_online_clients',
         'allows_emails',
         'allows_public_page',
-        'allows_custom_domain',
         'is_active',
         'stripe_price_id',
     ];
@@ -29,7 +28,6 @@ class Plan extends Model
             'allows_online_clients' => 'boolean',
             'allows_emails' => 'boolean',
             'allows_public_page' => 'boolean',
-            'allows_custom_domain' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

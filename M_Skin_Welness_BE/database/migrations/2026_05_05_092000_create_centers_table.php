@@ -13,8 +13,6 @@ return new class extends Migration
             $table->uuid('uuid');
             $table->string('name', 120);
             $table->string('slug', 80);
-            $table->string('custom_domain', 255)->nullable();
-            $table->boolean('is_domain_verified')->default(false);
             $table->foreignId('plan_id');
             $table->foreignId('billing_user_id')->nullable();
             $table->boolean('is_active')->default(true);
@@ -22,7 +20,6 @@ return new class extends Migration
 
             $table->unique(['uuid'], 'uq_centers_uuid');
             $table->unique(['slug'], 'uq_centers_slug');
-            $table->unique(['custom_domain'], 'uq_centers_custom_domain');
 
             $table->foreign('plan_id', 'fk_centers_plan')
                 ->references('id')->on('plans')

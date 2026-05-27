@@ -78,9 +78,6 @@
                     @endif
                 </dd>
 
-                <dt class="col-sm-4 text-secondary fw-normal">Dominio personalizado</dt>
-                <dd class="col-sm-8">{{ $center->custom_domain ?? '—' }}</dd>
-
                 <dt class="col-sm-4 text-secondary fw-normal">Usuarios</dt>
                 <dd class="col-sm-8">{{ $center->users_count }}</dd>
 

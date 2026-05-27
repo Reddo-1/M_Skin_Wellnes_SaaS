@@ -45,12 +45,6 @@
           </div>
         }
 
-        @if (generalError(); as error) {
-          <div class="mb-6">
-            <app-alert variant="error" [message]="error" />
-          </div>
-        }
-
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6" novalidate>
           <div>
             <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -68,10 +62,9 @@
             />
             @if (hasValidationError('email', 'required')) {
               <p class="mt-1.5 text-xs text-error-500">El correo es obligatorio.</p>
-            } @else if (hasValidationError('email', 'email')) {
+            }
+            @if (hasValidationError('email', 'email')) {
               <p class="mt-1.5 text-xs text-error-500">Introduce un correo válido.</p>
-            } @else if (firstError('email')) {
-              <p class="mt-1.5 text-xs text-error-500">{{ firstError('email') }}</p>
             }
           </div>
 
@@ -131,8 +124,6 @@
             </div>
             @if (hasValidationError('password', 'required')) {
               <p class="mt-1.5 text-xs text-error-500">La contraseña es obligatoria.</p>
-            } @else if (firstError('password')) {
-              <p class="mt-1.5 text-xs text-error-500">{{ firstError('password') }}</p>
             }
           </div>
 

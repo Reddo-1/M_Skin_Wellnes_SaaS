@@ -1,26 +1,16 @@
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { TodayAppointment } from '../../../core/models/dashboard.model';
+import { loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { StatCardComponent, StatCardTrend } from '../../../shared/ui/stat-card/stat-card.component';
-
-const currencyFormatter = new Intl.NumberFormat('es-ES', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 2,
-});
-
-const timeFormatter = new Intl.DateTimeFormat('es-ES', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [AlertComponent, StatCardComponent],
+  imports: [CurrencyPipe, DatePipe, AlertComponent, StatCardComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
@@ -57,23 +47,13 @@ export class DashboardComponent {
     void this.load();
   }
 
-  protected formatCurrency(value: number): string {
-    return currencyFormatter.format(value);
-  }
-
-  protected formatAppointmentTime(appointment: TodayAppointment): string {
-    const startsAt = new Date(appointment.starts_at);
-    const endsAt = new Date(appointment.ends_at);
-    return `${timeFormatter.format(startsAt)} – ${timeFormatter.format(endsAt)}`;
-  }
-
   protected async load(): Promise<void> {
     this.loading.set(true);
     this.errorMessage.set(null);
     try {
       await this.dashboard.fetchSummary();
     } catch {
-      const message = 'No se han podido cargar los datos del panel. Vuelve a intentarlo en unos segundos. Si el problema persiste contacte con soporte.';
+      const message = loadResourceError('los datos del panel');
       this.errorMessage.set(message);
       this.notifications.toast.error(message);
     } finally {

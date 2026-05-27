@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\CenterFileController;
 use App\Http\Controllers\Api\CenterRegistrationController;
 use App\Http\Controllers\Api\ClientConsentController;
+use App\Http\Controllers\Api\ConsentWizardController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ClientProfileController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -126,15 +127,18 @@ Route::middleware(['auth:sanctum','verified'])->group(function () {
             ->parameters(['skin-evaluations' => 'skin_evaluation'])
             ->except(['destroy']);
 
-        //aptitud + consent específico por tratamiento; sin firma (la firma va en client-consents)
+        //historico de aptitudes + consent por tratamiento; alta/edicion solo a traves del wizard de consents
         Route::apiResource('treatment-consents', TreatmentConsentController::class)
             ->parameters(['treatment-consents' => 'treatment_consent'])
-            ->except(['destroy']);
+            ->only(['index']);
 
-        //consents RGPD generales del paciente con el centro + firma; sin destroy (registro legal)
+        //historico de consents RGPD del paciente; alta solo a traves del wizard, sin update porque es registro legal
         Route::apiResource('client-consents', ClientConsentController::class)
             ->parameters(['client-consents' => 'client_consent'])
-            ->except(['destroy']);
+            ->only(['index']);
+
+        //wizard: crea client_consent + N treatment_consents + PDF firmado en una sola transaccion
+        Route::post('consents/wizard', [ConsentWizardController::class, 'store']);
 
         //fotos clinicas y avatars; no hay update (se borra y se sube de nuevo)
         Route::apiResource('user-files', UserFileController::class)

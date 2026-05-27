@@ -1,13 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild, ElementRef, WritableSignal } from '@angular/core';
+import { Component, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UserService } from '../../../core/services/user.service';
-import { ValidationErrorResponse } from '../../../core/models/auth.model';
-import { ROLE_LABELS } from '../../../../environments/environment';
-import { AlertComponent } from '../../../shared/ui/alert/alert.component';
+import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 
@@ -26,7 +24,7 @@ type PasswordField = 'password' | 'password_confirmation';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AlertComponent, IconComponent, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, TitleCasePipe, IconComponent, ModalComponent],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -38,23 +36,9 @@ export class ProfileComponent {
   private readonly avatarInput = viewChild<ElementRef<HTMLInputElement>>('avatarInput');
 
   protected readonly editModalOpen = signal(false);
-  protected readonly savingPersonal = signal(false);
-  protected readonly changingPassword = signal(false);
-  protected readonly uploadingAvatar = signal(false);
-
-  protected readonly personalFieldErrors = signal<Record<string, string[]>>({});
-  protected readonly passwordFieldErrors = signal<Record<string, string[]>>({});
-  protected readonly personalGeneralError = signal<string | null>(null);
-  protected readonly passwordGeneralError = signal<string | null>(null);
-
-  //Linea de roles ej: Administrador · Dermoesteticién · Manicurista etc.
-  protected readonly rolesLabel = computed(() => {
-    const roles = this.auth.user()?.roles ?? [];
-    if (roles.length === 0) return '';
-    return roles
-      .map((role) => ROLE_LABELS.find((entry) => entry.code === role)?.label ?? role)
-      .join(' · ');
-  });
+  protected readonly submittingPersonal = signal(false);
+  protected readonly submittingPassword = signal(false);
+  protected readonly submittingAvatar = signal(false);
 
   protected readonly personalForm = this.fb.nonNullable.group({
     name: [this.auth.user()?.name ?? '', [Validators.required, Validators.maxLength(120)]],
@@ -74,32 +58,28 @@ export class ProfileComponent {
   protected openEditModal(): void {
     if (this.auth.user() === null) return;
     this.personalForm.reset({
-      name: this.auth.user()?.name,
-      email: this.auth.user()?.email,
-      phone: this.auth.user()?.phone,
-      birth_date: this.auth.user()?.birth_date,
+      name: this.auth.user()?.name ?? '',
+      email: this.auth.user()?.email ?? '',
+      phone: this.auth.user()?.phone ?? null,
+      birth_date: this.auth.user()?.birth_date ?? null,
     });
-    this.personalFieldErrors.set({});
-    this.personalGeneralError.set(null);
     this.editModalOpen.set(true);
   }
 
   protected closeEditModal(): void {
-    if (this.savingPersonal()) return;
+    if (this.submittingPersonal()) return;
     this.editModalOpen.set(false);
   }
 
   async submitPersonal(): Promise<void> {
-    if (this.personalForm.invalid || this.savingPersonal()) {
+    if (this.personalForm.invalid || this.submittingPersonal()) {
       this.personalForm.markAllAsTouched();
       return;
     }
     const user = this.auth.user();
     if (user === null) return;
 
-    this.savingPersonal.set(true);
-    this.personalFieldErrors.set({});
-    this.personalGeneralError.set(null);
+    this.submittingPersonal.set(true);
 
     try {
       const raw = this.personalForm.getRawValue();
@@ -113,14 +93,15 @@ export class ProfileComponent {
       this.editModalOpen.set(false);
       this.notifications.toast.success('Datos personales actualizados.');
     } catch (error) {
-      this.applyBackendError(error as HttpErrorResponse, this.personalFieldErrors, this.personalGeneralError);
+      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
+      this.notifications.toast.error(message);
     } finally {
-      this.savingPersonal.set(false);
+      this.submittingPersonal.set(false);
     }
   }
 
   async submitPassword(): Promise<void> {
-    if (this.passwordForm.invalid || this.changingPassword()) {
+    if (this.passwordForm.invalid || this.submittingPassword()) {
       this.passwordForm.markAllAsTouched();
       return;
     }
@@ -136,9 +117,7 @@ export class ProfileComponent {
     });
     if (!confirmed) return;
 
-    this.changingPassword.set(true);
-    this.passwordFieldErrors.set({});
-    this.passwordGeneralError.set(null);
+    this.submittingPassword.set(true);
 
     try {
       const raw = this.passwordForm.getRawValue();
@@ -146,18 +125,17 @@ export class ProfileComponent {
       this.passwordForm.reset({ password: '', password_confirmation: '' });
       this.notifications.toast.success('Contraseña actualizada.');
     } catch (error) {
-      this.applyBackendError(error as HttpErrorResponse, this.passwordFieldErrors, this.passwordGeneralError);
+      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
+      this.notifications.toast.error(message);
     } finally {
-      this.changingPassword.set(false);
+      this.submittingPassword.set(false);
     }
   }
 
-  //Hace que el click al botón actue como click al input tipo redirección. Por estilo.
   protected triggerAvatarPicker(): void {
     this.avatarInput()?.nativeElement.click();
   }
 
-  //Validación de la imagen nada más cambiarla.
   async onAvatarSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -185,74 +163,43 @@ export class ProfileComponent {
     });
     if (!confirmed) return;
 
-    this.uploadingAvatar.set(true);
+    this.submittingAvatar.set(true);
     try {
       await this.users.uploadAvatar(user.id, file);
       await this.auth.fetchMe();
       this.notifications.toast.success('Foto de perfil actualizada.');
     } catch (error) {
       const httpError = error as HttpErrorResponse;
-      const errorMsg = httpError.status === 422
-        ? Object.values((httpError.error as ValidationErrorResponse | undefined)?.errors ?? {})[0]?.[0]
-        : httpError.status === 413
-          ? 'La imagen es demasiado grande. El máximo permitido son 5 MB.'
-          : undefined;
-      this.notifications.toast.error(errorMsg ?? 'No se ha podido actualizar la foto de perfil.');
+      //413 lo gestionamos aparte: Nginx puede cortar antes de que Laravel responda con su 422
+      const message = httpError.status === 413
+        ? 'La imagen es demasiado grande. El máximo permitido son 5 MB.'
+        : httpError.error?.message ?? 'No se ha podido actualizar la foto de perfil.';
+      this.notifications.toast.error(message);
     } finally {
-      this.uploadingAvatar.set(false);
+      this.submittingAvatar.set(false);
     }
   }
 
-  //Errores cambiar clase de inputs (pintar borde en rojo); devuelven boolean 
   protected hasPersonalError(field: PersonalField): boolean {
-    const control = this.personalForm.controls[field];
-    return control.touched && (control.invalid || this.personalBackendErrors(field).length > 0);
+    return hasFieldError(this.personalForm.controls[field]);
   }
+
   protected hasPasswordError(field: PasswordField): boolean {
-    const control = this.passwordForm.controls[field];
-    return control.touched && (control.invalid || this.passwordBackendErrors(field).length > 0);
+    return hasFieldError(this.passwordForm.controls[field]);
   }
 
-  //Pinta errores de BE en los errores de formulario. 
-  protected personalBackendErrors(field: PersonalField): string[] {
-    return this.personalFieldErrors()[field] ?? [];
-  }
-  protected passwordBackendErrors(field: PasswordField): string[] {
-    return this.passwordFieldErrors()[field] ?? [];
-  }
-
-  //Revisa el tipo de validación (key: required,email,minlenth) junto al campo (field: input email,password) para pintar mensajes en html 
   protected hasPersonalValidation(field: PersonalField, key: string): boolean {
-    const control = this.personalForm.controls[field];
-    return control.touched && control.hasError(key);
-  }
-  protected hasPasswordValidation(field: PasswordField, key: string): boolean {
-    const control = this.passwordForm.controls[field];
-    return control.touched && control.hasError(key);
+    return hasValidationError(this.personalForm.controls[field], key);
   }
 
-  //Valida los 2 campos de cambio de contraseña y aplica el error al form en sí.
+  protected hasPasswordValidation(field: PasswordField, key: string): boolean {
+    return hasValidationError(this.passwordForm.controls[field], key);
+  }
+
   protected showPasswordMismatch(): boolean {
     return (
       this.passwordForm.controls.password_confirmation.touched &&
       this.passwordForm.errors?.['passwordsMismatch'] === true
     );
-  }
-
-  //Pintar bloque de error tipo card si ha habido error de campo desde el BE
-  private applyBackendError(
-    error: HttpErrorResponse,fieldErrors: WritableSignal<Record<string, string[]>>,generalError: WritableSignal<string | null>,
-  ): void {
-    if (error.status === 422) {
-      const body = error.error as ValidationErrorResponse | undefined;
-      fieldErrors.set(body?.errors ?? {});
-      generalError.set(null);
-      return;
-    }
-    if (error.status === 0) {
-      generalError.set('No se puede contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo.');
-      return;
-    }
-    generalError.set('Ha ocurrido un error inesperado. Inténtalo de nuevo en unos segundos. ');
   }
 }
