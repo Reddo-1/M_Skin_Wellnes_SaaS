@@ -4,6 +4,7 @@ import { Machine } from '../../../../../core/models/machine.model';
 import { LookupItem } from '../../../../../core/models/lookup.model';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { SelectComponent, SelectOption } from '../../../../../shared/ui/select/select.component';
 
 export interface MachineFormValue {
   name: string;
@@ -15,7 +16,7 @@ export interface MachineFormValue {
 @Component({
   selector: 'app-machine-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent, SelectComponent],
   templateUrl: './machine-modal.component.html',
 })
 export class MachineModalComponent {
@@ -30,6 +31,11 @@ export class MachineModalComponent {
   private readonly fb = inject(FormBuilder);
 
   protected readonly isEdit = computed(() => this.machine() !== null);
+
+  protected readonly roomOptions = computed<SelectOption[]>(() => [
+    { value: '', label: 'Sin sala fija' },
+    ...this.rooms().map((room) => ({ value: String(room.id), label: room.name })),
+  ]);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],

@@ -1,10 +1,11 @@
-import { Component, effect, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClinicalRecordSummary } from '../../../../../../../core/models/clinical-record.model';
 import { LookupService } from '../../../../../../../core/services/lookup.service';
 import { hasFieldError, hasValidationError } from '../../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../../../shared/ui/multi-select/multi-select.component';
+import { SelectComponent, SelectOption } from '../../../../../../../shared/ui/select/select.component';
 
 export interface CreateSkinEvaluationFormValue {
   client_profile_id: number;
@@ -19,7 +20,7 @@ type EvaluationField = 'client_profile_id' | 'skin_type_id' | 'evaluation_date' 
 @Component({
   selector: 'app-create-skin-evaluation-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent],
+  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent, SelectComponent],
   templateUrl: './create-skin-evaluation-modal.component.html',
 })
 export class CreateSkinEvaluationModalComponent {
@@ -32,6 +33,17 @@ export class CreateSkinEvaluationModalComponent {
 
   private readonly fb = inject(FormBuilder);
   protected readonly lookup = inject(LookupService);
+
+  protected readonly recordOptions = computed<SelectOption[]>(() =>
+    this.records().map((record) => ({
+      value: String(record.id),
+      label: record.body_type === 'facial' ? 'Ficha facial' : 'Ficha corporal',
+    })),
+  );
+
+  protected readonly skinTypeOptions = computed<SelectOption[]>(() =>
+    this.lookup.skinTypes().map((type) => ({ value: String(type.id), label: type.name })),
+  );
 
   protected readonly form = this.fb.nonNullable.group({
     client_profile_id: ['', Validators.required],

@@ -8,20 +8,16 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
         <div>
-          <label for="edit-eval-skin-type" class="mb-1.5 block text-sm font-medium text-gray-700">
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">
             Tipo de piel
           </label>
-          <select
-            id="edit-eval-skin-type"
-            formControlName="skin_type_id"
-            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('skin_type_id')"
-          >
-            <option value="" disabled>Selecciona un tipo de piel…</option>
-            @for (skinType of lookup.skinTypes(); track skinType.id) {
-              <option [value]="skinType.id">{{ skinType.name }}</option>
-            }
-          </select>
+          <app-select
+            [options]="skinTypeOptions()"
+            [selected]="form.controls.skin_type_id.value"
+            [invalid]="hasFieldError('skin_type_id')"
+            placeholder="Selecciona un tipo de piel…"
+            (selectionChange)="form.controls.skin_type_id.setValue($event)"
+          />
           @if (hasValidationError('skin_type_id', 'required')) {
             <p class="mt-1.5 text-xs text-error-500">Selecciona el tipo de piel del cliente.</p>
           }

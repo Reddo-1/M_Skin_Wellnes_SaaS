@@ -5,6 +5,7 @@ import { LookupService } from '../../../../../../../core/services/lookup.service
 import { hasFieldError, hasValidationError } from '../../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../../../shared/ui/multi-select/multi-select.component';
+import { SelectComponent, SelectOption } from '../../../../../../../shared/ui/select/select.component';
 
 export interface EditSkinEvaluationFormValue {
   skin_type_id: number;
@@ -18,7 +19,7 @@ type EvaluationField = 'skin_type_id' | 'evaluation_date' | 'general_notes';
 @Component({
   selector: 'app-edit-skin-evaluation-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent],
+  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent, SelectComponent],
   templateUrl: './edit-skin-evaluation-modal.component.html',
 })
 export class EditSkinEvaluationModalComponent {
@@ -30,6 +31,10 @@ export class EditSkinEvaluationModalComponent {
 
   private readonly fb = inject(FormBuilder);
   protected readonly lookup = inject(LookupService);
+
+  protected readonly skinTypeOptions = computed<SelectOption[]>(() =>
+    this.lookup.skinTypes().map((type) => ({ value: String(type.id), label: type.name })),
+  );
 
   protected readonly form = this.fb.nonNullable.group({
     skin_type_id: ['', Validators.required],
