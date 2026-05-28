@@ -21,6 +21,13 @@ export class UserFileService {
     return page.data;
   }
 
+  async listByUser(userId: number): Promise<UserFileSummary[]> {
+    const page = await this.api.getCollection<UserFileSummary>('/user-files', {
+      user_id: userId,
+    });
+    return page.data;
+  }
+
   async upload(data: UploadUserFileData): Promise<UserFileSummary> {
     const form = new FormData();
     form.append('user_id', String(data.user_id));
