@@ -50,6 +50,21 @@ const ALL_ITEMS: NavItem[] = [
     allowedRoles: ['cliente'],
   },
   {
+    label: 'Tratamientos',
+    path: '/panel/tratamientos',
+    icon: 'sparkles',
+    section: 'catalogo',
+    allowedRoles: [
+      'administrador',
+      'recepcionista',
+      'rrhh',
+      'diagnosticador',
+      'dermo_esteticien',
+      'fisioterapeuta',
+      'manicurista',
+    ],
+  },
+  {
     label: 'Clientes',
     path: '/panel/clientes',
     icon: 'users',
@@ -141,6 +156,7 @@ const ALL_ITEMS: NavItem[] = [
 
 const SECTIONS: { section: NavSection; label: string }[] = [
   { section: 'operativa', label: 'Operativa' },
+  { section: 'catalogo', label: 'Catálogo' },
   { section: 'clinico', label: 'Clínico' },
   { section: 'equipo', label: 'Equipo' },
   { section: 'inventario', label: 'Inventario y ventas' },

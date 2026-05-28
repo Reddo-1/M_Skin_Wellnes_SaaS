@@ -94,6 +94,25 @@ export const routes: Routes = [
         loadComponent: placeholder,
       },
       {
+        path: 'tratamientos',
+        canActivate: [
+          roleGuard([
+            'administrador',
+            'recepcionista',
+            'rrhh',
+            'diagnosticador',
+            'dermo_esteticien',
+            'fisioterapeuta',
+            'manicurista',
+          ]),
+        ],
+        data: { title: 'Tratamientos' },
+        loadComponent: () =>
+          import('./features/panel/treatments/treatments-list.component').then(
+            (m) => m.TreatmentsListComponent,
+          ),
+      },
+      {
         path: 'mis-citas',
         canActivate: [roleGuard(['cliente'])],
         data: { title: 'Mis citas' },
