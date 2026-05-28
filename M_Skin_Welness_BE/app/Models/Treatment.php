@@ -54,4 +54,9 @@ class Treatment extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function treatmentConsents(): HasMany
+    {
+        return $this->hasMany(TreatmentConsent::class);
+    }
 }

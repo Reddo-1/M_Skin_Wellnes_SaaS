@@ -74,6 +74,12 @@ class TreatmentService
             ]);
         }
 
+        if ($treatment->treatmentConsents()->exists()) {
+            throw ValidationException::withMessages([
+                'treatment' => ['No se puede eliminar un tratamiento que está ligado a consentimientos. Desactívelo en su lugar.'],
+            ]);
+        }
+
         DB::transaction(function () use ($treatment) {
             $treatment->machines()->detach();
             $treatment->authorizedRoles()->detach();
