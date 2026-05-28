@@ -206,7 +206,6 @@ export const routes: Routes = [
           roleGuard([
             'administrador',
             'recepcionista',
-            'rrhh',
             'diagnosticador',
             'dermo_esteticien',
             'fisioterapeuta',

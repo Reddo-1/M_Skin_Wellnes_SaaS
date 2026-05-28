@@ -122,7 +122,6 @@ const ALL_ITEMS: NavItem[] = [
     allowedRoles: [
       'administrador',
       'recepcionista',
-      'rrhh',
       'diagnosticador',
       'dermo_esteticien',
       'fisioterapeuta',
