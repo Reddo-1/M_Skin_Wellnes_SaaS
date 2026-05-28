@@ -215,7 +215,28 @@ export const routes: Routes = [
           ]),
         ],
         data: { title: 'Productos' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/products/products-list.component').then(
+            (m) => m.ProductsListComponent,
+          ),
+      },
+      {
+        path: 'productos/:id',
+        canActivate: [
+          roleGuard([
+            'administrador',
+            'recepcionista',
+            'diagnosticador',
+            'dermo_esteticien',
+            'fisioterapeuta',
+            'manicurista',
+          ]),
+        ],
+        data: { title: 'Detalle del producto' },
+        loadComponent: () =>
+          import('./features/panel/products/product-detail/product-detail.component').then(
+            (m) => m.ProductDetailComponent,
+          ),
       },
       {
         path: 'inventario',
