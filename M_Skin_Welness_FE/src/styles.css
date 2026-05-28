@@ -20,21 +20,17 @@
   --text-title-sm: 30px;
   --text-title-sm--line-height: 38px;
 
-  /* Paleta corporativa MSkinWellness — anchor #E6621F en brand-500.
-     Solo declaramos los tonos en uso; el resto de la escala derivada está documentada
-     en CLAUDE.md y se reactiva aquí cuando alguno haga falta. */
+  /* Paleta de colores */
   --color-brand-50: #fef4ee;
   --color-brand-300: #f7a872;
   --color-brand-500: #e6621f;
   --color-brand-600: #c84c14;
   --color-brand-950: #391306;
 
-  /* Neutros corporativos */
   --color-ink: #333333;
   --color-muted: #898989;
   --color-surface-alt: #ededee;
 
-  /* Estados (paleta neutra para semánticos, solo tonos en uso). */
   --color-error-50: #fef3f2;
   --color-error-500: #f04438;
   --color-error-600: #d92d20;
