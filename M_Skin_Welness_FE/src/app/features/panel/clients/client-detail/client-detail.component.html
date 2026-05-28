@@ -90,6 +90,12 @@
       @case ('ficha') {
         <app-clinical-record-tab [client]="data" />
       }
+      @case ('evaluaciones') {
+        <app-skin-evaluations-tab [client]="data" />
+      }
+      @case ('sesiones') {
+        <app-sessions-tab [client]="data" />
+      }
       @case ('personal') {
         <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 class="text-lg font-semibold text-ink">Datos personales</h2>
@@ -282,11 +288,6 @@
               }
             </article>
           }
-        </section>
-      }
-      @default {
-        <section class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-muted">
-          Esta pestaña estará disponible en un próximo bloque.
         </section>
       }
     }

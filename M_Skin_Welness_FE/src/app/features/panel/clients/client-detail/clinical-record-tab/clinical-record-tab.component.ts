@@ -9,8 +9,8 @@ import { ClinicalRecordService } from '../../../../../core/services/clinical-rec
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { GENERIC_ERROR, loadResourceError } from '../../../../../core/utils/form.util';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../../../shared/ui/segmented-control/segmented-control.component';
-import { CreateClinicalRecordFormValue, CreateClinicalRecordModalComponent } from '../create-clinical-record-modal/create-clinical-record-modal.component';
-import { EditClinicalRecordFormValue, EditClinicalRecordModalComponent } from '../edit-clinical-record-modal/edit-clinical-record-modal.component';
+import { CreateClinicalRecordFormValue, CreateClinicalRecordModalComponent } from './modals/create-clinical-record-modal/create-clinical-record-modal.component';
+import { EditClinicalRecordFormValue, EditClinicalRecordModalComponent } from './modals/edit-clinical-record-modal/edit-clinical-record-modal.component';
 
 const BODY_TYPE_OPTIONS: SegmentedControlOption<BodyType>[] = [
   { value: 'facial', label: 'Facial' },

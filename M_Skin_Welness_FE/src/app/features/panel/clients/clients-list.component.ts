@@ -11,8 +11,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
-import { NewClientModalComponent, NewClientFormValue } from './new-client-modal/new-client-modal.component';
-import { ActivateOnlineModalComponent, ActivateOnlineFormValue } from './activate-online-modal/activate-online-modal.component';
+import { NewClientModalComponent, NewClientFormValue } from './modals/new-client-modal/new-client-modal.component';
+import { ActivateOnlineModalComponent, ActivateOnlineFormValue } from './modals/activate-online-modal/activate-online-modal.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 

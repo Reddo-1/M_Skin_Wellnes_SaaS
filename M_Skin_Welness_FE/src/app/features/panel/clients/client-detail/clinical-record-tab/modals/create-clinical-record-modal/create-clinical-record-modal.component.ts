@@ -1,8 +1,8 @@
 import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
-import { BodyType } from '../../../../../core/models/skin-evaluation.model';
-import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { hasFieldError, hasValidationError } from '../../../../../../../core/utils/form.util';
+import { BodyType } from '../../../../../../../core/models/skin-evaluation.model';
+import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
 
 export interface CreateClinicalRecordFormValue {
   general_notes: string;

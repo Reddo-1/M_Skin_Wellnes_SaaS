@@ -10,23 +10,31 @@ import { loadResourceError } from '../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { ClinicalRecordTabComponent } from './clinical-record-tab/clinical-record-tab.component';
+import { SessionsTabComponent } from './sessions-tab/sessions-tab.component';
+import { SkinEvaluationsTabComponent } from './skin-evaluations-tab/skin-evaluations-tab.component';
 
-type DetailTab = 'personal' | 'ficha' | 'evaluaciones' | 'consentimientos' | 'archivos' | 'citas' | 'sesiones';
+type DetailTab = 'personal' | 'ficha' | 'evaluaciones' | 'consentimientos' | 'sesiones';
 
 const TABS: { key: DetailTab; label: string }[] = [
   { key: 'personal', label: 'Datos personales' },
   { key: 'ficha', label: 'Ficha clínica' },
   { key: 'evaluaciones', label: 'Evaluaciones de piel' },
   { key: 'consentimientos', label: 'Consentimientos' },
-  { key: 'archivos', label: 'Archivos' },
-  { key: 'citas', label: 'Citas' },
   { key: 'sesiones', label: 'Sesiones' },
 ];
 
 @Component({
   selector: 'app-client-detail',
   standalone: true,
-  imports: [DatePipe, RouterLink, AlertComponent, IconComponent, ClinicalRecordTabComponent],
+  imports: [
+    DatePipe,
+    RouterLink,
+    AlertComponent,
+    IconComponent,
+    ClinicalRecordTabComponent,
+    SkinEvaluationsTabComponent,
+    SessionsTabComponent,
+  ],
   templateUrl: './client-detail.component.html',
 })
 export class ClientDetailComponent {
