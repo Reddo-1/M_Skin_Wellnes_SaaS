@@ -52,6 +52,7 @@
 
   --animate-mandala-spin: mandala-spin 120s linear infinite;
   --animate-toast-in: toast-in 180ms ease-out;
+  --animate-swipe-hint: swipe-hint 1.4s ease-in-out infinite;
 }
 
 @keyframes mandala-spin {
@@ -68,6 +69,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes swipe-hint {
+  0%,
+  100% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
   }
 }
 

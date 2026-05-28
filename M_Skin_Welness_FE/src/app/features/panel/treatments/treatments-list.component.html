@@ -50,6 +50,9 @@
         </span>
       </div>
     }
+    @if (items().length > 0) {
+      <app-table-scroll-hint />
+    }
     <div class="overflow-x-auto transition-opacity" [class.opacity-50]="loading() && items().length > 0">
       <table class="min-w-full divide-y divide-gray-100 text-sm">
         <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-muted">

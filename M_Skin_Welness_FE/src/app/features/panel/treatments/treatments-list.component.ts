@@ -11,6 +11,7 @@ import { PaginatedMeta } from '../../../core/models/paginated.model';
 import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
+import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { TreatmentModalComponent, TreatmentFormValue } from './modals/treatment-modal/treatment-modal.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -24,7 +25,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
 @Component({
   selector: 'app-treatments-list',
   standalone: true,
-  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TreatmentModalComponent],
+  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TableScrollHintComponent, TreatmentModalComponent],
   templateUrl: './treatments-list.component.html',
 })
 export class TreatmentsListComponent {
@@ -40,7 +41,7 @@ export class TreatmentsListComponent {
 
   protected readonly machineOptions = signal<LookupItem[]>([]);
 
-  protected readonly activeFilter = signal<ActiveFilter>('all');
+  protected readonly activeFilter = signal<ActiveFilter>('active');
   protected readonly page = signal(1);
   protected readonly activeFilterOptions = ACTIVE_FILTER_OPTIONS;
 
