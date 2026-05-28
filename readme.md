@@ -146,7 +146,6 @@ El sistema contempla una tabla global `plans` relacionada con `centers.plan_id`.
 - `allows_online_clients` — acceso online del cliente
 - `allows_emails` — correos automáticos
 - `allows_public_page` — página pública del centro y login por subdominio
-- `allows_custom_domain` — dominio personalizado
 
 Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Professional** y **Premium**.
 

@@ -56,7 +56,6 @@ CREATE TABLE plans (
     allows_online_clients  BOOLEAN     NOT NULL DEFAULT FALSE,
     allows_emails          BOOLEAN     NOT NULL DEFAULT FALSE,
     allows_public_page     BOOLEAN     NOT NULL DEFAULT FALSE,
-    allows_custom_domain   BOOLEAN     NOT NULL DEFAULT FALSE,
     is_active              BOOLEAN     NOT NULL DEFAULT TRUE,
     created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -69,15 +68,12 @@ CREATE TABLE centers (
     uuid               UUID         NOT NULL,
     name               VARCHAR(120) NOT NULL,
     slug               VARCHAR(80)  NOT NULL,
-    custom_domain      VARCHAR(255),
-    is_domain_verified BOOLEAN      NOT NULL DEFAULT FALSE,
     plan_id            INT          NOT NULL,
     is_active          BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uq_centers_uuid          UNIQUE (uuid),
     CONSTRAINT uq_centers_slug          UNIQUE (slug),
-    CONSTRAINT uq_centers_custom_domain UNIQUE (custom_domain),
     CONSTRAINT fk_centers_plan          FOREIGN KEY (plan_id)
         REFERENCES plans (id) ON DELETE RESTRICT
 );
