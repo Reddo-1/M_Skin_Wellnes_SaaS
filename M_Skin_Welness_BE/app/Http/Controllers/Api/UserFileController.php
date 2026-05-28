@@ -36,7 +36,7 @@ class UserFileController extends Controller
             ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
             ->orderByDesc('id');
 
-        return UserFileResource::collection($query->paginate(50));
+        return UserFileResource::collection($query->paginate(10));
     }
 
     public function store(StoreUserFileRequest $request): UserFileResource

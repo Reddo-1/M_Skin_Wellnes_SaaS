@@ -31,6 +31,6 @@ class ClientConsentController extends Controller
             ->orderByDesc('signed_at')
             ->orderByDesc('id');
 
-        return ClientConsentResource::collection($query->paginate(50));
+        return ClientConsentResource::collection($query->paginate(10));
     }
 }

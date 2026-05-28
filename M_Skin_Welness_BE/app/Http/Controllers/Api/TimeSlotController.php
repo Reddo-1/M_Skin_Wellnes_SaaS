@@ -30,7 +30,7 @@ class TimeSlotController extends Controller
             //orden por hora de inicio
             ->orderBy('start_time');
 
-        return TimeSlotResource::collection($query->paginate(50));
+        return TimeSlotResource::collection($query->paginate(10));
     }
 
     public function store(StoreTimeSlotRequest $request): TimeSlotResource

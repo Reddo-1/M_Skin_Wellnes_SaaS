@@ -32,7 +32,7 @@ class StockMovementController extends Controller
             ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<=', $request->date('to')))
             ->orderByDesc('id');
 
-        return StockMovementResource::collection($query->paginate(50));
+        return StockMovementResource::collection($query->paginate(10));
     }
 
     public function store(StoreStockMovementRequest $request): StockMovementResource

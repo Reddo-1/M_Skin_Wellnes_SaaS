@@ -32,7 +32,7 @@ class SaleController extends Controller
             ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<=', $request->date('to')))
             ->orderByDesc('id');
 
-        return SaleResource::collection($query->paginate(50));
+        return SaleResource::collection($query->paginate(10));
     }
 
     public function store(StoreSaleRequest $request): SaleResource

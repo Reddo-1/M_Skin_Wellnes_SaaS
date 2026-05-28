@@ -40,7 +40,7 @@ class ClientProfileController extends Controller
             })
             ->orderBy('id');
 
-        return ClientProfileResource::collection($query->paginate(50));
+        return ClientProfileResource::collection($query->paginate(10));
     }
 
     public function store(StoreClientProfileRequest $request): ClientProfileResource

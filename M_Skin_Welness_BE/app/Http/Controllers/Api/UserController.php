@@ -42,7 +42,7 @@ class UserController extends Controller
             })
             ->orderBy('name');
 
-        return UserResource::collection($query->paginate(50));
+        return UserResource::collection($query->paginate(10));
     }
 
     public function store(StoreUserRequest $request): UserResource

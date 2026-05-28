@@ -35,6 +35,6 @@ class TreatmentConsentController extends Controller
             ->orderByDesc('review_date')
             ->orderByDesc('id');
 
-        return TreatmentConsentResource::collection($query->paginate(50));
+        return TreatmentConsentResource::collection($query->paginate(10));
     }
 }

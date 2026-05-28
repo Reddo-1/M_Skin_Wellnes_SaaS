@@ -29,7 +29,7 @@ class ProductStockController extends Controller
             ->when($request->boolean('below_minimum'), fn ($q) => $q->belowMinimum())
             ->orderBy('product_id');
 
-        return ProductStockResource::collection($query->paginate(50));
+        return ProductStockResource::collection($query->paginate(10));
     }
 
     public function show(ProductStock $productStock): ProductStockResource

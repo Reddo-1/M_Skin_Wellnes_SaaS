@@ -38,7 +38,7 @@ class AppointmentController extends Controller
             $query->where('client_id', $user->id);
         }
 
-        return AppointmentResource::collection($query->paginate(50));
+        return AppointmentResource::collection($query->paginate(10));
     }
 
     public function store(StoreAppointmentRequest $request): AppointmentResource

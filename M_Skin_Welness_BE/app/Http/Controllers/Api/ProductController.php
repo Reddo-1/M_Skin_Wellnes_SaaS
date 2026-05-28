@@ -30,7 +30,7 @@ class ProductController extends Controller
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'ilike', '%'.$request->string('search').'%'))
             ->orderBy('name');
 
-        return ProductResource::collection($query->paginate(50));
+        return ProductResource::collection($query->paginate(10));
     }
 
     public function store(StoreProductRequest $request): ProductResource

@@ -31,7 +31,7 @@ class RoomController extends Controller
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name');
 
-        return RoomResource::collection($query->paginate(50));
+        return RoomResource::collection($query->paginate(10));
     }
 
     public function store(StoreRoomRequest $request): RoomResource

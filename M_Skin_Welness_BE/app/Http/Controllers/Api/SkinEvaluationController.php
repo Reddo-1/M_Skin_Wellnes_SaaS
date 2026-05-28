@@ -38,7 +38,7 @@ class SkinEvaluationController extends Controller
             ->orderByDesc('evaluation_date')
             ->orderByDesc('id');
 
-        return SkinEvaluationResource::collection($query->paginate(50));
+        return SkinEvaluationResource::collection($query->paginate(10));
     }
 
     public function store(StoreSkinEvaluationRequest $request): SkinEvaluationResource

@@ -25,7 +25,7 @@ class InvoiceController extends Controller
             ->when($request->filled('to'), fn ($q) => $q->where('issued_date', '<=', $request->date('to')))
             ->orderByDesc('id');
 
-        return InvoiceResource::collection($query->paginate(50));
+        return InvoiceResource::collection($query->paginate(10));
     }
 
     public function show(Invoice $invoice): InvoiceResource
