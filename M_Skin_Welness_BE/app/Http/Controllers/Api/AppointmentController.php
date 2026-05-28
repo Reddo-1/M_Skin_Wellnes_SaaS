@@ -30,6 +30,7 @@ class AppointmentController extends Controller
             ->when($request->filled('to'), fn ($q) => $q->where('starts_at', '<', $request->date('to')))
             ->when($request->filled('worker_id'), fn ($q) => $q->where('worker_id', $request->integer('worker_id')))
             ->when($request->filled('room_id'), fn ($q) => $q->where('room_id', $request->integer('room_id')))
+            ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->integer('client_id')))
             ->orderBy('starts_at');
 
         //un cliente solo ve sus propias citas
