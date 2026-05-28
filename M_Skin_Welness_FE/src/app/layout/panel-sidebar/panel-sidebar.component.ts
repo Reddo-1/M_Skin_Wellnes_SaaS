@@ -65,6 +65,21 @@ const ALL_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: 'Máquinas',
+    path: '/panel/maquinas',
+    icon: 'cpu',
+    section: 'catalogo',
+    allowedRoles: [
+      'administrador',
+      'recepcionista',
+      'rrhh',
+      'diagnosticador',
+      'dermo_esteticien',
+      'fisioterapeuta',
+      'manicurista',
+    ],
+  },
+  {
     label: 'Clientes',
     path: '/panel/clientes',
     icon: 'users',

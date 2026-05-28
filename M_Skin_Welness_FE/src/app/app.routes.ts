@@ -113,6 +113,25 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'maquinas',
+        canActivate: [
+          roleGuard([
+            'administrador',
+            'recepcionista',
+            'rrhh',
+            'diagnosticador',
+            'dermo_esteticien',
+            'fisioterapeuta',
+            'manicurista',
+          ]),
+        ],
+        data: { title: 'Máquinas' },
+        loadComponent: () =>
+          import('./features/panel/machines/machines-list.component').then(
+            (m) => m.MachinesListComponent,
+          ),
+      },
+      {
         path: 'mis-citas',
         canActivate: [roleGuard(['cliente'])],
         data: { title: 'Mis citas' },

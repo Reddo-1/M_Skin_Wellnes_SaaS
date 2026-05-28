@@ -1,0 +1,85 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar máquina' : 'Nueva máquina' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      Define el equipo del centro. Si es móvil no se fija a una sala; si es fija, indícale su sala.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div>
+        <label for="machine-name" class="mb-1.5 block text-sm font-medium text-gray-700">
+          Nombre <span class="text-error-500">*</span>
+        </label>
+        <input
+          id="machine-name"
+          type="text"
+          formControlName="name"
+          placeholder="Ej. Láser diodo LD-200"
+          class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+          [class.border-error-500]="hasFieldError('name')"
+        />
+        @if (hasValidationError('name', 'required')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre es obligatorio.</p>
+        }
+        @if (hasValidationError('name', 'maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+        }
+      </div>
+
+      <label class="flex items-center gap-3 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          formControlName="is_mobile"
+          (change)="onMobileToggle()"
+          class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20"
+        />
+        Máquina móvil (se traslada entre salas)
+      </label>
+
+      @if (!form.controls.is_mobile.value) {
+        <div>
+          <label for="machine-room" class="mb-1.5 block text-sm font-medium text-gray-700">Sala fija</label>
+          <select
+            id="machine-room"
+            formControlName="fixed_room_id"
+            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+          >
+            <option value="">Sin sala fija</option>
+            @for (room of rooms(); track room.id) {
+              <option [value]="room.id">{{ room.name }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <label class="flex items-center gap-3 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          formControlName="is_active"
+          class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20"
+        />
+        Máquina activa (disponible para sesiones)
+      </label>
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="close.emit()"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+        >
+          {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Crear máquina' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>
