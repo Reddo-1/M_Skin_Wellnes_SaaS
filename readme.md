@@ -17,9 +17,9 @@ Dentro de cada centro se contempla la gestión de:
 - ventas, pagos, facturas e inventario
 - archivos y branding del centro para su página pública
 
-La vista principal para trabajadores estará centrada en la agenda y el calendario de sesiones. Desde ahí podrán acceder al resto de módulos según su rol. Además, se plantea una vista tipo mapa del centro con GridStack para representar salas y ocupación de forma visual, persistiendo la disposición en la columna `rooms.grid_position` (JSONB).
+La vista principal para trabajadores estará centrada en la agenda y el calendario de sesiones. Desde ahí podrán acceder al resto de módulos según su rol. Además, se plantea una vista tipo mapa del centro con GridStack para representar salas y ocupación de forma visual, persistiendo la disposición en la columna `rooms.grid_position` (JSONB). El mapa se refresca con F5 manual: no hay sincronización en tiempo real (sin Reverb/WebSockets).
 
-El sistema también queda preparado para acceso online de clientes, página pública por centro, correos automáticos, reservas online y pagos con Stripe, aunque algunas de estas partes pueden quedar parciales según el tiempo disponible.
+Los pagos con Stripe (alta self-service del centro y suscripciones) forman parte del núcleo. El acceso online de clientes queda en modo lectura. Las reservas online del cliente y la página pública por centro quedan fuera del alcance de defensa.
 
 ## Objetivo del proyecto
 
@@ -39,19 +39,19 @@ El objetivo es construir un Proyecto Final serio y defendible que demuestre:
 - PHP 8.2
 - Laravel Sanctum (token mode) para la autenticación de la API consumida por Angular
 - `spatie/laravel-permission` (sin teams) para roles y permisos
-- Laravel Reverb para WebSockets (sincronización en tiempo real del mapa del centro)
+- Laravel Cashier + Stripe para el alta self-service del centro y las suscripciones
 - Blade para el panel de superadministración (guard `web`, sesión clásica)
 
 ### Frontend
 
 - Angular 21
 - TypeScript
-- Bootstrap 5 + SCSS para responsive y maquetación general
+- Tailwind CSS + SCSS para responsive y maquetación general (base del template TailAdmin)
 - Reactive Forms
 - Signals, computed y effect cuando proceda
 - guards, interceptores, servicios y consumo de API REST
 - GridStack para la vista visual del mapa del centro
-- `laravel-echo` como cliente WebSocket para suscribirse a los eventos en tiempo real del centro
+- `almothafar/angular-signature-pad` para la firma del consentimiento y FullCalendar (vía TailAdmin) para el cuadrante
 
 ### Base de datos
 
@@ -92,18 +92,13 @@ Convención de borrados en cascada:
 - `ON DELETE RESTRICT` para FKs hacia lookups globales
 - `ON DELETE SET NULL` en `audit_logs` para preservar el rastro
 
-### Login dual y subdominios
+### Login compartido (sin subdominios)
 
-Cualquier usuario del centro puede autenticarse contra el mismo backend desde dos rutas:
-
-- página global (`mskinwellness.com/login`), siempre disponible
-- página del centro (`centro-x.mskinwellness.com/login`), solo si el plan del centro lo permite
-
-Ambas rutas usan el mismo endpoint de Sanctum. La diferencia es la presentación: la página del centro aplica el branding desde `center_files` y, tras el login, redirige al dashboard del centro al que pertenece el usuario.
+Todos los usuarios del centro (staff y clientes) se autentican contra el mismo backend desde una única ruta: `mskinwellness.com/login`. Un formulario único de email + password; el backend resuelve los roles y el frontend redirige al destino según rol. No hay subdominio por centro: la app vive en un único hostname y el tenant se resuelve en backend leyendo `center_id` del usuario autenticado. El branding del centro (logos, colores, `center_files`) se aplica dentro del panel, no en el login. La idea anterior de `centro-x.mskinwellness.com/login` queda descartada.
 
 ### Auditoría
 
-El sistema mantiene una tabla `audit_logs` mínima centrada en el ciclo de vida del centro: alta (`center_create`), cambio de plan (`center_plan_change`) y desactivación (`center_deactivate`). No se utiliza para impersonation, catálogos globales ni eventos del cliente online.
+El sistema mantiene una tabla `audit_logs` mínima centrada en el ciclo de vida del centro: alta, cambio de plan, desactivación y reactivación del centro (estos tres últimos guiados por los webhooks de Stripe según el estado de la suscripción), más alta, baja y reactivación de usuarios del centro. No se utiliza para impersonation, catálogos globales ni eventos del cliente online.
 
 ## Modelo funcional resumido
 
@@ -119,10 +114,10 @@ Acceden a la aplicación principal del centro según sus roles. Un mismo usuario
 
 Pueden tener acceso online cuando el plan del centro lo permita. Hay dos vías de alta:
 
-- **Auto-registro online** desde la página pública del centro (planes `professional` y `premium`).
+- **Auto-registro online** desde la landing pública del SaaS (planes que lo permitan).
 - **Activación por el centro** de un cliente walk-in existente, mediante correo de activación.
 
-En plan `professional` el cliente consulta sus próximas citas y su histórico; en plan `premium` puede además solicitar y cancelar citas online.
+El acceso online del cliente es de **lectura**: ve sus datos personales, sus próximas citas y su histórico, sus fichas técnicas, sus consentimientos firmados (con descarga del PDF) y el escaparate de productos del centro. Las reservas online (pedir o cancelar cita) quedan fuera del alcance de defensa.
 
 ## Roles del sistema
 
@@ -145,7 +140,7 @@ El sistema contempla una tabla global `plans` relacionada con `centers.plan_id`.
 - `max_workers` — límite de trabajadores
 - `allows_online_clients` — acceso online del cliente
 - `allows_emails` — correos automáticos
-- `allows_public_page` — página pública del centro y login por subdominio
+- `allows_public_page` — página pública del centro (fuera del alcance de defensa; sin login por subdominio)
 
 Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Professional** y **Premium**.
 
@@ -166,35 +161,35 @@ Sobre esos flags se han definido tres niveles funcionales: **Starter**, **Profes
 
 ### Núcleo del Proyecto Final
 
-- multi-centro
-- planes
-- superadmin funcional
+- multi-centro y planes
+- superadmin (Blade) de solo lectura sobre el dominio del centro
 - autenticación con Sanctum y autorización con Spatie
-- alta self-service del centro
+- alta self-service del centro con Stripe Checkout + Cashier + verificación de email
 - gestión interna del centro
-- sesiones y calendario
-- fichas y archivos del cliente
+- sesiones y cuadrante (FullCalendar)
 - mapa del centro con GridStack
-- frontend responsive
+- wizard del consentimiento con firma + PDF
+- fichas clínicas y archivos del cliente
+- inventario (tres tablas) con descuento al finalizar la cita
+- ventas, sale_lines e invoices
+- horarios, ausencias y disponibilidades extra
+- frontend Angular responsive completo
 - despliegue funcional en VPS
 - datos demo para defensa
 
-### Funcionalidades previstas con posible cierre parcial
+### Funcionalidades con posible cierre parcial
 
-- acceso online del cliente
-- página pública por centro
-- reservas online
-- correos automáticos
-- pagos con Stripe
-- facturación más avanzada
-- inventario funcional ampliado
+- acceso online del cliente (lectura de sus datos; sin reservas online)
+- inventario avanzado (lo básico ya está; analíticas opcionales)
+- facturación avanzada (lo básico ya está; modelos fiscales opcionales)
 
 ### Fuera del Proyecto Final
 
-- sistema completo de suscripciones recurrentes
-- dominios personalizados totalmente resueltos
+- reservas online del cliente desde el portal
+- página pública por centro y dominios/subdominios por centro
 - CMS para páginas públicas
 - automatizaciones avanzadas de negocio
+- tiempo real con Reverb / WebSockets (el mapa se refresca con F5 manual)
 
 ## Nombre del tablero de planificación
 
