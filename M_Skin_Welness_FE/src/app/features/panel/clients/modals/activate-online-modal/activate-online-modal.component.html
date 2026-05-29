@@ -9,7 +9,7 @@
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
         <div>
-          <label for="activate-online-email" class="mb-1.5 block text-sm font-medium text-gray-700">
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">
             Correo electrónico
             @if (emailRequired()) {
               <span class="text-error-500">*</span>
@@ -21,13 +21,11 @@
               para usar este; rellénalo si quieres cambiarlo antes de enviar el correo.
             </p>
           }
-          <input
-            id="activate-online-email"
+          <app-input
             type="email"
             formControlName="email"
             [placeholder]="emailRequired() ? 'correo@cliente.com' : 'Nuevo correo (opcional)'"
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError()"
+            [invalid]="hasFieldError()"
           />
           @if (hasValidationError('required')) {
             <p class="mt-1.5 text-xs text-error-500">El correo es obligatorio para activar el acceso.</p>

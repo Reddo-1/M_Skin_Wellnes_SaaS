@@ -48,15 +48,11 @@
         </div>
 
         <div>
-          <label for="eval-date" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Fecha de evaluación
-          </label>
-          <input
-            id="eval-date"
-            type="date"
+          <app-date-picker
+            label="Fecha de evaluación"
             formControlName="evaluation_date"
-            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('evaluation_date')"
+            placeholder="Selecciona una fecha"
+            [invalid]="hasFieldError('evaluation_date')"
           />
           @if (hasValidationError('evaluation_date', 'required')) {
             <p class="mt-1.5 text-xs text-error-500">Indica la fecha de la evaluación.</p>
@@ -74,17 +70,13 @@
         </div>
 
         <div class="sm:col-span-2">
-          <label for="eval-notes" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Observaciones
-          </label>
-          <textarea
-            id="eval-notes"
+          <app-textarea
+            label="Observaciones"
             formControlName="general_notes"
-            rows="3"
+            [rows]="3"
             placeholder="Notas clínicas de esta evaluación…"
-            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('general_notes')"
-          ></textarea>
+            [invalid]="hasFieldError('general_notes')"
+          />
           @if (hasValidationError('general_notes', 'maxlength')) {
             <p class="mt-1.5 text-xs text-error-500">Las observaciones no pueden superar los 5000 caracteres.</p>
           }

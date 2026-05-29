@@ -4,6 +4,7 @@ import { ClinicalRecordSummary } from '../../../../../../../core/models/clinical
 import { BodyType } from '../../../../../../../core/models/skin-evaluation.model';
 import { hasFieldError, hasValidationError } from '../../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
+import { TextareaComponent } from '../../../../../../../shared/ui/textarea/textarea.component';
 
 export interface ClinicalRecordFormValue {
   general_notes: string;
@@ -12,7 +13,7 @@ export interface ClinicalRecordFormValue {
 @Component({
   selector: 'app-clinical-record-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent, TextareaComponent],
   templateUrl: './clinical-record-modal.component.html',
 })
 export class ClinicalRecordModalComponent {

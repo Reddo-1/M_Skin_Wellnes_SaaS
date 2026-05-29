@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { User } from '../../../../../core/models/user.model';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { InputComponent } from '../../../../../shared/ui/input/input.component';
 
 export interface ActivateOnlineFormValue {
   email: string | null;
@@ -11,7 +12,7 @@ export interface ActivateOnlineFormValue {
 @Component({
   selector: 'app-activate-online-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent, InputComponent],
   templateUrl: './activate-online-modal.component.html',
 })
 export class ActivateOnlineModalComponent {

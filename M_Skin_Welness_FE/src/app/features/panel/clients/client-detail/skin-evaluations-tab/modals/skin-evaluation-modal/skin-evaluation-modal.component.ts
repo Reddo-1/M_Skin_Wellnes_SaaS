@@ -7,6 +7,8 @@ import { hasFieldError, hasValidationError } from '../../../../../../../core/uti
 import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../../../shared/ui/multi-select/multi-select.component';
 import { SelectComponent, SelectOption } from '../../../../../../../shared/ui/select/select.component';
+import { TextareaComponent } from '../../../../../../../shared/ui/textarea/textarea.component';
+import { DatePickerComponent } from '../../../../../../../shared/ui/date-picker/date-picker.component';
 
 export interface SkinEvaluationFormValue {
   client_profile_id: number;
@@ -21,7 +23,14 @@ type EvaluationField = 'client_profile_id' | 'skin_type_id' | 'evaluation_date' 
 @Component({
   selector: 'app-skin-evaluation-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent, SelectComponent],
+  imports: [
+    ReactiveFormsModule,
+    ModalComponent,
+    MultiSelectComponent,
+    SelectComponent,
+    TextareaComponent,
+    DatePickerComponent,
+  ],
   templateUrl: './skin-evaluation-modal.component.html',
 })
 export class SkinEvaluationModalComponent {
