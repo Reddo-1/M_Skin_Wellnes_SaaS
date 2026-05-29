@@ -192,7 +192,19 @@ export const routes: Routes = [
         path: 'trabajadores',
         canActivate: [roleGuard(['administrador', 'rrhh'])],
         data: { title: 'Trabajadores' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/workers/workers-list.component').then(
+            (m) => m.WorkersListComponent,
+          ),
+      },
+      {
+        path: 'trabajadores/:id',
+        canActivate: [roleGuard(['administrador', 'rrhh'])],
+        data: { title: 'Ficha del trabajador' },
+        loadComponent: () =>
+          import('./features/panel/workers/worker-detail/worker-detail.component').then(
+            (m) => m.WorkerDetailComponent,
+          ),
       },
       {
         path: 'time-slots',
