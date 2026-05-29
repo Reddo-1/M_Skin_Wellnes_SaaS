@@ -1,4 +1,4 @@
-import { CommonModule, TitleCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
@@ -27,7 +27,6 @@ type PasswordField = 'password' | 'password_confirmation';
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     TitleCasePipe,
     IconComponent,
@@ -209,7 +208,7 @@ export class ProfileComponent {
   protected showPasswordMismatch(): boolean {
     return (
       this.passwordForm.controls.password_confirmation.touched &&
-      this.passwordForm.errors?.['passwordsMismatch'] === true
+      this.passwordForm.hasError('passwordsMismatch')
     );
   }
 }

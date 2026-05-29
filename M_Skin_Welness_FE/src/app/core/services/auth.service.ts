@@ -6,7 +6,6 @@ import { LoginCredentials, LoginResponse } from '../models/auth.model';
 import { User, UserRole } from '../models/user.model';
 import { ApiService } from './api.service';
 
-//Constantes con nombres para localstorage.
 const TOKEN_AUTH = 'mskin.auth.token';
 const USER = 'mskin.auth.user';
 const IMPERSONATION_CENTER_ID = 'mskin.impersonation.center_id';

@@ -62,7 +62,7 @@ export class WorkerDetailComponent {
   constructor() {
     effect(() => {
       const workerId = Number(this.id());
-      if (!Number.isFinite(workerId)) return;
+      if (!Number.isInteger(workerId) || workerId <= 0) return;
       void this.load(workerId);
     });
   }

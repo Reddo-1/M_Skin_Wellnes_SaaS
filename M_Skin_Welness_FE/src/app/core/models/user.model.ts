@@ -1,6 +1,13 @@
-export type UserRole =|'superadmin'|'administrador'|'recepcionista'|
-'rrhh'|'diagnosticador'|'dermo_esteticien'|'fisioterapeuta'|'manicurista'|
-'cliente';
+export type UserRole =
+  | 'superadmin'
+  | 'administrador'
+  | 'recepcionista'
+  | 'rrhh'
+  | 'diagnosticador'
+  | 'dermo_esteticien'
+  | 'fisioterapeuta'
+  | 'manicurista'
+  | 'cliente';
 
 export interface PlanSummary {
   id: number;

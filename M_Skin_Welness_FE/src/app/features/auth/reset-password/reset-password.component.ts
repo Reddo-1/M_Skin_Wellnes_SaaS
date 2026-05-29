@@ -86,7 +86,7 @@ export class ResetPasswordComponent {
   protected showPasswordMismatch(): boolean {
     return (
       this.form.controls.password_confirmation.touched &&
-      this.form.errors?.['passwordsMismatch'] === true
+      this.form.hasError('passwordsMismatch')
     );
   }
 }
