@@ -9,8 +9,7 @@ import { ClinicalRecordService } from '../../../../../core/services/clinical-rec
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { GENERIC_ERROR, loadResourceError } from '../../../../../core/utils/form.util';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../../../shared/ui/segmented-control/segmented-control.component';
-import { CreateClinicalRecordFormValue, CreateClinicalRecordModalComponent } from './modals/create-clinical-record-modal/create-clinical-record-modal.component';
-import { EditClinicalRecordFormValue, EditClinicalRecordModalComponent } from './modals/edit-clinical-record-modal/edit-clinical-record-modal.component';
+import { ClinicalRecordFormValue, ClinicalRecordModalComponent } from './modals/clinical-record-modal/clinical-record-modal.component';
 
 const BODY_TYPE_OPTIONS: SegmentedControlOption<BodyType>[] = [
   { value: 'facial', label: 'Facial' },
@@ -20,7 +19,7 @@ const BODY_TYPE_OPTIONS: SegmentedControlOption<BodyType>[] = [
 @Component({
   selector: 'app-clinical-record-tab',
   standalone: true,
-  imports: [DatePipe, CreateClinicalRecordModalComponent, EditClinicalRecordModalComponent, SegmentedControlComponent],
+  imports: [DatePipe, ClinicalRecordModalComponent, SegmentedControlComponent],
   templateUrl: './clinical-record-tab.component.html',
 })
 export class ClinicalRecordTabComponent {
@@ -37,7 +36,7 @@ export class ClinicalRecordTabComponent {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedBodyType = signal<BodyType>('facial');
 
-  protected readonly bodyTypeToCreate = signal<BodyType | null>(null);
+  protected readonly modalOpen = signal(false);
   protected readonly recordToEdit = signal<ClinicalRecordSummary | null>(null);
   protected readonly submitting = signal(false);
 
@@ -57,64 +56,47 @@ export class ClinicalRecordTabComponent {
     this.selectedBodyType.set(value);
   }
 
-  protected openCreate(bodyType: BodyType): void {
-    this.bodyTypeToCreate.set(bodyType);
-  }
-
-  protected closeCreate(): void {
-    if (this.submitting()) return;
-    this.bodyTypeToCreate.set(null);
+  protected openCreate(): void {
+    this.recordToEdit.set(null);
+    this.modalOpen.set(true);
   }
 
   protected openEdit(): void {
     const record = this.currentRecord();
     if (record !== null) {
       this.recordToEdit.set(record);
+      this.modalOpen.set(true);
     }
   }
 
-  protected closeEdit(): void {
+  protected closeModal(): void {
     if (this.submitting()) return;
-    this.recordToEdit.set(null);
+    this.modalOpen.set(false);
   }
 
-  protected async submitCreate(value: CreateClinicalRecordFormValue): Promise<void> {
-    const bodyType = this.bodyTypeToCreate();
-    if (bodyType === null) return;
-
-    this.submitting.set(true);
-    try {
-      const created = await this.records.create({
-        user_id: this.client().id,
-        body_type: bodyType,
-        general_notes: value.general_notes.trim() === '' ? null : value.general_notes,
-      });
-      this.items.update((current) => [...current, created]);
-      this.selectedBodyType.set(bodyType);
-      this.bodyTypeToCreate.set(null);
-      this.notifications.toast.success(`Ficha ${bodyType} creada.`);
-    } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
-    } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  protected async submitEdit(value: EditClinicalRecordFormValue): Promise<void> {
+  protected async submit(value: ClinicalRecordFormValue): Promise<void> {
     const record = this.recordToEdit();
-    if (record === null) return;
+    const generalNotes = value.general_notes.trim() === '' ? null : value.general_notes;
 
     this.submitting.set(true);
     try {
-      const updated = await this.records.update(record.id, {
-        general_notes: value.general_notes.trim() === '' ? null : value.general_notes,
-      });
-      this.items.update((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item)),
-      );
-      this.recordToEdit.set(null);
-      this.notifications.toast.success('Ficha actualizada.');
+      if (record !== null) {
+        const updated = await this.records.update(record.id, { general_notes: generalNotes });
+        this.items.update((current) =>
+          current.map((item) => (item.id === updated.id ? updated : item)),
+        );
+        this.notifications.toast.success('Ficha actualizada.');
+      } else {
+        const bodyType = this.selectedBodyType();
+        const created = await this.records.create({
+          user_id: this.client().id,
+          body_type: bodyType,
+          general_notes: generalNotes,
+        });
+        this.items.update((current) => [...current, created]);
+        this.notifications.toast.success(`Ficha ${bodyType} creada.`);
+      }
+      this.modalOpen.set(false);
     } catch (error) {
       const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
       this.notifications.toast.error(message);

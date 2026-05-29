@@ -114,7 +114,7 @@
       @if (auth.hasPermission('client_profiles.create')) {
         <button
           type="button"
-          (click)="openCreate(selectedBodyType())"
+          (click)="openCreate()"
           class="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -132,16 +132,11 @@
   }
 </section>
 
-<app-create-clinical-record-modal
-  [bodyType]="bodyTypeToCreate()"
-  [submitting]="submitting()"
-  (close)="closeCreate()"
-  (formSubmit)="submitCreate($event)"
-/>
-
-<app-edit-clinical-record-modal
+<app-clinical-record-modal
+  [isOpen]="modalOpen()"
   [record]="recordToEdit()"
+  [bodyType]="selectedBodyType()"
   [submitting]="submitting()"
-  (close)="closeEdit()"
-  (formSubmit)="submitEdit($event)"
+  (close)="closeModal()"
+  (formSubmit)="submit($event)"
 />

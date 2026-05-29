@@ -111,17 +111,11 @@
   }
 </section>
 
-<app-create-skin-evaluation-modal
-  [isOpen]="creating()"
+<app-skin-evaluation-modal
+  [isOpen]="modalOpen()"
+  [evaluation]="evaluationToEdit()"
   [records]="clinicalRecords()"
   [submitting]="submitting()"
-  (close)="closeCreate()"
-  (formSubmit)="submitCreate($event)"
-/>
-
-<app-edit-skin-evaluation-modal
-  [evaluation]="evaluationToEdit()"
-  [submitting]="submitting()"
-  (close)="closeEdit()"
-  (formSubmit)="submitEdit($event)"
+  (close)="closeModal()"
+  (formSubmit)="submit($event)"
 />

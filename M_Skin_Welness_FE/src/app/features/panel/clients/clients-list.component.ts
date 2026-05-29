@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ClientService, CreateClientData } from '../../../core/services/client.service';
+import { ClientService, CreateClientData, UpdateClientData } from '../../../core/services/client.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -11,7 +11,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
-import { NewClientModalComponent, NewClientFormValue } from './modals/new-client-modal/new-client-modal.component';
+import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
+import { ClientModalComponent, ClientFormValue } from './modals/client-modal/client-modal.component';
 import { ActivateOnlineModalComponent, ActivateOnlineFormValue } from './modals/activate-online-modal/activate-online-modal.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -29,9 +30,10 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     DatePipe,
     RouterLink,
     AlertComponent,
-    NewClientModalComponent,
+    ClientModalComponent,
     ActivateOnlineModalComponent,
     SegmentedControlComponent,
+    TableScrollHintComponent,
   ],
   templateUrl: './clients-list.component.html',
 })
@@ -56,8 +58,9 @@ export class ClientsListComponent {
     () => this.lookups.roles().find((role) => role.name === 'cliente')?.id ?? null,
   );
 
-  protected readonly newClientModalOpen = signal(false);
-  protected readonly submittingNewClient = signal(false);
+  protected readonly modalOpen = signal(false);
+  protected readonly editingClient = signal<User | null>(null);
+  protected readonly submitting = signal(false);
 
   protected readonly activateOnlineTarget = signal<User | null>(null);
   protected readonly submittingActivateOnline = signal(false);
@@ -105,44 +108,56 @@ export class ClientsListComponent {
     void this.load();
   }
 
-  protected openNewClientModal(): void {
+  protected openCreateModal(): void {
     if (this.clienteRoleId() === null) {
       this.notifications.toast.error('No se han podido cargar los roles. Vuelve a intentarlo en unos segundos.');
       return;
     }
-    this.newClientModalOpen.set(true);
+    this.editingClient.set(null);
+    this.modalOpen.set(true);
   }
 
-  protected closeNewClientModal(): void {
-    if (this.submittingNewClient()) return;
-    this.newClientModalOpen.set(false);
+  protected openEditModal(client: User): void {
+    this.editingClient.set(client);
+    this.modalOpen.set(true);
   }
 
-  async submitNewClient(value: NewClientFormValue): Promise<void> {
-    const roleId = this.clienteRoleId();
-    if (roleId === null) return;
+  protected closeModal(): void {
+    if (this.submitting()) return;
+    this.modalOpen.set(false);
+  }
 
-    this.submittingNewClient.set(true);
-
-    const payload: CreateClientData = {
+  async submitClient(value: ClientFormValue): Promise<void> {
+    const editing = this.editingClient();
+    const data: UpdateClientData = {
       name: value.name,
       email: value.email === '' ? null : value.email,
       phone: value.phone === '' ? null : value.phone,
       birth_date: value.birth_date === '' ? null : value.birth_date,
-      role_ids: [roleId],
     };
 
+    this.submitting.set(true);
     try {
-      await this.clients.create(payload);
-      this.newClientModalOpen.set(false);
-      this.notifications.toast.success('Cliente dado de alta.');
-      this.page.set(1);
-      await this.load();
+      if (editing !== null) {
+        const updated = await this.clients.update(editing.id, data);
+        this.replaceItem(updated);
+        this.modalOpen.set(false);
+        this.notifications.toast.success('Cliente actualizado.');
+      } else {
+        const roleId = this.clienteRoleId();
+        if (roleId === null) return;
+        const payload: CreateClientData = { ...data, role_ids: [roleId] };
+        await this.clients.create(payload);
+        this.modalOpen.set(false);
+        this.notifications.toast.success('Cliente dado de alta.');
+        this.page.set(1);
+        await this.load();
+      }
     } catch (error) {
       const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
       this.notifications.toast.error(message);
     } finally {
-      this.submittingNewClient.set(false);
+      this.submitting.set(false);
     }
   }
 

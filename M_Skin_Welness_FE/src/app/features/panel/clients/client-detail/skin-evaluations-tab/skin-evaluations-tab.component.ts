@@ -10,13 +10,12 @@ import { NotificationService } from '../../../../../core/services/notification.s
 import { SkinEvaluationService } from '../../../../../core/services/skin-evaluation.service';
 import { GENERIC_ERROR, loadResourceError } from '../../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../../shared/ui/alert/alert.component';
-import { CreateSkinEvaluationFormValue, CreateSkinEvaluationModalComponent } from './modals/create-skin-evaluation-modal/create-skin-evaluation-modal.component';
-import { EditSkinEvaluationFormValue, EditSkinEvaluationModalComponent } from './modals/edit-skin-evaluation-modal/edit-skin-evaluation-modal.component';
+import { SkinEvaluationFormValue, SkinEvaluationModalComponent } from './modals/skin-evaluation-modal/skin-evaluation-modal.component';
 
 @Component({
   selector: 'app-skin-evaluations-tab',
   standalone: true,
-  imports: [DatePipe, AlertComponent, CreateSkinEvaluationModalComponent, EditSkinEvaluationModalComponent],
+  imports: [DatePipe, AlertComponent, SkinEvaluationModalComponent],
   templateUrl: './skin-evaluations-tab.component.html',
 })
 export class SkinEvaluationsTabComponent {
@@ -32,7 +31,7 @@ export class SkinEvaluationsTabComponent {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  protected readonly creating = signal(false);
+  protected readonly modalOpen = signal(false);
   protected readonly evaluationToEdit = signal<SkinEvaluationSummary | null>(null);
   protected readonly submitting = signal(false);
 
@@ -48,61 +47,48 @@ export class SkinEvaluationsTabComponent {
   }
 
   protected openCreate(): void {
-    this.creating.set(true);
-  }
-
-  protected closeCreate(): void {
-    if (this.submitting()) return;
-    this.creating.set(false);
+    this.evaluationToEdit.set(null);
+    this.modalOpen.set(true);
   }
 
   protected openEdit(evaluation: SkinEvaluationSummary): void {
     this.evaluationToEdit.set(evaluation);
+    this.modalOpen.set(true);
   }
 
-  protected closeEdit(): void {
+  protected closeModal(): void {
     if (this.submitting()) return;
-    this.evaluationToEdit.set(null);
+    this.modalOpen.set(false);
   }
 
-  protected async submitCreate(value: CreateSkinEvaluationFormValue): Promise<void> {
-    this.submitting.set(true);
-    try {
-      const created = await this.evaluations.create({
-        client_profile_id: value.client_profile_id,
-        skin_type_id: value.skin_type_id,
-        evaluation_date: value.evaluation_date,
-        general_notes: value.general_notes,
-        variation_ids: value.variation_ids,
-      });
-      this.items.update((current) => [created, ...current]);
-      this.creating.set(false);
-      this.notifications.toast.success('Evaluación registrada.');
-    } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
-    } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  protected async submitEdit(value: EditSkinEvaluationFormValue): Promise<void> {
+  protected async submit(value: SkinEvaluationFormValue): Promise<void> {
     const evaluation = this.evaluationToEdit();
-    if (evaluation === null) return;
 
     this.submitting.set(true);
     try {
-      const updated = await this.evaluations.update(evaluation.id, {
-        skin_type_id: value.skin_type_id,
-        evaluation_date: value.evaluation_date,
-        general_notes: value.general_notes,
-        variation_ids: value.variation_ids,
-      });
-      this.items.update((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item)),
-      );
-      this.evaluationToEdit.set(null);
-      this.notifications.toast.success('Evaluación actualizada.');
+      if (evaluation !== null) {
+        const updated = await this.evaluations.update(evaluation.id, {
+          skin_type_id: value.skin_type_id,
+          evaluation_date: value.evaluation_date,
+          general_notes: value.general_notes,
+          variation_ids: value.variation_ids,
+        });
+        this.items.update((current) =>
+          current.map((item) => (item.id === updated.id ? updated : item)),
+        );
+        this.notifications.toast.success('Evaluación actualizada.');
+      } else {
+        const created = await this.evaluations.create({
+          client_profile_id: value.client_profile_id,
+          skin_type_id: value.skin_type_id,
+          evaluation_date: value.evaluation_date,
+          general_notes: value.general_notes,
+          variation_ids: value.variation_ids,
+        });
+        this.items.update((current) => [created, ...current]);
+        this.notifications.toast.success('Evaluación registrada.');
+      }
+      this.modalOpen.set(false);
     } catch (error) {
       const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
       this.notifications.toast.error(message);

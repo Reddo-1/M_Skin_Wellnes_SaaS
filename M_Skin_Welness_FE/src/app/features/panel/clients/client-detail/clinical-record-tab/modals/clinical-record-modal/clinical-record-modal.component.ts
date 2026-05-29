@@ -1,40 +1,42 @@
 import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClinicalRecordSummary } from '../../../../../../../core/models/clinical-record.model';
+import { BodyType } from '../../../../../../../core/models/skin-evaluation.model';
 import { hasFieldError, hasValidationError } from '../../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
 
-export interface EditClinicalRecordFormValue {
+export interface ClinicalRecordFormValue {
   general_notes: string;
 }
 
 @Component({
-  selector: 'app-edit-clinical-record-modal',
+  selector: 'app-clinical-record-modal',
   standalone: true,
   imports: [ReactiveFormsModule, ModalComponent],
-  templateUrl: './edit-clinical-record-modal.component.html',
+  templateUrl: './clinical-record-modal.component.html',
 })
-export class EditClinicalRecordModalComponent {
+export class ClinicalRecordModalComponent {
+  readonly isOpen = input.required<boolean>();
   readonly record = input<ClinicalRecordSummary | null>(null);
+  readonly bodyType = input.required<BodyType>();
   readonly submitting = input.required<boolean>();
 
   readonly close = output<void>();
-  readonly formSubmit = output<EditClinicalRecordFormValue>();
+  readonly formSubmit = output<ClinicalRecordFormValue>();
 
   private readonly fb = inject(FormBuilder);
+
+  protected readonly isEdit = computed(() => this.record() !== null);
 
   protected readonly form = this.fb.nonNullable.group({
     general_notes: ['', [Validators.maxLength(5000)]],
   });
 
-  protected readonly isOpen = computed(() => this.record() !== null);
-
   constructor() {
     effect(() => {
-      const record = this.record();
-      if (record !== null) {
-        this.form.reset({ general_notes: record.general_notes ?? '' });
-      }
+      if (!this.isOpen()) return;
+      const current = this.record();
+      this.form.reset({ general_notes: current?.general_notes ?? '' });
     });
   }
 

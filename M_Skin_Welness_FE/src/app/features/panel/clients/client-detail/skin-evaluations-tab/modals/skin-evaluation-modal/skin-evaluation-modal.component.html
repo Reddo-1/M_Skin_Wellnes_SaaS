@@ -1,27 +1,35 @@
 <app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
   <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
-    <h3 class="text-xl font-semibold text-ink">Nueva evaluación de piel</h3>
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar evaluación de piel' : 'Nueva evaluación de piel' }}
+    </h3>
     <p class="mt-1 text-sm text-muted">
-      Registra el estado de la piel del cliente en una de sus fichas clínicas. Quedará como la evaluación vigente de esa ficha.
+      @if (isEdit()) {
+        Actualiza los datos de esta evaluación. La ficha clínica a la que pertenece no cambia.
+      } @else {
+        Registra el estado de la piel del cliente en una de sus fichas clínicas. Quedará como la evaluación vigente de esa ficha.
+      }
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700">
-            Ficha clínica
-          </label>
-          <app-select
-            [options]="recordOptions()"
-            [selected]="form.controls.client_profile_id.value"
-            [invalid]="hasFieldError('client_profile_id')"
-            placeholder="Selecciona una ficha…"
-            (selectionChange)="form.controls.client_profile_id.setValue($event)"
-          />
-          @if (hasValidationError('client_profile_id', 'required')) {
-            <p class="mt-1.5 text-xs text-error-500">Selecciona la ficha clínica a la que pertenece la evaluación.</p>
-          }
-        </div>
+        @if (!isEdit()) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700">
+              Ficha clínica
+            </label>
+            <app-select
+              [options]="recordOptions()"
+              [selected]="form.controls.client_profile_id.value"
+              [invalid]="hasFieldError('client_profile_id')"
+              placeholder="Selecciona una ficha…"
+              (selectionChange)="form.controls.client_profile_id.setValue($event)"
+            />
+            @if (hasValidationError('client_profile_id', 'required')) {
+              <p class="mt-1.5 text-xs text-error-500">Selecciona la ficha clínica a la que pertenece la evaluación.</p>
+            }
+          </div>
+        }
 
         <div>
           <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -40,11 +48,11 @@
         </div>
 
         <div>
-          <label for="create-eval-date" class="mb-1.5 block text-sm font-medium text-gray-700">
+          <label for="eval-date" class="mb-1.5 block text-sm font-medium text-gray-700">
             Fecha de evaluación
           </label>
           <input
-            id="create-eval-date"
+            id="eval-date"
             type="date"
             formControlName="evaluation_date"
             class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
@@ -66,11 +74,11 @@
         </div>
 
         <div class="sm:col-span-2">
-          <label for="create-eval-notes" class="mb-1.5 block text-sm font-medium text-gray-700">
+          <label for="eval-notes" class="mb-1.5 block text-sm font-medium text-gray-700">
             Observaciones
           </label>
           <textarea
-            id="create-eval-notes"
+            id="eval-notes"
             formControlName="general_notes"
             rows="3"
             placeholder="Notas clínicas de esta evaluación…"
@@ -97,7 +105,7 @@
           [disabled]="submitting()"
           class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
         >
-          {{ submitting() ? 'Guardando…' : 'Guardar evaluación' }}
+          {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Guardar evaluación' }}
         </button>
       </div>
     </form>

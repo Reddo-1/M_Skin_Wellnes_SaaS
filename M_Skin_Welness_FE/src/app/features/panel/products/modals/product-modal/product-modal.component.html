@@ -97,7 +97,7 @@
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             [class.border-error-500]="hasFieldError('doses_per_package')"
           />
-          <p class="mt-1.5 text-xs text-muted">Cuántas dosis rinde un paquete (un bote individual = 1).</p>
+          <p class="mt-1.5 text-xs text-muted">Cuántas dosis rinde un paquete/bote.</p>
           @if (hasValidationError('doses_per_package', 'required')) {
             <p class="mt-1.5 text-xs text-error-500">Indica las dosis por paquete.</p>
           }

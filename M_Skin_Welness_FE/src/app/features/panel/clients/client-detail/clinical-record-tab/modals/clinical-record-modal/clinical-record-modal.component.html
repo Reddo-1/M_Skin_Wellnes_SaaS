@@ -1,23 +1,23 @@
 <app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
   <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
     <h3 class="text-xl font-semibold text-ink">
-      @if (record(); as data) {
-        Editar ficha {{ data.body_type }}
-      } @else {
-        Editar ficha clínica
-      }
+      {{ isEdit() ? 'Editar' : 'Crear' }} ficha {{ bodyType() }}
     </h3>
     <p class="mt-1 text-sm text-muted">
-      Solo se editan las notas permanentes. El estado clínico actual (tipo de piel, variaciones) se actualiza creando una nueva evaluación en la pestaña Evaluaciones.
+      @if (isEdit()) {
+        Solo se editan las notas permanentes. El estado clínico actual (tipo de piel, variaciones) se actualiza creando una nueva evaluación en la pestaña Evaluaciones.
+      } @else {
+        Las notas generales recogen información que se mantiene siempre vigente, principalmente metodologías de trabajo con ese paciente. Son opcionales y podrás editarlas más adelante.
+      }
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div>
-        <label for="edit-clinical-record-notes" class="mb-1.5 block text-sm font-medium text-gray-700">
+        <label for="clinical-record-notes" class="mb-1.5 block text-sm font-medium text-gray-700">
           Notas generales
         </label>
         <textarea
-          id="edit-clinical-record-notes"
+          id="clinical-record-notes"
           formControlName="general_notes"
           rows="6"
           placeholder="Por ejemplo: embarazo, alergia a parabenos, intolerancia a la luz pulsada…"
@@ -43,7 +43,7 @@
           [disabled]="submitting()"
           class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
         >
-          {{ submitting() ? 'Guardando…' : 'Guardar cambios' }}
+          {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Crear ficha' }}
         </button>
       </div>
     </form>

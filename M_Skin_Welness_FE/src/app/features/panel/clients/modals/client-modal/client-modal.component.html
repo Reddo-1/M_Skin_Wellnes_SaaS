@@ -1,17 +1,23 @@
 <app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
   <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
-    <h3 class="text-xl font-semibold text-ink">Dar de alta un cliente</h3>
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar cliente' : 'Dar de alta un cliente' }}
+    </h3>
     <p class="mt-1 text-sm text-muted">
-      Si introduces un correo le enviaremos el acceso online. El correo y la fecha de nacimiento son opcionales.
+      @if (isEdit()) {
+        Modifica los datos básicos del cliente. El correo y la fecha de nacimiento son opcionales.
+      } @else {
+        Si introduces un correo le enviaremos el acceso online. El correo y la fecha de nacimiento son opcionales.
+      }
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div>
-        <label for="new-client-name" class="mb-1.5 block text-sm font-medium text-gray-700">
+        <label for="client-name" class="mb-1.5 block text-sm font-medium text-gray-700">
           Nombre completo <span class="text-error-500">*</span>
         </label>
         <input
-          id="new-client-name"
+          id="client-name"
           type="text"
           formControlName="name"
           placeholder="Nombre y apellidos"
@@ -27,11 +33,11 @@
       </div>
 
       <div>
-        <label for="new-client-email" class="mb-1.5 block text-sm font-medium text-gray-700">
+        <label for="client-email" class="mb-1.5 block text-sm font-medium text-gray-700">
           Correo electrónico
         </label>
         <input
-          id="new-client-email"
+          id="client-email"
           type="email"
           autocomplete="off"
           formControlName="email"
@@ -49,9 +55,9 @@
 
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label for="new-client-phone" class="mb-1.5 block text-sm font-medium text-gray-700">Teléfono</label>
+          <label for="client-phone" class="mb-1.5 block text-sm font-medium text-gray-700">Teléfono</label>
           <input
-            id="new-client-phone"
+            id="client-phone"
             type="tel"
             autocomplete="tel"
             formControlName="phone"
@@ -64,9 +70,9 @@
           }
         </div>
         <div>
-          <label for="new-client-birth" class="mb-1.5 block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
+          <label for="client-birth" class="mb-1.5 block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
           <input
-            id="new-client-birth"
+            id="client-birth"
             type="date"
             formControlName="birth_date"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
@@ -89,7 +95,11 @@
           [disabled]="submitting()"
           class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
         >
-          {{ submitting() ? 'Guardando…' : 'Crear cliente' }}
+          @if (submitting()) {
+            Guardando…
+          } @else {
+            {{ isEdit() ? 'Guardar cambios' : 'Crear cliente' }}
+          }
         </button>
       </div>
     </form>

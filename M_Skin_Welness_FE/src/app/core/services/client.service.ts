@@ -11,6 +11,13 @@ export interface CreateClientData {
   role_ids: number[];
 }
 
+export interface UpdateClientData {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  birth_date: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ClientService {
   private readonly api = inject(ApiService);
@@ -35,6 +42,10 @@ export class ClientService {
 
   async create(data: CreateClientData): Promise<User> {
     return await this.api.postResource<User>('/users', data);
+  }
+
+  async update(userId: number, data: UpdateClientData): Promise<User> {
+    return await this.api.putResource<User>(`/users/${userId}`, data);
   }
 
   async activate(userId: number): Promise<User> {
