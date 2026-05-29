@@ -96,7 +96,7 @@
         </div>
         <div>
           <dt class="text-xs uppercase tracking-wide text-muted">Fecha de nacimiento</dt>
-          <dd class="mt-1 text-sm font-medium text-ink">{{ data.birth_date ?? '—' }}</dd>
+          <dd class="mt-1 text-sm font-medium text-ink">{{ (data.birth_date | date:'dd/MM/yyyy') ?? '—' }}</dd>
         </div>
       </dl>
     </section>

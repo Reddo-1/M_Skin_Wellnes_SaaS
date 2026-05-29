@@ -28,10 +28,21 @@
     </section>
 
     <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      @if (loading() && stockItems().length > 0) {
+        <div class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-white/60">
+          <span class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm ring-1 ring-gray-200">
+            <svg class="h-4 w-4 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"></path>
+            </svg>
+            Actualizando…
+          </span>
+        </div>
+      }
       @if (stockItems().length > 0) {
         <app-table-scroll-hint />
       }
-      <div class="overflow-x-auto transition-opacity" [class.opacity-50]="loading()">
+      <div class="overflow-x-auto transition-opacity" [class.opacity-50]="loading() && stockItems().length > 0">
         <table class="min-w-full divide-y divide-gray-100 text-sm">
           <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-muted">
             <tr>
@@ -99,7 +110,7 @@
     </section>
   } @else {
     <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end" [formGroup]="filterForm">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div class="w-full sm:w-56">
           <app-select
             [options]="typeOptions()"
@@ -109,19 +120,30 @@
           />
         </div>
         <div class="w-full sm:w-44">
-          <app-date-picker label="Desde" formControlName="from" (valueChange)="onFromChange($event)" />
+          <app-date-picker label="Desde" (valueChange)="onFromChange($event)" />
         </div>
         <div class="w-full sm:w-44">
-          <app-date-picker label="Hasta" formControlName="to" (valueChange)="onToChange($event)" />
+          <app-date-picker label="Hasta" (valueChange)="onToChange($event)" />
         </div>
       </div>
     </section>
 
     <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      @if (movements().length > 0) {
+      @if (loading() && movementItems().length > 0) {
+        <div class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-white/60">
+          <span class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm ring-1 ring-gray-200">
+            <svg class="h-4 w-4 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"></path>
+            </svg>
+            Actualizando…
+          </span>
+        </div>
+      }
+      @if (movementItems().length > 0) {
         <app-table-scroll-hint />
       }
-      <div class="overflow-x-auto transition-opacity" [class.opacity-50]="loading()">
+      <div class="overflow-x-auto transition-opacity" [class.opacity-50]="loading() && movementItems().length > 0">
         <table class="min-w-full divide-y divide-gray-100 text-sm">
           <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-muted">
             <tr>
@@ -135,14 +157,14 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            @if (movements().length === 0 && !loading()) {
+            @if (movementItems().length === 0 && !loading()) {
               <tr>
                 <td colspan="7" class="px-5 py-10 text-center text-sm text-muted">
                   No hay movimientos de stock con los filtros aplicados.
                 </td>
               </tr>
             }
-            @for (movement of movements(); track movement.id) {
+            @for (movement of movementItems(); track movement.id) {
               <tr class="transition hover:bg-gray-50">
                 <td class="px-5 py-3 text-muted">{{ movement.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td class="px-5 py-3 font-medium text-ink">{{ movement.product?.name ?? '—' }}</td>

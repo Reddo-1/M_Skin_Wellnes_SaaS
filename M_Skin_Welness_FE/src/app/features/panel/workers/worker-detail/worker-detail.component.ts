@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { WorkerService, UpdateWorkerData } from '../../../../core/services/worker.service';
@@ -19,6 +20,7 @@ import { WorkerModalComponent, WorkerFormValue } from '../modals/worker-modal/wo
   standalone: true,
   imports: [
     RouterLink,
+    DatePipe,
     ReactiveFormsModule,
     AlertComponent,
     MultiSelectComponent,
@@ -34,7 +36,6 @@ export class WorkerDetailComponent {
   protected readonly auth = inject(AuthService);
   private readonly lookups = inject(LookupService);
   private readonly notifications = inject(NotificationService);
-  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
   protected readonly worker = signal<User | null>(null);
@@ -62,7 +63,10 @@ export class WorkerDetailComponent {
   constructor() {
     effect(() => {
       const workerId = Number(this.id());
-      if (!Number.isInteger(workerId) || workerId <= 0) return;
+      if (!Number.isInteger(workerId) || workerId <= 0) {
+        this.errorMessage.set('El identificador del trabajador no es válido.');
+        return;
+      }
       void this.load(workerId);
     });
   }

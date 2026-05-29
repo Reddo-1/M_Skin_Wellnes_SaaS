@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProductStockService } from '../../../core/services/product-stock.service';
 import { StockMovementService, StockEntryData } from '../../../core/services/stock-movement.service';
@@ -49,7 +48,6 @@ interface EntryTarget {
   imports: [
     DatePipe,
     DecimalPipe,
-    ReactiveFormsModule,
     AlertComponent,
     SegmentedControlComponent,
     SelectComponent,
@@ -64,12 +62,6 @@ export class InventoryComponent {
   private readonly stockMovements = inject(StockMovementService);
   private readonly lookups = inject(LookupService);
   private readonly notifications = inject(NotificationService);
-  private readonly fb = inject(FormBuilder);
-
-  protected readonly filterForm = this.fb.nonNullable.group({
-    from: [''],
-    to: [''],
-  });
 
   protected readonly tab = signal<InventoryTab>('stock');
   protected readonly tabOptions = TAB_OPTIONS;
@@ -80,7 +72,7 @@ export class InventoryComponent {
   protected readonly stockPage = signal(1);
   protected readonly stockFilter = signal<StockFilter>('all');
 
-  protected readonly movements = signal<StockMovement[]>([]);
+  protected readonly movementItems = signal<StockMovement[]>([]);
   protected readonly movementsMeta = signal<PaginatedMeta | null>(null);
   protected readonly movementsPage = signal(1);
   protected readonly typeFilter = signal('');
@@ -226,7 +218,7 @@ export class InventoryComponent {
         to: this.toDate(),
         page: this.movementsPage(),
       });
-      this.movements.set(result.data);
+      this.movementItems.set(result.data);
       this.movementsMeta.set(result.meta);
     } catch {
       const message = loadResourceError('los movimientos de stock');
