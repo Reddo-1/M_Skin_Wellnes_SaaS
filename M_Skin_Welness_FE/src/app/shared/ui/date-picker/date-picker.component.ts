@@ -5,6 +5,7 @@ import {
   OnDestroy,
   forwardRef,
   input,
+  output,
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -30,6 +31,8 @@ export class DatePickerComponent implements AfterViewInit, OnDestroy, ControlVal
   readonly timeOnly = input(false);
   readonly minDate = input<string>();
   readonly maxDate = input<string>();
+
+  readonly valueChange = output<string | null>();
 
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('dateInput');
 
@@ -57,6 +60,7 @@ export class DatePickerComponent implements AfterViewInit, OnDestroy, ControlVal
       onChange: (_dates, dateStr) => {
         this.currentValue = dateStr || null;
         this.onChange(this.currentValue);
+        this.valueChange.emit(this.currentValue);
       },
       onClose: () => this.onTouched(),
     });

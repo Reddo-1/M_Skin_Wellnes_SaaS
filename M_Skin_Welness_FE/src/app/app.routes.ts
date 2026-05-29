@@ -256,7 +256,10 @@ export const routes: Routes = [
         path: 'inventario',
         canActivate: [roleGuard(['administrador', 'recepcionista'])],
         data: { title: 'Inventario' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/inventory/inventory.component').then(
+            (m) => m.InventoryComponent,
+          ),
       },
       {
         path: 'ventas',
