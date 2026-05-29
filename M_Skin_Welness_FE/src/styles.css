@@ -3,6 +3,8 @@
 
 @import "tailwindcss";
 
+@import "flatpickr/dist/flatpickr.css";
+
 /* Estructura TailAdmin */
 @theme {
   --font-*: initial;
@@ -116,4 +118,47 @@
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Date picker (flatpickr) con la paleta de marca */
+.flatpickr-calendar {
+  font-family: var(--font-outfit);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.selected:hover {
+  background: var(--color-brand-500);
+  border-color: var(--color-brand-500);
+  color: #fff;
+}
+
+.flatpickr-day.selected:hover {
+  background: var(--color-brand-600);
+  border-color: var(--color-brand-600);
+}
+
+.flatpickr-day.today {
+  border-color: var(--color-brand-500);
+}
+
+.flatpickr-day.today:hover,
+.flatpickr-day.today:focus {
+  background: var(--color-brand-500);
+  border-color: var(--color-brand-500);
+  color: #fff;
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-weekday {
+  color: var(--color-ink);
+}
+
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+  fill: var(--color-brand-500);
 }
