@@ -28,7 +28,6 @@ export class DatePickerComponent implements AfterViewInit, OnDestroy, ControlVal
   readonly placeholder = input('Selecciona una fecha');
   readonly invalid = input(false);
   readonly enableTime = input(false);
-  readonly timeOnly = input(false);
   readonly minDate = input<string>();
   readonly maxDate = input<string>();
 
@@ -45,14 +44,13 @@ export class DatePickerComponent implements AfterViewInit, OnDestroy, ControlVal
   private onTouched: () => void = () => {};
 
   ngAfterViewInit(): void {
-    const timeOnly = this.timeOnly();
-    const withTime = this.enableTime() || timeOnly;
+    const withTime = this.enableTime();
     this.instance = flatpickr(this.inputRef().nativeElement, {
       locale: Spanish,
+      static: true,
       enableTime: withTime,
-      noCalendar: timeOnly,
       time_24hr: true,
-      dateFormat: timeOnly ? 'H:i' : withTime ? 'Y-m-d H:i' : 'Y-m-d',
+      dateFormat: withTime ? 'Y-m-d H:i' : 'Y-m-d',
       minDate: this.minDate(),
       maxDate: this.maxDate(),
       defaultDate: this.currentValue ?? undefined,
@@ -91,7 +89,9 @@ export class DatePickerComponent implements AfterViewInit, OnDestroy, ControlVal
 
   setDisabledState(isDisabled: boolean): void {
     this.disabledState = isDisabled;
-    this.instance?.set('clickOpens', !isDisabled);
-    this.inputRef().nativeElement.disabled = isDisabled;
+    if (this.instance) {
+      this.instance.set('clickOpens', !isDisabled);
+      this.inputRef().nativeElement.disabled = isDisabled;
+    }
   }
 }

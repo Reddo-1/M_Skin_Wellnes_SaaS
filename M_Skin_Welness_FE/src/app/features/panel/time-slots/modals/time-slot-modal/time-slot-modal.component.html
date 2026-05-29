@@ -23,12 +23,10 @@
 
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <app-date-picker
+          <app-time-picker
             label="Hora de inicio"
             [required]="true"
-            [timeOnly]="true"
             formControlName="start_time"
-            placeholder="HH:mm"
             [invalid]="hasFieldError('start_time')"
           />
           @if (hasValidationError('start_time', 'required')) {
@@ -36,12 +34,10 @@
           }
         </div>
         <div>
-          <app-date-picker
+          <app-time-picker
             label="Hora de fin"
             [required]="true"
-            [timeOnly]="true"
             formControlName="end_time"
-            placeholder="HH:mm"
             [invalid]="hasFieldError('end_time') || showEndBeforeStart()"
           />
           @if (hasValidationError('end_time', 'required')) {

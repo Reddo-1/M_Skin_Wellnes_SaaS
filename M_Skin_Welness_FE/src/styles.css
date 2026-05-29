@@ -121,6 +121,11 @@
 }
 
 /* Date picker (flatpickr) con la paleta de marca */
+.flatpickr-wrapper {
+  display: block;
+  width: 100%;
+}
+
 .flatpickr-calendar {
   font-family: var(--font-outfit);
 }

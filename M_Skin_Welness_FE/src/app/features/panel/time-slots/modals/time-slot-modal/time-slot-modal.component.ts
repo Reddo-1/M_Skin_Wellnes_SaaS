@@ -4,7 +4,7 @@ import { TimeSlot } from '../../../../../core/models/time-slot.model';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
-import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
+import { TimePickerComponent } from '../../../../../shared/ui/time-picker/time-picker.component';
 import { ToggleComponent } from '../../../../../shared/ui/toggle/toggle.component';
 
 export interface TimeSlotFormValue {
@@ -26,7 +26,7 @@ const endAfterStartValidator = (group: AbstractControl): ValidationErrors | null
 @Component({
   selector: 'app-time-slot-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, InputComponent, DatePickerComponent, ToggleComponent],
+  imports: [ReactiveFormsModule, ModalComponent, InputComponent, TimePickerComponent, ToggleComponent],
   templateUrl: './time-slot-modal.component.html',
 })
 export class TimeSlotModalComponent {
