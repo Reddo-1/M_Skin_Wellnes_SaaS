@@ -31,7 +31,9 @@ class UserController extends Controller
             ->when(
                 $restrictToClient,
                 fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', 'cliente')),
-                fn ($q) => $q->when($request->filled('role'), fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $request->string('role')))),
+                fn ($q) => $q
+                    ->when($request->filled('role'), fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $request->string('role'))))
+                    ->when($request->boolean('staff'), fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', '!=', 'cliente'))),
             )
             ->when($request->filled('search'), function ($q) use ($request) {
                 $term = '%'.$request->string('search').'%';
