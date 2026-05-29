@@ -11,12 +11,16 @@
 @php
     $activityIconColor = [
         'center.created' => 'var(--sa-purple)',
+        'center.plan_changed' => 'var(--sa-info)',
+        'center.activated' => 'var(--sa-success)',
         'user.created' => 'var(--sa-info)',
         'center.deactivated' => 'var(--sa-warn)',
     ];
 
     $activityLabel = [
         'center.created' => 'Nuevo centro dado de alta',
+        'center.plan_changed' => 'Plan modificado',
+        'center.activated' => 'Centro reactivado',
         'user.created' => 'Nuevo usuario registrado',
         'center.deactivated' => 'Centro desactivado',
     ];

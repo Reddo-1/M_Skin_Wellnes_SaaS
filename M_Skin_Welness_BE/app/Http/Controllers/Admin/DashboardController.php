@@ -138,7 +138,7 @@ class DashboardController extends Controller
     {
         return AuditLog::query()
             ->with(['center:id,name', 'actor:id,name'])
-            ->whereIn('action', ['center.created', 'user.created', 'center.deactivated'])
+            ->whereIn('action', ['center.created', 'center.plan_changed', 'center.deactivated', 'center.activated', 'user.created'])
             ->orderByDesc('created_at')
             ->limit(4)
             ->get()

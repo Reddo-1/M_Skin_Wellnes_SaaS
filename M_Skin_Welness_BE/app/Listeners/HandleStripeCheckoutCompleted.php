@@ -43,7 +43,6 @@ class HandleStripeCheckoutCompleted
             Log::error('Plan no encontrado al completar checkout', ['plan_id' => $metadata['pending_plan_id'] ?? null]);
             return;
         }
-
         DB::transaction(function () use ($metadata, $plan, $stripeCustomerId, $stripeSubscriptionId) {
             $center = Center::create([
                 'uuid' => $metadata['pending_center_uuid'],
@@ -53,7 +52,7 @@ class HandleStripeCheckoutCompleted
                 'is_active' => true,
             ]);
 
-            $user = User::create([
+            $user = User::query()->create([
                 'center_id' => $center->id,
                 'name' => $metadata['pending_admin_name'],
                 'email' => $metadata['pending_admin_email'],
@@ -71,8 +70,6 @@ class HandleStripeCheckoutCompleted
             $user->assignRole('administrador');
 
             $this->syncSubscription($user, $stripeSubscriptionId);
-
-            $user->sendEmailVerificationNotification();
 
             $this->auditLogs->record(
                 action: 'center.created',
@@ -94,6 +91,8 @@ class HandleStripeCheckoutCompleted
                     'source' => 'stripe_checkout',
                 ],
             );
+
+            $user->sendEmailVerificationNotification();
         });
     }
 
