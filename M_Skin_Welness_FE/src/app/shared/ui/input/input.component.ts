@@ -1,4 +1,4 @@
-import { Component, forwardRef, input, signal } from '@angular/core';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel';
@@ -24,10 +24,16 @@ export class InputComponent implements ControlValueAccessor {
   readonly min = input<number | string>();
   readonly max = input<number | string>();
   readonly step = input<number | string>();
+  readonly revealToggle = input(false);
 
   protected readonly inputId = `app-input-${nextId++}`;
   protected readonly value = signal<string | number | null>('');
   protected readonly disabled = signal(false);
+  protected readonly revealed = signal(false);
+
+  protected readonly effectiveType = computed(() =>
+    this.type() === 'password' && this.revealToggle() && this.revealed() ? 'text' : this.type(),
+  );
 
   private onChange: (value: string | number | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -57,5 +63,9 @@ export class InputComponent implements ControlValueAccessor {
 
   protected handleBlur(): void {
     this.onTouched();
+  }
+
+  protected toggleReveal(): void {
+    this.revealed.update((current) => !current);
   }
 }

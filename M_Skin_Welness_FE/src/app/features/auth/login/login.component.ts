@@ -8,13 +8,21 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { AuthPageLayoutComponent } from '../../../layout/auth-page-layout/auth-page-layout.component';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
+import { InputComponent } from '../../../shared/ui/input/input.component';
 
 type LoginField = 'email' | 'password';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, AuthPageLayoutComponent, AlertComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    AuthPageLayoutComponent,
+    AlertComponent,
+    InputComponent,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -29,16 +37,11 @@ export class LoginComponent {
   protected readonly submitting = signal(false);
   private readonly dismissed = signal(false);
   protected readonly showSessionExpired = computed(() => this.sesionExpirada() === '1' && !this.dismissed());
-  protected readonly showPassword = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
-
-  togglePassword(): void {
-    this.showPassword.update((value) => !value);
-  }
 
   async submit(): Promise<void> {
     if (this.form.invalid || this.submitting()) {

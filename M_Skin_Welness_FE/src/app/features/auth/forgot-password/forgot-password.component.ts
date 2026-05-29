@@ -7,11 +7,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { AuthPageLayoutComponent } from '../../../layout/auth-page-layout/auth-page-layout.component';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
+import { InputComponent } from '../../../shared/ui/input/input.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, AuthPageLayoutComponent, AlertComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthPageLayoutComponent, AlertComponent, InputComponent],
   templateUrl: './forgot-password.component.html',
 })
 export class ForgotPasswordComponent {

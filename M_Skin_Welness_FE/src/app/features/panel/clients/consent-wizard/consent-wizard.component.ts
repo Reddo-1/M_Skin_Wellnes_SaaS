@@ -11,6 +11,8 @@ import { TreatmentSummary } from '../../../../core/models/treatment.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
 import { BooleanPipe } from '../../../../shared/pipes/boolean.pipe';
+import { InputComponent } from '../../../../shared/ui/input/input.component';
+import { TextareaComponent } from '../../../../shared/ui/textarea/textarea.component';
 
 interface TreatmentFormControls {
   treatment_id: FormControl<number>;
@@ -23,7 +25,16 @@ interface TreatmentFormControls {
 @Component({
   selector: 'app-consent-wizard',
   standalone: true,
-  imports: [CurrencyPipe, ReactiveFormsModule, RouterLink, SignaturePadComponent, AlertComponent, BooleanPipe],
+  imports: [
+    CurrencyPipe,
+    ReactiveFormsModule,
+    RouterLink,
+    SignaturePadComponent,
+    AlertComponent,
+    BooleanPipe,
+    InputComponent,
+    TextareaComponent,
+  ],
   templateUrl: './consent-wizard.component.html',
 })
 export class ConsentWizardComponent {

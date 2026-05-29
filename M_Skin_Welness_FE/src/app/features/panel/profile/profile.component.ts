@@ -8,6 +8,8 @@ import { UserService } from '../../../core/services/user.service';
 import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
+import { InputComponent } from '../../../shared/ui/input/input.component';
+import { DatePickerComponent } from '../../../shared/ui/date-picker/date-picker.component';
 
 const passwordsMatchValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
   const password = group.get('password')?.value;
@@ -24,7 +26,15 @@ type PasswordField = 'password' | 'password_confirmation';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TitleCasePipe, IconComponent, ModalComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TitleCasePipe,
+    IconComponent,
+    ModalComponent,
+    InputComponent,
+    DatePickerComponent,
+  ],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {

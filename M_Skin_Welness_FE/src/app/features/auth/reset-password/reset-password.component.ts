@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { AuthPageLayoutComponent } from '../../../layout/auth-page-layout/auth-page-layout.component';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
+import { InputComponent } from '../../../shared/ui/input/input.component';
 
 type ResetField = 'password' | 'password_confirmation';
 
@@ -22,7 +23,7 @@ const passwordsMatchValidator: ValidatorFn = (group: AbstractControl): Validatio
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, AuthPageLayoutComponent, AlertComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthPageLayoutComponent, AlertComponent, InputComponent],
   templateUrl: './reset-password.component.html',
 })
 export class ResetPasswordComponent {
@@ -35,7 +36,6 @@ export class ResetPasswordComponent {
   private readonly router = inject(Router);
 
   protected readonly submitting = signal(false);
-  protected readonly showPassword = signal(false);
 
   protected readonly missingParams = computed(() => !this.token() || !this.email());
 
@@ -46,10 +46,6 @@ export class ResetPasswordComponent {
     },
     { validators: passwordsMatchValidator },
   );
-
-  protected togglePassword(): void {
-    this.showPassword.update((value) => !value);
-  }
 
   async submit(): Promise<void> {
     if (this.missingParams() || this.submitting()) return;
