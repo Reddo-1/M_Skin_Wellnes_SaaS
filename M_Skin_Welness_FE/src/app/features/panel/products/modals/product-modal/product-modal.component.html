@@ -9,16 +9,12 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div>
-        <label for="product-name" class="mb-1.5 block text-sm font-medium text-gray-700">
-          Nombre <span class="text-error-500">*</span>
-        </label>
-        <input
-          id="product-name"
-          type="text"
+        <app-input
+          label="Nombre"
+          [required]="true"
           formControlName="name"
           placeholder="Ej. Crema hidratante facial"
-          class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-          [class.border-error-500]="hasFieldError('name')"
+          [invalid]="hasFieldError('name')"
         />
         @if (hasValidationError('name', 'required')) {
           <p class="mt-1.5 text-xs text-error-500">El nombre es obligatorio.</p>
@@ -29,17 +25,13 @@
       </div>
 
       <div>
-        <label for="product-description" class="mb-1.5 block text-sm font-medium text-gray-700">
-          Descripción
-        </label>
-        <textarea
-          id="product-description"
+        <app-textarea
+          label="Descripción"
           formControlName="description"
-          rows="3"
+          [rows]="3"
           placeholder="Detalle del producto, indicaciones de uso…"
-          class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-          [class.border-error-500]="hasFieldError('description')"
-        ></textarea>
+          [invalid]="hasFieldError('description')"
+        />
         @if (hasValidationError('description', 'maxlength')) {
           <p class="mt-1.5 text-xs text-error-500">La descripción no puede superar los 5000 caracteres.</p>
         }
@@ -47,18 +39,14 @@
 
       <div class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
         <div>
-          <label for="product-sale-price" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Precio de venta (€)
-          </label>
-          <input
-            id="product-sale-price"
+          <app-input
+            label="Precio de venta (€)"
             type="number"
-            step="0.01"
-            min="0"
+            [min]="0"
+            [step]="0.01"
             formControlName="sale_price"
             placeholder="0,00"
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('sale_price')"
+            [invalid]="hasFieldError('sale_price')"
           />
           @if (hasValidationError('sale_price', 'min')) {
             <p class="mt-1.5 text-xs text-error-500">El precio no puede ser negativo.</p>
@@ -66,18 +54,14 @@
         </div>
 
         <div>
-          <label for="product-cost-price" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Precio de coste (€)
-          </label>
-          <input
-            id="product-cost-price"
+          <app-input
+            label="Precio de coste (€)"
             type="number"
-            step="0.01"
-            min="0"
+            [min]="0"
+            [step]="0.01"
             formControlName="cost_price"
             placeholder="0,00"
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('cost_price')"
+            [invalid]="hasFieldError('cost_price')"
           />
           @if (hasValidationError('cost_price', 'min')) {
             <p class="mt-1.5 text-xs text-error-500">El coste no puede ser negativo.</p>
@@ -85,19 +69,16 @@
         </div>
 
         <div>
-          <label for="product-doses" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Dosis por paquete <span class="text-error-500">*</span>
-          </label>
-          <input
-            id="product-doses"
+          <app-input
+            label="Dosis por paquete"
+            [required]="true"
             type="number"
-            step="1"
-            min="1"
+            [min]="1"
+            [step]="1"
             formControlName="doses_per_package"
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('doses_per_package')"
+            hint="Cuántas dosis rinde un paquete/bote."
+            [invalid]="hasFieldError('doses_per_package')"
           />
-          <p class="mt-1.5 text-xs text-muted">Cuántas dosis rinde un paquete/bote.</p>
           @if (hasValidationError('doses_per_package', 'required')) {
             <p class="mt-1.5 text-xs text-error-500">Indica las dosis por paquete.</p>
           }
@@ -107,19 +88,16 @@
         </div>
 
         <div>
-          <label for="product-minimum-stock" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Stock mínimo (dosis) <span class="text-error-500">*</span>
-          </label>
-          <input
-            id="product-minimum-stock"
+          <app-input
+            label="Stock mínimo (dosis)"
+            [required]="true"
             type="number"
-            step="0.001"
-            min="0"
+            [min]="0"
+            [step]="0.001"
             formControlName="minimum_stock"
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            [class.border-error-500]="hasFieldError('minimum_stock')"
+            hint="Avisa cuando el stock baje de este umbral."
+            [invalid]="hasFieldError('minimum_stock')"
           />
-          <p class="mt-1.5 text-xs text-muted">Avisa cuando el stock baje de este umbral.</p>
           @if (hasValidationError('minimum_stock', 'required')) {
             <p class="mt-1.5 text-xs text-error-500">Indica el stock mínimo.</p>
           }
@@ -129,23 +107,17 @@
         </div>
       </div>
 
-      <label class="flex items-center gap-3 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          formControlName="is_sellable"
-          class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20"
-        />
-        Producto vendible (aparece en el escaparate y en ventas)
-      </label>
+      <app-toggle
+        formControlName="is_sellable"
+        label="Producto vendible"
+        description="Aparece en el escaparate y en ventas."
+      />
 
-      <label class="flex items-center gap-3 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          formControlName="is_active"
-          class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20"
-        />
-        Producto activo (disponible para uso y stock)
-      </label>
+      <app-toggle
+        formControlName="is_active"
+        label="Producto activo"
+        description="Disponible para uso y stock."
+      />
 
       <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
         <button

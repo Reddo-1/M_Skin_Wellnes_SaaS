@@ -5,6 +5,7 @@ import { LookupService } from '../../../../../../core/services/lookup.service';
 import { hasFieldError, hasValidationError } from '../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { SelectComponent, SelectOption } from '../../../../../../shared/ui/select/select.component';
+import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 
 export interface StockEntryFormValue {
   movement_type_id: number;
@@ -17,7 +18,7 @@ type EntryField = 'movement_type_id' | 'package_quantity' | 'reason';
 @Component({
   selector: 'app-stock-entry-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, SelectComponent],
+  imports: [ReactiveFormsModule, ModalComponent, SelectComponent, InputComponent],
   templateUrl: './stock-entry-modal.component.html',
 })
 export class StockEntryModalComponent {

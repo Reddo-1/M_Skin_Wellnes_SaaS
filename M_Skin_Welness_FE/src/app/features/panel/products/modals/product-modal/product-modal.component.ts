@@ -3,6 +3,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Product } from '../../../../../core/models/product.model';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { InputComponent } from '../../../../../shared/ui/input/input.component';
+import { TextareaComponent } from '../../../../../shared/ui/textarea/textarea.component';
+import { ToggleComponent } from '../../../../../shared/ui/toggle/toggle.component';
 
 export interface ProductFormValue {
   name: string;
@@ -26,7 +29,7 @@ type ProductField =
 @Component({
   selector: 'app-product-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent, InputComponent, TextareaComponent, ToggleComponent],
   templateUrl: './product-modal.component.html',
 })
 export class ProductModalComponent {

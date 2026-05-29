@@ -5,6 +5,8 @@ import { LookupItem } from '../../../../../core/models/lookup.model';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { SelectComponent, SelectOption } from '../../../../../shared/ui/select/select.component';
+import { InputComponent } from '../../../../../shared/ui/input/input.component';
+import { ToggleComponent } from '../../../../../shared/ui/toggle/toggle.component';
 
 export interface MachineFormValue {
   name: string;
@@ -16,7 +18,7 @@ export interface MachineFormValue {
 @Component({
   selector: 'app-machine-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, SelectComponent],
+  imports: [ReactiveFormsModule, ModalComponent, SelectComponent, InputComponent, ToggleComponent],
   templateUrl: './machine-modal.component.html',
 })
 export class MachineModalComponent {
@@ -55,12 +57,6 @@ export class MachineModalComponent {
         is_active: current?.is_active ?? true,
       });
     });
-  }
-
-  protected onMobileToggle(): void {
-    if (this.form.controls.is_mobile.value) {
-      this.form.controls.fixed_room_id.setValue('');
-    }
   }
 
   protected onSubmit(): void {

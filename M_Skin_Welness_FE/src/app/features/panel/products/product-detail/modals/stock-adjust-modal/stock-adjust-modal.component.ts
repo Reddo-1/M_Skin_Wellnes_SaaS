@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Product } from '../../../../../../core/models/product.model';
 import { hasFieldError, hasValidationError } from '../../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 
 export interface StockAdjustFormValue {
   new_quantity: number;
@@ -14,7 +15,7 @@ type AdjustField = 'new_quantity' | 'reason';
 @Component({
   selector: 'app-stock-adjust-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent, InputComponent],
   templateUrl: './stock-adjust-modal.component.html',
 })
 export class StockAdjustModalComponent {

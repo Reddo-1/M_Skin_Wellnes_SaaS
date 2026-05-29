@@ -6,6 +6,8 @@ import { LookupService } from '../../../../../core/services/lookup.service';
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../shared/ui/multi-select/multi-select.component';
+import { InputComponent } from '../../../../../shared/ui/input/input.component';
+import { ToggleComponent } from '../../../../../shared/ui/toggle/toggle.component';
 
 export interface TreatmentFormValue {
   name: string;
@@ -21,7 +23,7 @@ type TreatmentField = 'name' | 'duration_minutes' | 'price';
 @Component({
   selector: 'app-treatment-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent],
+  imports: [ReactiveFormsModule, ModalComponent, MultiSelectComponent, InputComponent, ToggleComponent],
   templateUrl: './treatment-modal.component.html',
 })
 export class TreatmentModalComponent {
