@@ -7,6 +7,12 @@ export interface CreateClinicalRecordData {
   user_id: number;
   body_type: BodyType;
   general_notes: string | null;
+  evaluation: {
+    skin_type_id: number;
+    evaluation_date?: string;
+    general_notes: string | null;
+    variation_ids: number[];
+  };
 }
 
 export interface UpdateClinicalRecordData {

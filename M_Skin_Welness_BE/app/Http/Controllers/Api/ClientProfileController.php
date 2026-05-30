@@ -47,6 +47,7 @@ class ClientProfileController extends Controller
     {
         $profile = $this->service->create(
             centerId: (int) $request->attributes->get('center_id'),
+            actorId: $request->user()->id,
             data: $request->validated(),
         );
 

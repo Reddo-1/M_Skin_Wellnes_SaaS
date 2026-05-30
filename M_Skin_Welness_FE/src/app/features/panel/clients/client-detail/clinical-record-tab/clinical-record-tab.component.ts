@@ -87,11 +87,19 @@ export class ClinicalRecordTabComponent {
         );
         this.notifications.toast.success('Ficha actualizada.');
       } else {
+        const evaluation = value.evaluation;
+        if (evaluation === null) return;
         const bodyType = this.selectedBodyType();
         const created = await this.records.create({
           user_id: this.client().id,
           body_type: bodyType,
           general_notes: generalNotes,
+          evaluation: {
+            skin_type_id: evaluation.skin_type_id,
+            evaluation_date: evaluation.evaluation_date,
+            general_notes: evaluation.general_notes.trim() === '' ? null : evaluation.general_notes,
+            variation_ids: evaluation.variation_ids,
+          },
         });
         this.items.update((current) => [...current, created]);
         this.notifications.toast.success(`Ficha ${bodyType} creada.`);

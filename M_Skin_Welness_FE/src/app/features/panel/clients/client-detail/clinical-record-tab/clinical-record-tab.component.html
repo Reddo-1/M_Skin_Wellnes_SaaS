@@ -111,7 +111,7 @@
       <p class="mt-2 text-sm text-muted">
         Este cliente todavía no tiene ficha {{ selectedBodyType() }} en el centro.
       </p>
-      @if (auth.hasPermission('client_profiles.create')) {
+      @if (auth.hasPermission('client_profiles.create') && auth.hasPermission('skin_evaluations.create')) {
         <button
           type="button"
           (click)="openCreate()"

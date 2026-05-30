@@ -7,16 +7,16 @@
       @if (isEdit()) {
         Solo se editan las notas permanentes. El estado clínico actual (tipo de piel, variaciones) se actualiza creando una nueva evaluación en la pestaña Evaluaciones.
       } @else {
-        Las notas generales recogen información que se mantiene siempre vigente, principalmente metodologías de trabajo con ese paciente. Son opcionales y podrás editarlas más adelante.
+        Al crear la ficha se registra también su primera evaluación, que quedará como la vigente. Las notas generales son opcionales y podrás editarlas más adelante.
       }
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
       <div>
         <app-textarea
-          label="Notas generales"
+          label="Notas generales de la ficha"
           formControlName="general_notes"
-          [rows]="6"
+          [rows]="isEdit() ? 6 : 3"
           placeholder="Por ejemplo: embarazo, alergia a parabenos, intolerancia a la luz pulsada…"
           [invalid]="hasFieldError('general_notes')"
         />
@@ -24,6 +24,67 @@
           <p class="mt-1.5 text-xs text-error-500">Las notas no pueden superar los 5000 caracteres.</p>
         }
       </div>
+
+      @if (!isEdit()) {
+        <div class="border-t border-gray-100 pt-5">
+          <h4 class="text-sm font-semibold text-ink">Primera evaluación</h4>
+          <p class="mt-0.5 text-sm text-muted">Estado de la piel del cliente en esta ficha.</p>
+
+          <div class="mt-4 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                Tipo de piel<span class="text-error-500"> *</span>
+              </label>
+              <app-select
+                [options]="skinTypeOptions()"
+                [selected]="form.controls.skin_type_id.value"
+                [invalid]="hasFieldError('skin_type_id')"
+                placeholder="Selecciona un tipo de piel…"
+                (selectionChange)="form.controls.skin_type_id.setValue($event)"
+              />
+              @if (hasValidationError('skin_type_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Selecciona el tipo de piel del cliente.</p>
+              }
+            </div>
+
+            <div>
+              <app-date-picker
+                label="Fecha de evaluación"
+                [required]="true"
+                formControlName="evaluation_date"
+                placeholder="Selecciona una fecha"
+                [invalid]="hasFieldError('evaluation_date')"
+              />
+              @if (hasValidationError('evaluation_date', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Indica la fecha de la evaluación.</p>
+              }
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Variaciones</label>
+              <app-multi-select
+                [options]="lookup.variations()"
+                [selectedIds]="form.controls.variation_ids.value"
+                placeholder="Selecciona las variaciones observadas…"
+                (selectionChange)="form.controls.variation_ids.setValue($event)"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <app-textarea
+                label="Observaciones de la evaluación"
+                formControlName="evaluation_notes"
+                [rows]="3"
+                placeholder="Notas clínicas de esta evaluación…"
+                [invalid]="hasFieldError('evaluation_notes')"
+              />
+              @if (hasValidationError('evaluation_notes', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">Las observaciones no pueden superar los 5000 caracteres.</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
 
       <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
         <button

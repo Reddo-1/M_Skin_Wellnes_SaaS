@@ -7,9 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class ClientProfileService
 {
-    public function create(int $centerId, array $data): ClientProfile
+    public function __construct(private readonly SkinEvaluationService $evaluations)
     {
-        return DB::transaction(function () use ($centerId, $data) {
+    }
+
+    public function create(int $centerId, int $actorId, array $data): ClientProfile
+    {
+        return DB::transaction(function () use ($centerId, $actorId, $data) {
             $profile = ClientProfile::create([
                 'center_id' => $centerId,
                 'user_id' => $data['user_id'],
@@ -17,7 +21,17 @@ class ClientProfileService
                 'general_notes' => $data['general_notes'] ?? null,
             ]);
 
-            return $profile->load(['client', 'currentEvaluation']);
+            //la ficha nace con su primera evaluacion, que queda como la vigente del perfil
+            $evaluationData = $data['evaluation'];
+            $evaluationData['client_profile_id'] = $profile->id;
+            $this->evaluations->create($centerId, $actorId, $evaluationData);
+
+            return $profile->refresh()->load([
+                'client',
+                'currentEvaluation.skinType',
+                'currentEvaluation.variations',
+                'currentEvaluation.professional',
+            ]);
         });
     }
 
