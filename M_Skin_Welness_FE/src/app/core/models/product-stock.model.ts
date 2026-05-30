@@ -2,6 +2,7 @@ export interface ProductStockProduct {
   id: number;
   name: string;
   minimum_stock: string;
+  doses_per_package: number;
 }
 
 export interface ProductStock {

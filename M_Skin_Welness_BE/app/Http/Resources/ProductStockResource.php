@@ -21,6 +21,7 @@ class ProductStockResource extends JsonResource
                     'id' => $this->product->id,
                     'name' => $this->product->name,
                     'minimum_stock' => $this->product->minimum_stock,
+                    'doses_per_package' => $this->product->doses_per_package,
                 ];
             }),
             'created_at' => $this->created_at?->toIso8601String(),

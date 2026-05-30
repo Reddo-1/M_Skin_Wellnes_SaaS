@@ -27,10 +27,10 @@ class ProductStock extends Model
 
     public function scopeBelowMinimum(Builder $query): Builder
     {
-        return $query
-            ->join('products', 'product_stocks.product_id', '=', 'products.id')
-            ->whereColumn('product_stocks.current_quantity', '<', 'products.minimum_stock')
-            ->select('product_stocks.*');
+        //subconsulta correlacionada en vez de join: evita que 'center_id' quede ambiguo al combinarlo con forCenter()
+        return $query->whereHas('product', function (Builder $q) {
+            $q->whereColumn('products.minimum_stock', '>', 'product_stocks.current_quantity');
+        });
     }
 
     public function center(): BelongsTo
