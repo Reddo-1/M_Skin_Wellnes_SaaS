@@ -1,0 +1,92 @@
+<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 class="text-lg font-semibold text-ink">Horario semanal</h2>
+      <p class="mt-1 text-sm text-muted">
+        Franjas recurrentes, ausencias y disponibilidad extra del trabajador.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      @if (auth.hasPermission('worker_schedules.create')) {
+        <button
+          type="button"
+          (click)="openScheduleModal()"
+          class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-ink shadow-sm transition hover:bg-gray-50"
+        >
+          <span class="h-2.5 w-2.5 rounded-sm bg-brand-100 ring-1 ring-brand-500"></span>
+          Asignar franja
+        </button>
+      }
+      @if (auth.hasPermission('worker_absences.create')) {
+        <button
+          type="button"
+          (click)="openAbsenceModal()"
+          class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-ink shadow-sm transition hover:bg-gray-50"
+        >
+          <span class="h-2.5 w-2.5 rounded-sm bg-error-100 ring-1 ring-error-500"></span>
+          Registrar ausencia
+        </button>
+      }
+      @if (auth.hasPermission('worker_extra_availabilities.create')) {
+        <button
+          type="button"
+          (click)="openExtraModal()"
+          class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-ink shadow-sm transition hover:bg-gray-50"
+        >
+          <span class="h-2.5 w-2.5 rounded-sm bg-success-100 ring-1 ring-success-500"></span>
+          Añadir extra
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage(); as message) {
+    <div class="mt-4">
+      <app-alert variant="error" [message]="message" />
+    </div>
+  }
+
+  <div class="mt-4 flex flex-wrap gap-4 text-xs text-muted">
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-brand-100 ring-1 ring-brand-500"></span>Franja recurrente
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-error-100 ring-1 ring-error-500"></span>Ausencia
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-success-100 ring-1 ring-success-500"></span>Disponibilidad extra
+    </span>
+  </div>
+
+  <div class="mt-4 transition-opacity" [class.opacity-50]="loading()">
+    <full-calendar [options]="calendarOptions()" />
+  </div>
+</section>
+
+<app-schedule-modal
+  [isOpen]="scheduleModalOpen()"
+  [schedule]="editingSchedule()"
+  [submitting]="submitting()"
+  (close)="closeScheduleModal()"
+  (formSubmit)="submitSchedule($event)"
+  (remove)="deleteSchedule()"
+/>
+
+<app-absence-modal
+  [isOpen]="absenceModalOpen()"
+  [absence]="editingAbsence()"
+  [submitting]="submitting()"
+  (close)="closeAbsenceModal()"
+  (formSubmit)="submitAbsence($event)"
+  (remove)="deleteAbsence()"
+/>
+
+<app-extra-modal
+  [isOpen]="extraModalOpen()"
+  [extra]="editingExtra()"
+  [submitting]="submitting()"
+  (close)="closeExtraModal()"
+  (formSubmit)="submitExtra($event)"
+  (remove)="deleteExtra()"
+/>

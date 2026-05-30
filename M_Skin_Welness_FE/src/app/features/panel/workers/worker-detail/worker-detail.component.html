@@ -64,6 +64,28 @@
       </div>
     </section>
 
+    <nav class="rounded-2xl border border-gray-200 bg-white p-2 shadow-sm">
+      <div class="flex flex-wrap gap-1">
+        @for (tab of tabs(); track tab.key) {
+          <button
+            type="button"
+            (click)="setActiveTab(tab.key)"
+            class="rounded-lg px-3 py-2 text-sm font-medium transition"
+            [class.bg-brand-500]="activeTab() === tab.key"
+            [class.text-white]="activeTab() === tab.key"
+            [class.shadow-sm]="activeTab() === tab.key"
+            [class.text-muted]="activeTab() !== tab.key"
+            [class.hover:bg-gray-50]="activeTab() !== tab.key"
+            [class.hover:text-ink]="activeTab() !== tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+    </nav>
+
+    @switch (activeTab()) {
+      @case ('datos') {
     <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div class="flex items-start justify-between">
         <div>
@@ -182,6 +204,11 @@
           </form>
         </div>
       </section>
+    }
+      }
+      @case ('horario') {
+        <app-worker-schedule-tab [workerId]="data.id" />
+      }
     }
   }
 </div>

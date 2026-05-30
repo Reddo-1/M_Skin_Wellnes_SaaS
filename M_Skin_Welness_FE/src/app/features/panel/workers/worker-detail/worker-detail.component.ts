@@ -14,6 +14,9 @@ import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
 import { MultiSelectComponent } from '../../../../shared/ui/multi-select/multi-select.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { WorkerModalComponent, WorkerFormValue } from '../modals/worker-modal/worker-modal.component';
+import { ScheduleTabComponent } from './schedule-tab/schedule-tab.component';
+
+type WorkerTab = 'datos' | 'horario';
 
 @Component({
   selector: 'app-worker-detail',
@@ -26,6 +29,7 @@ import { WorkerModalComponent, WorkerFormValue } from '../modals/worker-modal/wo
     MultiSelectComponent,
     InputComponent,
     WorkerModalComponent,
+    ScheduleTabComponent,
   ],
   templateUrl: './worker-detail.component.html',
 })
@@ -41,6 +45,15 @@ export class WorkerDetailComponent {
   protected readonly worker = signal<User | null>(null);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly activeTab = signal<WorkerTab>('datos');
+  protected readonly tabs = computed<{ key: WorkerTab; label: string }[]>(() => {
+    const tabs: { key: WorkerTab; label: string }[] = [{ key: 'datos', label: 'Datos y acceso' }];
+    if (this.auth.hasPermission('worker_schedules.view')) {
+      tabs.push({ key: 'horario', label: 'Horario' });
+    }
+    return tabs;
+  });
 
   protected readonly modalOpen = signal(false);
   protected readonly submitting = signal(false);
@@ -99,6 +112,10 @@ export class WorkerDetailComponent {
   protected closeModal(): void {
     if (this.submitting()) return;
     this.modalOpen.set(false);
+  }
+
+  protected setActiveTab(tab: WorkerTab): void {
+    this.activeTab.set(tab);
   }
 
   async submitWorker(value: WorkerFormValue): Promise<void> {

@@ -117,3 +117,23 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* FullCalendar — barra de herramientas compacta en móvil (evita que prev/next/hoy se apilen) */
+@media (max-width: 767px) {
+  .fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 0.75rem;
+  }
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+  .fc .fc-button {
+    padding: 0.25em 0.5em;
+    font-size: 0.78rem;
+  }
+}
