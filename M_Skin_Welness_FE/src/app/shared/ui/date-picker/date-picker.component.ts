@@ -117,7 +117,7 @@ export class DatePickerComponent implements ControlValueAccessor {
     this.value.set(normalized);
     this.open.set(false);
     this.mode.set('days');
-    this.syncViewToValue();
+    this.syncViewToValue(normalized);
   }
 
   registerOnChange(fn: (value: string | null) => void): void {
@@ -136,7 +136,7 @@ export class DatePickerComponent implements ControlValueAccessor {
     if (this.disabled()) return;
     if (!this.open()) {
       this.mode.set('days');
-      this.syncViewToValue();
+      this.syncViewToValue(this.value());
       const rect = this.host.nativeElement.getBoundingClientRect();
       this.openUpward.set(rect.bottom > window.innerHeight * 0.6);
     }
@@ -203,8 +203,7 @@ export class DatePickerComponent implements ControlValueAccessor {
     this.open.set(false);
   }
 
-  private syncViewToValue(): void {
-    const current = this.value();
+  private syncViewToValue(current: string | null): void {
     if (!current) {
       this.resetViewToToday();
       return;
