@@ -4,7 +4,7 @@
       {{ isEdit() ? 'Editar máquina' : 'Nueva máquina' }}
     </h3>
     <p class="mt-1 text-sm text-muted">
-      Define el equipo del centro. Si es móvil no se fija a una sala; si es fija, indícale su sala.
+      Define el equipo del centro. Si le asignas una sala será fija; si la dejas en "Sin sala fija" se considera móvil.
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
@@ -24,23 +24,18 @@
         }
       </div>
 
-      <app-toggle
-        formControlName="is_mobile"
-        label="Máquina móvil"
-        description="Se traslada entre salas, no se fija a ninguna."
-      />
-
-      @if (!form.controls.is_mobile.value) {
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-gray-700">Sala fija</label>
-          <app-select
-            [options]="roomOptions()"
-            [selected]="form.controls.fixed_room_id.value"
-            placeholder="Sin sala fija"
-            (selectionChange)="form.controls.fixed_room_id.setValue($event)"
-          />
-        </div>
-      }
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-gray-700">Sala fija</label>
+        <app-select
+          [options]="roomOptions()"
+          [selected]="form.controls.fixed_room_id.value"
+          placeholder="Sin sala fija (móvil)"
+          (selectionChange)="form.controls.fixed_room_id.setValue($event)"
+        />
+        <p class="mt-1.5 text-xs text-muted">
+          Sin sala fija, la máquina se trata como móvil y puede usarse en cualquier sala.
+        </p>
+      </div>
 
       <app-toggle
         formControlName="is_active"

@@ -35,6 +35,10 @@ export class TreatmentService {
     return await this.api.putResource<Treatment>(`/treatments/${id}`, data);
   }
 
+  async setActive(id: number, isActive: boolean): Promise<Treatment> {
+    return await this.api.putResource<Treatment>(`/treatments/${id}`, { is_active: isActive });
+  }
+
   async delete(id: number): Promise<void> {
     await this.api.delete(`/treatments/${id}`);
   }

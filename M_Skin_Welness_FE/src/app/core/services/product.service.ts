@@ -44,6 +44,10 @@ export class ProductService {
     return await this.api.putResource<Product>(`/products/${id}`, data);
   }
 
+  async setActive(id: number, isActive: boolean): Promise<Product> {
+    return await this.api.putResource<Product>(`/products/${id}`, { is_active: isActive });
+  }
+
   async delete(id: number): Promise<void> {
     await this.api.delete(`/products/${id}`);
   }

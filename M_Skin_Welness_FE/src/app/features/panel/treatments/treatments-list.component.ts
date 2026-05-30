@@ -123,6 +123,36 @@ export class TreatmentsListComponent {
     }
   }
 
+  async toggleActive(treatment: Treatment): Promise<void> {
+    if (this.isRowBusy(treatment.id)) return;
+
+    const action = treatment.is_active ? 'desactivar' : 'reactivar';
+    const confirmed = await this.notifications.modal.confirm({
+      variant: treatment.is_active ? 'warning' : 'info',
+      title: treatment.is_active ? '¿Desactivar este tratamiento?' : '¿Reactivar este tratamiento?',
+      message: treatment.is_active
+        ? `El tratamiento "${treatment.name}" dejará de aparecer en los listados activos y no podrá reservarse en nuevas citas. Su historial se conserva.`
+        : `El tratamiento "${treatment.name}" volverá a estar disponible en el catálogo del centro.`,
+      confirmText: treatment.is_active ? 'Sí, desactivar' : 'Sí, reactivar',
+      cancelText: 'Cancelar',
+    });
+    if (!confirmed) return;
+
+    this.markBusy(treatment.id, true);
+    try {
+      const updated = await this.treatments.setActive(treatment.id, !treatment.is_active);
+      this.replaceItem(updated);
+      this.notifications.toast.success(
+        treatment.is_active ? 'Tratamiento desactivado.' : 'Tratamiento reactivado.',
+      );
+    } catch (error) {
+      const message = (error as HttpErrorResponse).error?.message ?? `No se ha podido ${action} el tratamiento. Vuelve a intentarlo en unos segundos.`;
+      this.notifications.toast.error(message);
+    } finally {
+      this.markBusy(treatment.id, false);
+    }
+  }
+
   async deleteTreatment(treatment: Treatment): Promise<void> {
     if (this.isRowBusy(treatment.id)) return;
 

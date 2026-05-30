@@ -155,6 +155,36 @@ export class ProductsListComponent {
     }
   }
 
+  async toggleActive(product: Product): Promise<void> {
+    if (this.isRowBusy(product.id)) return;
+
+    const action = product.is_active ? 'desactivar' : 'reactivar';
+    const confirmed = await this.notifications.modal.confirm({
+      variant: product.is_active ? 'warning' : 'info',
+      title: product.is_active ? '¿Desactivar este producto?' : '¿Reactivar este producto?',
+      message: product.is_active
+        ? `El producto "${product.name}" dejará de aparecer en los listados activos y no se podrá vender. Su historial se conserva.`
+        : `El producto "${product.name}" volverá a estar disponible en el catálogo del centro.`,
+      confirmText: product.is_active ? 'Sí, desactivar' : 'Sí, reactivar',
+      cancelText: 'Cancelar',
+    });
+    if (!confirmed) return;
+
+    this.markBusy(product.id, true);
+    try {
+      const updated = await this.products.setActive(product.id, !product.is_active);
+      this.replaceItem(updated);
+      this.notifications.toast.success(
+        product.is_active ? 'Producto desactivado.' : 'Producto reactivado.',
+      );
+    } catch (error) {
+      const message = (error as HttpErrorResponse).error?.message ?? `No se ha podido ${action} el producto. Vuelve a intentarlo en unos segundos.`;
+      this.notifications.toast.error(message);
+    } finally {
+      this.markBusy(product.id, false);
+    }
+  }
+
   async deleteProduct(product: Product): Promise<void> {
     if (this.isRowBusy(product.id)) return;
 
@@ -207,6 +237,10 @@ export class ProductsListComponent {
     if (value === 'active') return true;
     if (value === 'inactive') return false;
     return undefined;
+  }
+
+  private replaceItem(updated: Product): void {
+    this.items.update((items) => items.map((item) => (item.id === updated.id ? updated : item)));
   }
 
   private markBusy(id: number, busy: boolean): void {

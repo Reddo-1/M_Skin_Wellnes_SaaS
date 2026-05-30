@@ -35,13 +35,12 @@ export class MachineModalComponent {
   protected readonly isEdit = computed(() => this.machine() !== null);
 
   protected readonly roomOptions = computed<SelectOption[]>(() => [
-    { value: '', label: 'Sin sala fija' },
+    { value: '', label: 'Sin sala fija (móvil)' },
     ...this.rooms().map((room) => ({ value: String(room.id), label: room.name })),
   ]);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
-    is_mobile: [false],
     fixed_room_id: [''],
     is_active: [true],
   });
@@ -52,7 +51,6 @@ export class MachineModalComponent {
       const current = this.machine();
       this.form.reset({
         name: current?.name ?? '',
-        is_mobile: current?.is_mobile ?? false,
         fixed_room_id: current?.fixed_room_id != null ? String(current.fixed_room_id) : '',
         is_active: current?.is_active ?? true,
       });
@@ -66,10 +64,10 @@ export class MachineModalComponent {
       return;
     }
     const raw = this.form.getRawValue();
-    const fixedRoomId = raw.is_mobile || raw.fixed_room_id === '' ? null : Number(raw.fixed_room_id);
+    const fixedRoomId = raw.fixed_room_id === '' ? null : Number(raw.fixed_room_id);
     this.formSubmit.emit({
       name: raw.name,
-      is_mobile: raw.is_mobile,
+      is_mobile: fixedRoomId === null,
       fixed_room_id: fixedRoomId,
       is_active: raw.is_active,
     });

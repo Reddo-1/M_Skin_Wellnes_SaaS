@@ -33,6 +33,10 @@ export class MachineService {
     return await this.api.putResource<Machine>(`/machines/${id}`, data);
   }
 
+  async setActive(id: number, isActive: boolean): Promise<Machine> {
+    return await this.api.putResource<Machine>(`/machines/${id}`, { is_active: isActive });
+  }
+
   async delete(id: number): Promise<void> {
     await this.api.delete(`/machines/${id}`);
   }

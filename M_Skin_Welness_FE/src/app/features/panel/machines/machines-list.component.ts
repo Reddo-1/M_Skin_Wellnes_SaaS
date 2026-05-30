@@ -120,6 +120,36 @@ export class MachinesListComponent {
     }
   }
 
+  async toggleActive(machine: Machine): Promise<void> {
+    if (this.isRowBusy(machine.id)) return;
+
+    const action = machine.is_active ? 'desactivar' : 'reactivar';
+    const confirmed = await this.notifications.modal.confirm({
+      variant: machine.is_active ? 'warning' : 'info',
+      title: machine.is_active ? '¿Desactivar esta máquina?' : '¿Reactivar esta máquina?',
+      message: machine.is_active
+        ? `La máquina "${machine.name}" dejará de aparecer en los listados activos y no podrá asignarse a tratamientos ni sesiones. Su historial se conserva.`
+        : `La máquina "${machine.name}" volverá a estar disponible en el centro.`,
+      confirmText: machine.is_active ? 'Sí, desactivar' : 'Sí, reactivar',
+      cancelText: 'Cancelar',
+    });
+    if (!confirmed) return;
+
+    this.markBusy(machine.id, true);
+    try {
+      const updated = await this.machines.setActive(machine.id, !machine.is_active);
+      this.replaceItem(updated);
+      this.notifications.toast.success(
+        machine.is_active ? 'Máquina desactivada.' : 'Máquina reactivada.',
+      );
+    } catch (error) {
+      const message = (error as HttpErrorResponse).error?.message ?? `No se ha podido ${action} la máquina. Vuelve a intentarlo en unos segundos.`;
+      this.notifications.toast.error(message);
+    } finally {
+      this.markBusy(machine.id, false);
+    }
+  }
+
   async deleteMachine(machine: Machine): Promise<void> {
     if (this.isRowBusy(machine.id)) return;
 
