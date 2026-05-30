@@ -108,7 +108,7 @@ const ALL_ITEMS: NavItem[] = [
     allowedRoles: ['administrador', 'rrhh'],
   },
   {
-    label: 'Horarios',
+    label: 'Franjas horarias',
     path: '/panel/time-slots',
     icon: 'clock',
     section: 'equipo',

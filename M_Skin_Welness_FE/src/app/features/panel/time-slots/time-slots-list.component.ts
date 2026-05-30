@@ -116,6 +116,35 @@ export class TimeSlotsListComponent {
     }
   }
 
+  async toggleActive(timeSlot: TimeSlot): Promise<void> {
+    if (this.isRowBusy(timeSlot.id)) return;
+
+    const confirmed = await this.notifications.modal.confirm({
+      variant: timeSlot.is_active ? 'warning' : 'info',
+      title: timeSlot.is_active ? '¿Desactivar esta franja?' : '¿Reactivar esta franja?',
+      message: timeSlot.is_active
+        ? `La franja "${timeSlot.name ?? 'sin nombre'}" dejará de poder asignarse a trabajadores. Su historial se conserva.`
+        : `La franja "${timeSlot.name ?? 'sin nombre'}" volverá a estar disponible para asignar.`,
+      confirmText: timeSlot.is_active ? 'Sí, desactivar' : 'Sí, reactivar',
+      cancelText: 'Cancelar',
+    });
+    if (!confirmed) return;
+
+    this.markBusy(timeSlot.id, true);
+    try {
+      await this.timeSlots.setActive(timeSlot.id, !timeSlot.is_active);
+      this.notifications.toast.success(
+        timeSlot.is_active ? 'Franja desactivada.' : 'Franja reactivada.',
+      );
+      await this.load();
+    } catch (error) {
+      const message = (error as HttpErrorResponse).error?.message ?? 'No se ha podido cambiar el estado de la franja.';
+      this.notifications.toast.error(message);
+    } finally {
+      this.markBusy(timeSlot.id, false);
+    }
+  }
+
   async deleteTimeSlot(timeSlot: TimeSlot): Promise<void> {
     if (this.isRowBusy(timeSlot.id)) return;
 

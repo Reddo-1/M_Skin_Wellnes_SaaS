@@ -209,7 +209,7 @@ export const routes: Routes = [
       {
         path: 'time-slots',
         canActivate: [roleGuard(['administrador', 'rrhh'])],
-        data: { title: 'Horarios' },
+        data: { title: 'Franjas horarias' },
         loadComponent: () =>
           import('./features/panel/time-slots/time-slots-list.component').then(
             (m) => m.TimeSlotsListComponent,

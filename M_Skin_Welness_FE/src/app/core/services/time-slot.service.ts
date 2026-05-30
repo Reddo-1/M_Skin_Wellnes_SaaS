@@ -33,6 +33,10 @@ export class TimeSlotService {
     return await this.api.putResource<TimeSlot>(`/time-slots/${id}`, data);
   }
 
+  async setActive(id: number, isActive: boolean): Promise<TimeSlot> {
+    return await this.api.putResource<TimeSlot>(`/time-slots/${id}`, { is_active: isActive });
+  }
+
   async delete(id: number): Promise<void> {
     await this.api.delete(`/time-slots/${id}`);
   }
