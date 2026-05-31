@@ -76,7 +76,8 @@ export const routes: Routes = [
           ]),
         ],
         data: { title: 'Cuadrante' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/cuadrante/cuadrante.component').then((m) => m.CuadranteComponent),
       },
       {
         path: 'mapa',

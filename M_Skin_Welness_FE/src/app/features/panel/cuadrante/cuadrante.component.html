@@ -1,0 +1,74 @@
+<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 class="text-lg font-semibold text-ink">Cuadrante</h2>
+      <p class="mt-1 text-sm text-muted">Planificación de citas por profesional.</p>
+    </div>
+
+    @if (canCreate()) {
+      <button
+        type="button"
+        (click)="openCreate()"
+        class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600"
+      >
+        Nueva cita
+      </button>
+    }
+  </div>
+
+  @if (errorMessage(); as message) {
+    <div class="mt-4">
+      <app-alert variant="error" [message]="message" />
+    </div>
+  }
+
+  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-warning-500"></span>Pendiente
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-brand-500"></span>Confirmada
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-success-500"></span>Realizada
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-error-500"></span>No presentada
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-gray-400"></span>Cancelada
+    </span>
+    <span class="ml-2 inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-gray-100 ring-1 ring-gray-300"></span>Jornada
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-error-100 ring-1 ring-error-300"></span>Ausencia
+    </span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm bg-success-100 ring-1 ring-success-300"></span>Extra
+    </span>
+  </div>
+
+  <div class="mt-4 transition-opacity" [class.opacity-50]="loading()">
+    <div class="custom-calendar">
+      <full-calendar [options]="calendarOptions()" />
+    </div>
+  </div>
+</section>
+
+<app-appointment-modal
+  [isOpen]="modalOpen()"
+  [appointment]="editingAppointment()"
+  [prefill]="prefill()"
+  [submitting]="submitting()"
+  [clients]="clients()"
+  [workers]="workers()"
+  [treatments]="treatments()"
+  [rooms]="rooms()"
+  [machines]="machines()"
+  [canManage]="canManage()"
+  (close)="closeModal()"
+  (formSubmit)="submit($event)"
+  (statusChange)="changeStatus($event)"
+  (remove)="removeAppointment()"
+/>
