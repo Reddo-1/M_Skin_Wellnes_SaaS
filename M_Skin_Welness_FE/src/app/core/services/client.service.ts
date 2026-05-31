@@ -26,7 +26,12 @@ export class ClientService {
     return await this.api.getResource<User>(`/users/${userId}`);
   }
 
-  async list(filters: { search?: string; is_active?: boolean; page?: number }): Promise<Paginated<User>> {
+  async list(filters: {
+    search?: string;
+    is_active?: boolean;
+    page?: number;
+    per_page?: number;
+  }): Promise<Paginated<User>> {
     const params: QueryParams = { role: 'cliente' };
     if (filters.search !== undefined && filters.search.trim() !== '') {
       params['search'] = filters.search.trim();
@@ -36,6 +41,9 @@ export class ClientService {
     }
     if (filters.page !== undefined) {
       params['page'] = filters.page;
+    }
+    if (filters.per_page !== undefined) {
+      params['per_page'] = filters.per_page;
     }
     return await this.api.getCollection<User>('/users', params);
   }

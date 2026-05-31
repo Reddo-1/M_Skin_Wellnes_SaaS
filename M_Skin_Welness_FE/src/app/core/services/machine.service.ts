@@ -14,13 +14,20 @@ export interface MachineData {
 export class MachineService {
   private readonly api = inject(ApiService);
 
-  async list(filters: { is_active?: boolean; page?: number }): Promise<Paginated<Machine>> {
+  async list(filters: {
+    is_active?: boolean;
+    page?: number;
+    per_page?: number;
+  }): Promise<Paginated<Machine>> {
     const params: QueryParams = {};
     if (filters.is_active !== undefined) {
       params['is_active'] = filters.is_active;
     }
     if (filters.page !== undefined) {
       params['page'] = filters.page;
+    }
+    if (filters.per_page !== undefined) {
+      params['per_page'] = filters.per_page;
     }
     return await this.api.getCollection<Machine>('/machines', params);
   }

@@ -33,6 +33,7 @@ export class WorkerService {
     role?: string;
     is_active?: boolean;
     page?: number;
+    per_page?: number;
   }): Promise<Paginated<User>> {
     const params: QueryParams = {};
     if (filters.role !== undefined && filters.role !== '') {
@@ -48,6 +49,9 @@ export class WorkerService {
     }
     if (filters.page !== undefined) {
       params['page'] = filters.page;
+    }
+    if (filters.per_page !== undefined) {
+      params['per_page'] = filters.per_page;
     }
     return await this.api.getCollection<User>('/users', params);
   }
