@@ -47,8 +47,9 @@ class AppointmentSeeder extends Seeder
         $laserMachine = $machines['Láser diodo LD-200'] ?? null;
         $pressureMachine = $machines['Presoterapia móvil'] ?? null;
 
-        //arranca hoy para que el cuadrante y el mapa muestren citas al abrir (dia 0 = hoy)
-        $base = CarbonImmutable::today()->setTime(9, 0);
+        //arranca hoy en la zona del centro para que la hora de pared (09:00...) cuadre con el overlay
+        //de jornada del cuadrante y no se desfase al renderizar en el navegador (dia 0 = hoy)
+        $base = CarbonImmutable::today('Europe/Madrid')->setTime(9, 0);
 
         //15 citas: dia, hora, worker, cliente_email, treatment, room, machine?, status
         $rows = [
@@ -56,8 +57,8 @@ class AppointmentSeeder extends Seeder
             [0, 10, 'dermo',  'cliente2@demo.test', 'Limpieza facial profunda',           $facialesRoom, null,             'realizada'],
             [0, 12, 'fisio',  'cliente3@demo.test', 'Radiofrecuencia corporal',           $machineRoom,  $rfMachine,       'realizada'],
             [1,  9, 'diagno', 'cliente4@demo.test', 'Diagnóstico inicial',                $diagnoRoom,   null,             'cancelada'],
-            [1, 11, 'dermo',  'cliente5@demo.test', 'Tratamiento antiedad',               $facialesRoom, null,             'realizada'],
-            [1, 17, 'mani',   'cliente6@demo.test', 'Manicura completa',                  $facialesRoom, null,             'no_presentada'],
+            [1, 11, 'dermo',  'cliente5@demo.test', 'Tratamiento antiedad',               $facialesRoom, null,             'confirmada'],
+            [1, 17, 'mani',   'cliente6@demo.test', 'Manicura completa',                  $facialesRoom, null,             'pendiente'],
             [2,  9, 'dermo',  'cliente7@demo.test', 'Limpieza facial profunda',           $facialesRoom, null,             'confirmada'],
             [2, 10, 'fisio',  'cliente8@demo.test', 'Depilación láser piernas',           $machineRoom,  $laserMachine,    'confirmada'],
             [2, 12, 'fisio',  'cliente1@demo.test', 'Drenaje linfático con presoterapia', $machineRoom,  $pressureMachine, 'pendiente'],
