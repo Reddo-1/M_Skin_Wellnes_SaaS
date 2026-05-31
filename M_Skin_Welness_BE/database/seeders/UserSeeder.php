@@ -32,13 +32,13 @@ class UserSeeder extends Seeder
         }
 
         $staff = [
-            ['eljefazomaximo@gmail.com',      'Admin',          'administrador'],
-            ['recepcionista@gmail.com',  'Sheila Recepción',     'recepcionista'],
-            ['recursos.humanos@gmail.com',       'María RRHH',          'rrhh'],
-            ['marc@gmail.com',     'Marc',   'diagnosticador'],
-            ['raquel@gmail.com',      'Raquel ',         'dermo_esteticien'],
-            ['ivan@gmail.com',      'Iván Fisio',          'fisioterapeuta'],
-            ['mari@gmail.com',       'Mari Manicura',      'manicurista'],
+            ['admin@gmail.com',          'Admin del Centro',  'administrador'],
+            ['recepcionista@gmail.com',  'Sheila Recepción',  'recepcionista'],
+            ['rrhh@gmail.com',           'María RRHH',        'rrhh'],
+            ['diagnosticador@gmail.com', 'Marc Díaz',         'diagnosticador'],
+            ['dermo@gmail.com',          'Raquel Soler',      'dermo_esteticien'],
+            ['fisio@gmail.com',          'Iván Bravo',        'fisioterapeuta'],
+            ['manicura@gmail.com',       'Mari Manicura',     'manicurista'],
         ];
 
         foreach ($staff as [$email, $name, $role]) {
@@ -52,33 +52,38 @@ class UserSeeder extends Seeder
                     'password' => '1234',
                     'registration_source' => 'staff',
                     'is_active' => true,
+                    'email_verified_at' => now(),
                 ]
             );
             $user->syncRoles([$role]);
         }
 
-        $clients = [
-            ['alexsanchezgradomedio@gmail.com', 'Alehandro',     '+34666666666', '1350-04-12'],
-            ['cliente2@demo.test', 'Carlos Pérez',  '+34622222222', '1985-08-21'],
-            ['cliente3@demo.test', 'Beatriz Ruiz',  '+34633333333', '1995-01-30'],
-            ['cliente4@demo.test', 'David Castro',  '+34644444444', '1978-11-09'],
-            ['cliente5@demo.test', 'Elena Vidal',   '+34655555555', '2000-06-15'],
-            ['cliente6@demo.test', 'Fernando Gil',  '+34666666660', '1992-03-25'],
-            ['cliente7@demo.test', 'Gema Soto',     '+34677777777', '1988-09-04'],
-            ['cliente8@demo.test', 'Hugo Marín',    '+34688888888', '1997-12-18'],
+        //20 clientes: los 16 primeros con acceso online (email + contraseña), los 4 ultimos walk-in (sin email)
+        $names = [
+            'Carlos Pérez', 'Beatriz Ruiz', 'David Castro', 'Elena Vidal', 'Fernando Gil',
+            'Gema Soto', 'Hugo Marín', 'Inés Lozano', 'Javier Núñez', 'Lucía Ramos',
+            'Manuel Ortega', 'Nuria Cano', 'Óscar Prieto', 'Paula Serrano', 'Rosa Ibáñez',
+            'Sergio Vega', 'Teresa Lara', 'Víctor Peña', 'Yolanda Cruz', 'Andrés Bello',
         ];
 
-        foreach ($clients as [$email, $name, $phone, $birthDate]) {
+        foreach ($names as $index => $name) {
+            $number = $index + 1;
+            $isWalkIn = $index >= 16;
+            $year = 1975 + ($index % 25);
+            $month = str_pad((string) (($index % 12) + 1), 2, '0', STR_PAD_LEFT);
+            $day = str_pad((string) (($index % 27) + 1), 2, '0', STR_PAD_LEFT);
+
+            //se clava por (center_id, name): los walk-in no tienen email y varios null no podrian distinguirse
             $user = User::updateOrCreate(
-                ['email' => $email],
+                ['center_id' => $centerId, 'name' => $name],
                 [
-                    'center_id' => $centerId,
-                    'name' => $name,
-                    'phone' => $phone,
-                    'birth_date' => $birthDate,
-                    'password' => '1234',
+                    'email' => $isWalkIn ? null : "cliente{$number}@demo.test",
+                    'phone' => '+3466600'.str_pad((string) $number, 4, '0', STR_PAD_LEFT),
+                    'birth_date' => "{$year}-{$month}-{$day}",
+                    'password' => $isWalkIn ? null : '1234',
                     'registration_source' => 'staff',
                     'is_active' => true,
+                    'email_verified_at' => $isWalkIn ? null : now(),
                 ]
             );
             $user->syncRoles(['cliente']);

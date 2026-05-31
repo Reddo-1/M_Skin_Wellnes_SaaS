@@ -17,31 +17,37 @@ class ClientProfileSeeder extends Seeder
             return;
         }
 
-        $profiles = [
-            ['email' => 'cliente1@demo.test', 'body_type' => 'facial',   'notes' => 'Cliente habitual. Sin alergias conocidas.'],
-            ['email' => 'cliente1@demo.test', 'body_type' => 'corporal', 'notes' => 'Sin alteraciones corporales permanentes.'],
-            ['email' => 'cliente2@demo.test', 'body_type' => 'facial',   'notes' => 'Alergica al niquel. Embarazada hasta sep 2026.'],
-            ['email' => 'cliente3@demo.test', 'body_type' => 'facial',   'notes' => 'Reactiva a productos con alcohol.'],
+        $notes = [
+            'Cliente habitual. Sin alergias conocidas.',
+            'Piel sensible. Evitar productos con alcohol.',
+            'Alergia al níquel.',
+            'Sin alteraciones permanentes.',
+            'Reactiva a fragancias fuertes.',
         ];
 
-        foreach ($profiles as $p) {
-            $userId = User::query()
-                ->where('email', $p['email'])
-                ->where('center_id', $centerId)
-                ->value('id');
+        //ficha facial para los 10 primeros clientes (con consentimiento) + corporal para la mitad
+        $clients = User::role('cliente')->where('center_id', $centerId)->orderBy('id')->take(10)->get();
 
-            if ($userId === null) {
-                continue;
-            }
-
+        foreach ($clients as $index => $client) {
             DB::table('client_profiles')->updateOrInsert(
-                ['center_id' => $centerId, 'user_id' => $userId, 'body_type' => $p['body_type']],
+                ['center_id' => $centerId, 'user_id' => $client->id, 'body_type' => 'facial'],
                 [
-                    'general_notes' => $p['notes'],
+                    'general_notes' => $notes[$index % count($notes)],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
             );
+
+            if ($index % 2 === 0) {
+                DB::table('client_profiles')->updateOrInsert(
+                    ['center_id' => $centerId, 'user_id' => $client->id, 'body_type' => 'corporal'],
+                    [
+                        'general_notes' => 'Seguimiento corporal.',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
         }
     }
 }

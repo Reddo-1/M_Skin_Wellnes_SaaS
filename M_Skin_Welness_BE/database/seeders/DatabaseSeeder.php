@@ -28,11 +28,14 @@ class DatabaseSeeder extends Seeder
             TimeSlotSeeder::class,
             TreatmentSeeder::class,
             WorkerScheduleSeeder::class,
-            AppointmentSeeder::class,
+            WorkerAbsenceSeeder::class,
+            WorkerExtraAvailabilitySeeder::class,
             ProductSeeder::class,
             ProductStockSeeder::class,
+            ConsentSeeder::class,
             ClientProfileSeeder::class,
             SkinEvaluationSeeder::class,
+            AppointmentSeeder::class,
             SaleSeeder::class,
         ]);
     }

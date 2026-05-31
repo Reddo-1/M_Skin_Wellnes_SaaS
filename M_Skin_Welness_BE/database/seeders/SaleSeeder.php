@@ -2,10 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Center;
-use App\Models\Sale;
-use App\Models\Treatment;
-use App\Models\User;
+use App\Models\{Appointment, Center, Sale, User};
 use App\Services\InvoiceService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,98 +11,85 @@ class SaleSeeder extends Seeder
 {
     public function run(): void
     {
+        mt_srand(20260602);
+
         $centerId = Center::query()->where('slug', 'demo')->value('id');
 
         if ($centerId === null) {
             return;
         }
 
-        $reception = User::query()->where('email', 'recepcion@demo.test')->value('id');
+        $reception = User::role('recepcionista')->where('center_id', $centerId)->value('id');
+        $saleStatusPaid = (int) config('lookups.sale_statuses.pagada');
+        $paymentMethods = DB::table('payment_methods')->whereIn('name', ['tarjeta', 'efectivo'])->pluck('id')->all();
+        $realizadaId = (int) config('lookups.session_statuses.realizada');
 
-        $clients = User::query()
-            ->where('center_id', $centerId)
-            ->whereIn('email', ['cliente1@demo.test', 'cliente2@demo.test', 'cliente3@demo.test'])
-            ->pluck('id', 'email')
-            ->all();
-
-        $treatments = Treatment::query()->where('center_id', $centerId)->pluck('id', 'name')->all();
-
-        $cremaProductId = DB::table('products')->where('center_id', $centerId)->where('name', 'Crema hidratante facial')->value('id');
-        $serumProductId = DB::table('products')->where('center_id', $centerId)->where('name', 'Sérum vitamina C')->value('id');
-
-        $saleStatusPaid = DB::table('sale_statuses')->where('name', 'pagada')->value('id');
-        $paymentMethodCard = DB::table('payment_methods')->where('name', 'tarjeta')->value('id');
-
-        if ($reception === null || $saleStatusPaid === null || $paymentMethodCard === null) {
+        if ($reception === null || $paymentMethods === [] || $saleStatusPaid === 0) {
             return;
         }
 
-        $sales = [
-            [
-                'client_email' => 'cliente1@demo.test',
-                'lines' => [
-                    ['type' => 'treatment', 'reference_id' => $treatments['Limpieza facial profunda'] ?? null, 'description' => 'Limpieza facial profunda', 'unit_price' => 45.00, 'quantity' => 1],
-                    ['type' => 'product',   'reference_id' => $cremaProductId,                                 'description' => 'Crema hidratante facial', 'unit_price' => 29.90, 'quantity' => 1],
-                ],
-            ],
-            [
-                'client_email' => 'cliente2@demo.test',
-                'lines' => [
-                    ['type' => 'treatment', 'reference_id' => $treatments['Tratamiento antiedad'] ?? null, 'description' => 'Tratamiento antiedad', 'unit_price' => 65.00, 'quantity' => 1],
-                ],
-            ],
-            [
-                'client_email' => 'cliente3@demo.test',
-                'lines' => [
-                    ['type' => 'treatment', 'reference_id' => $treatments['Manicura completa'] ?? null, 'description' => 'Manicura completa', 'unit_price' => 25.00, 'quantity' => 1],
-                    ['type' => 'product',   'reference_id' => $serumProductId,                          'description' => 'Sérum vitamina C',  'unit_price' => 39.50, 'quantity' => 1],
-                ],
-            ],
-        ];
+        $products = DB::table('products')
+            ->where('center_id', $centerId)
+            ->where('is_sellable', true)
+            ->where('is_active', true)
+            ->get()
+            ->values();
 
-        foreach ($sales as $sale) {
-            $clientId = $clients[$sale['client_email']] ?? null;
-            if ($clientId === null) {
+        //ventas a partir de las citas realizadas con precio > 0 (se cobran al terminar la sesion)
+        $appointments = Appointment::query()
+            ->where('center_id', $centerId)
+            ->where('status_id', $realizadaId)
+            ->where('reserved_price', '>', 0)
+            ->with('treatment')
+            ->get();
+
+        $invoices = app(InvoiceService::class);
+
+        foreach ($appointments as $appt) {
+            if (mt_rand(1, 100) > 55) {
                 continue;
             }
 
-            $subtotal = 0;
-            foreach ($sale['lines'] as $line) {
-                $subtotal += $line['unit_price'] * $line['quantity'];
-            }
-            $total = $subtotal;
+            $lines = [[
+                'type' => 'treatment',
+                'reference_id' => $appt->treatment_id,
+                'description' => $appt->treatment?->name ?? 'Tratamiento',
+                'unit_price' => (float) $appt->reserved_price,
+                'quantity' => 1,
+            ]];
 
-            $existingSale = DB::table('sales')
-                ->where('center_id', $centerId)
-                ->where('client_id', $clientId)
-                ->where('subtotal', $subtotal)
-                ->first();
-
-            if ($existingSale !== null) {
-                continue;
+            //~40% de las ventas llevan ademas un producto
+            if (mt_rand(1, 100) <= 40 && $products->isNotEmpty()) {
+                $product = $products[mt_rand(0, $products->count() - 1)];
+                $lines[] = [
+                    'type' => 'product',
+                    'reference_id' => $product->id,
+                    'description' => $product->name,
+                    'unit_price' => (float) $product->sale_price,
+                    'quantity' => 1,
+                ];
             }
+
+            $subtotal = array_sum(array_map(fn ($l) => $l['unit_price'] * $l['quantity'], $lines));
+            $paidAt = $appt->starts_at;
 
             $saleId = DB::table('sales')->insertGetId([
                 'center_id' => $centerId,
-                'client_id' => $clientId,
-                'appointment_id' => null,
+                'client_id' => $appt->client_id,
+                'appointment_id' => $appt->id,
                 'created_by_user_id' => $reception,
                 'subtotal' => $subtotal,
                 'discount' => 0,
-                'total' => $total,
+                'total' => $subtotal,
                 'status_id' => $saleStatusPaid,
-                'payment_method_id' => $paymentMethodCard,
-                'paid_at' => now(),
+                'payment_method_id' => $paymentMethods[mt_rand(0, count($paymentMethods) - 1)],
+                'paid_at' => $paidAt,
                 'notes' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $paidAt,
+                'updated_at' => $paidAt,
             ]);
 
-            foreach ($sale['lines'] as $line) {
-                if ($line['reference_id'] === null) {
-                    continue;
-                }
-
+            foreach ($lines as $line) {
                 DB::table('sale_lines')->insert([
                     'sale_id' => $saleId,
                     'center_id' => $centerId,
@@ -119,10 +103,9 @@ class SaleSeeder extends Seeder
                 ]);
             }
 
-            //emite la factura asociada (las ventas seed nacen pagadas)
             $saleModel = Sale::query()->whereKey($saleId)->first();
             if ($saleModel !== null) {
-                app(InvoiceService::class)->issueForSale($saleModel, $reception);
+                $invoices->issueForSale($saleModel, $reception);
             }
         }
     }

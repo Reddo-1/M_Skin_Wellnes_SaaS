@@ -17,17 +17,15 @@ class SkinEvaluationSeeder extends Seeder
             return;
         }
 
-        $diagnoId = User::query()
-            ->where('email', 'marc@gmail.com')
-            ->value('id');
+        $diagnoId = User::role('diagnosticador')->where('center_id', $centerId)->value('id');
 
         if ($diagnoId === null) {
             return;
         }
 
-        $skinTypeId = DB::table('skin_types')->where('name', 'mixta')->value('id');
+        $skinTypeIds = DB::table('skin_types')->pluck('id')->all();
 
-        if ($skinTypeId === null) {
+        if ($skinTypeIds === []) {
             return;
         }
 
@@ -40,8 +38,8 @@ class SkinEvaluationSeeder extends Seeder
                 'center_id' => $centerId,
                 'user_id' => $profile->user_id,
                 'client_profile_id' => $profile->id,
-                'skin_type_id' => $skinTypeId,
-                'evaluation_date' => now()->subDays(7)->toDateString(),
+                'skin_type_id' => $skinTypeIds[array_rand($skinTypeIds)],
+                'evaluation_date' => now()->subDays(mt_rand(5, 25))->toDateString(),
                 'professional_id' => $diagnoId,
                 'general_notes' => 'Evaluacion inicial. Estado general adecuado.',
                 'created_at' => now(),
