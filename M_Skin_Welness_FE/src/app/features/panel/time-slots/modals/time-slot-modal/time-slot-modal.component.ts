@@ -11,6 +11,8 @@ export interface TimeSlotFormValue {
   name: string;
   start_time: string;
   end_time: string;
+  break_start: string | null;
+  break_end: string | null;
   is_active: boolean;
 }
 
@@ -20,6 +22,19 @@ const endAfterStartValidator = (group: AbstractControl): ValidationErrors | null
   if (start && end && end <= start) {
     return { endBeforeStart: true };
   }
+  return null;
+};
+
+//el descanso es opcional: ambos o ninguno, dentro de la franja y bien ordenado
+const breakValidator = (group: AbstractControl): ValidationErrors | null => {
+  const start = group.get('start_time')?.value;
+  const end = group.get('end_time')?.value;
+  const breakStart = group.get('break_start')?.value;
+  const breakEnd = group.get('break_end')?.value;
+  if (!breakStart && !breakEnd) return null;
+  if (!breakStart || !breakEnd) return { breakIncomplete: true };
+  if (breakEnd <= breakStart) return { breakOrder: true };
+  if ((start && breakStart < start) || (end && breakEnd > end)) return { breakOutside: true };
   return null;
 };
 
@@ -46,9 +61,11 @@ export class TimeSlotModalComponent {
       name: ['', [Validators.maxLength(50)]],
       start_time: ['', [Validators.required]],
       end_time: ['', [Validators.required]],
+      break_start: [''],
+      break_end: [''],
       is_active: [true],
     },
-    { validators: endAfterStartValidator },
+    { validators: [endAfterStartValidator, breakValidator] },
   );
 
   constructor() {
@@ -59,6 +76,8 @@ export class TimeSlotModalComponent {
         name: current?.name ?? '',
         start_time: current ? current.start_time.slice(0, 5) : '',
         end_time: current ? current.end_time.slice(0, 5) : '',
+        break_start: current?.break_start ? current.break_start.slice(0, 5) : '',
+        break_end: current?.break_end ? current.break_end.slice(0, 5) : '',
         is_active: current?.is_active ?? true,
       });
     });
@@ -70,7 +89,15 @@ export class TimeSlotModalComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.formSubmit.emit(this.form.getRawValue());
+    const raw = this.form.getRawValue();
+    this.formSubmit.emit({
+      name: raw.name,
+      start_time: raw.start_time,
+      end_time: raw.end_time,
+      break_start: raw.break_start === '' ? null : raw.break_start,
+      break_end: raw.break_end === '' ? null : raw.break_end,
+      is_active: raw.is_active,
+    });
   }
 
   protected hasFieldError(field: 'name' | 'start_time' | 'end_time'): boolean {
@@ -83,5 +110,21 @@ export class TimeSlotModalComponent {
 
   protected showEndBeforeStart(): boolean {
     return this.form.controls.end_time.touched && this.form.hasError('endBeforeStart');
+  }
+
+  protected breakError(): string | null {
+    if (!this.form.controls.break_start.touched && !this.form.controls.break_end.touched) {
+      return null;
+    }
+    if (this.form.hasError('breakIncomplete')) {
+      return 'Indica inicio y fin del descanso, o deja ambos vacíos.';
+    }
+    if (this.form.hasError('breakOrder')) {
+      return 'El fin del descanso debe ser posterior a su inicio.';
+    }
+    if (this.form.hasError('breakOutside')) {
+      return 'El descanso debe quedar dentro de la franja.';
+    }
+    return null;
   }
 }

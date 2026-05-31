@@ -93,6 +93,8 @@ export class TimeSlotsListComponent {
       name: value.name.trim() === '' ? null : value.name,
       start_time: value.start_time,
       end_time: value.end_time,
+      break_start: value.break_start,
+      break_end: value.break_end,
       is_active: value.is_active,
     };
     const editing = this.editingTimeSlot();

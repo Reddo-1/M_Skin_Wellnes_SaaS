@@ -49,6 +49,31 @@
         </div>
       </div>
 
+      <div>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <app-time-picker
+              label="Inicio del descanso"
+              formControlName="break_start"
+              [invalid]="breakError() !== null"
+            />
+          </div>
+          <div>
+            <app-time-picker
+              label="Fin del descanso"
+              formControlName="break_end"
+              [invalid]="breakError() !== null"
+            />
+          </div>
+        </div>
+        <p class="mt-1.5 text-xs text-muted">
+          Descanso interno opcional (p. ej. comida). Déjalo vacío si la franja no tiene pausa.
+        </p>
+        @if (breakError(); as message) {
+          <p class="mt-1.5 text-xs text-error-500">{{ message }}</p>
+        }
+      </div>
+
       <app-toggle
         formControlName="is_active"
         label="Franja activa"
