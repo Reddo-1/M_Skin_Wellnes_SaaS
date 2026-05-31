@@ -28,7 +28,7 @@ class TreatmentController extends Controller
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name');
 
-        return TreatmentResource::collection($query->paginate(10));
+        return TreatmentResource::collection($query->paginate($request->integer('per_page', 10)));
     }
 
     public function store(StoreTreatmentRequest $request): TreatmentResource

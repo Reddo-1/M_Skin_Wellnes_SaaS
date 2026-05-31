@@ -38,7 +38,8 @@ class AppointmentController extends Controller
             $query->where('client_id', $user->id);
         }
 
-        return AppointmentResource::collection($query->paginate(10));
+        //el cuadrante pide el rango completo del dia (per_page alto); el resto pagina de 10
+        return AppointmentResource::collection($query->paginate($request->integer('per_page', 10)));
     }
 
     public function store(StoreAppointmentRequest $request): AppointmentResource

@@ -44,7 +44,8 @@ class UserController extends Controller
             })
             ->orderBy('name');
 
-        return UserResource::collection($query->paginate(10));
+        //los desplegables del cuadrante/POS piden la lista completa (per_page alto); los listados paginan de 10
+        return UserResource::collection($query->paginate($request->integer('per_page', 10)));
     }
 
     public function store(StoreUserRequest $request): UserResource

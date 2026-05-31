@@ -33,7 +33,7 @@ class MachineController extends Controller
             ->when($request->filled('is_mobile'), fn ($q) => $q->where('is_mobile', $request->boolean('is_mobile')))
             ->orderBy('name');
 
-        return MachineResource::collection($query->paginate(10));
+        return MachineResource::collection($query->paginate($request->integer('per_page', 10)));
     }
 
     public function store(StoreMachineRequest $request): MachineResource
