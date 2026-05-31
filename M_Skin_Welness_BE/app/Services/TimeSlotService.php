@@ -12,11 +12,8 @@ class TimeSlotService
     {
         return DB::transaction(function () use ($centerId, $data) {
             return TimeSlot::create([
+                ...$data,
                 'center_id' => $centerId,
-                'name' => $data['name'] ?? null,
-                'start_time' => $data['start_time'],
-                'end_time' => $data['end_time'],
-                'is_active' => $data['is_active'] ?? true,
             ]);
         });
     }

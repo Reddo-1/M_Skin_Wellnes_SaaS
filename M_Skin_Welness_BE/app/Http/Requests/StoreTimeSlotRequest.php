@@ -28,6 +28,9 @@ class StoreTimeSlotRequest extends FormRequest
                 }),
             ],
             'end_time' => ['required', 'date_format:H:i:s,H:i', 'after:start_time'],
+            //descanso interno opcional: ambos o ninguno, y dentro de la franja
+            'break_start' => ['nullable', 'required_with:break_end', 'date_format:H:i:s,H:i', 'after_or_equal:start_time', 'before:end_time'],
+            'break_end' => ['nullable', 'required_with:break_start', 'date_format:H:i:s,H:i', 'after:break_start', 'before_or_equal:end_time'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -36,6 +39,12 @@ class StoreTimeSlotRequest extends FormRequest
     {
         return [
             'start_time.unique' => 'Ya existe una franja con ese mismo horario en el centro.',
+            'break_start.required_with' => 'Indica también el inicio del descanso.',
+            'break_end.required_with' => 'Indica también el fin del descanso.',
+            'break_start.after_or_equal' => 'El descanso no puede empezar antes de la franja.',
+            'break_start.before' => 'El descanso debe quedar dentro de la franja.',
+            'break_end.after' => 'El fin del descanso debe ser posterior a su inicio.',
+            'break_end.before_or_equal' => 'El descanso no puede terminar después de la franja.',
         ];
     }
 }

@@ -17,6 +17,8 @@ class TimeSlotResource extends JsonResource
             'name' => $this->name,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
+            'break_start' => $this->break_start,
+            'break_end' => $this->break_end,
             'is_active' => $this->is_active,
         ];
     }

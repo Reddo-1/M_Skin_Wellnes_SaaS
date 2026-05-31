@@ -31,6 +31,8 @@ class WorkerScheduleResource extends JsonResource
                     'name' => $this->timeSlot->name,
                     'start_time' => $this->timeSlot->start_time,
                     'end_time' => $this->timeSlot->end_time,
+                    'break_start' => $this->timeSlot->break_start,
+                    'break_end' => $this->timeSlot->break_end,
                 ];
             }),
             'created_at' => $this->created_at?->toIso8601String(),
