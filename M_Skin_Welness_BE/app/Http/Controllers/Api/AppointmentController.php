@@ -25,7 +25,7 @@ class AppointmentController extends Controller
 
         $query = Appointment::query()
             ->forCenter($centerId)
-            ->with(['status', 'treatment', 'room', 'machine', 'client', 'worker'])
+            ->with(['status', 'treatment', 'room', 'machine', 'client', 'worker', 'assistants'])
             ->when($request->filled('from'), fn ($q) => $q->where('starts_at', '>=', $request->date('from')))
             ->when($request->filled('to'), fn ($q) => $q->where('starts_at', '<', $request->date('to')))
             ->when($request->filled('worker_id'), fn ($q) => $q->where('worker_id', $request->integer('worker_id')))
