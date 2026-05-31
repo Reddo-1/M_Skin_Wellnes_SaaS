@@ -34,6 +34,8 @@
     "@fullcalendar/core": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/list": "^6.1.20",
+    "@fullcalendar/resource": "6.1.20",
+    "@fullcalendar/resource-timegrid": "6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
     "@tailwindcss/postcss": "^4.3.0",
     "flatpickr": "^4.6.13",
