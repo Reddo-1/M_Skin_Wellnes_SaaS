@@ -47,7 +47,8 @@ class AppointmentSeeder extends Seeder
         $laserMachine = $machines['Láser diodo LD-200'] ?? null;
         $pressureMachine = $machines['Presoterapia móvil'] ?? null;
 
-        $base = CarbonImmutable::today()->addDay()->setTime(9, 0);
+        //arranca hoy para que el cuadrante y el mapa muestren citas al abrir (dia 0 = hoy)
+        $base = CarbonImmutable::today()->setTime(9, 0);
 
         //15 citas: dia, hora, worker, cliente_email, treatment, room, machine?, status
         $rows = [
