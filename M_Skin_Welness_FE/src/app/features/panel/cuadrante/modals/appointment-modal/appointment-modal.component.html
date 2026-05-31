@@ -1,0 +1,220 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[640px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar cita' : 'Nueva cita' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      @if (isEdit()) {
+        Modifica los datos de la cita. Para cambiar de paciente, cancela y crea una nueva.
+      } @else {
+        Programa una cita. El sistema bloquea el agendado si falta el consentimiento o la aptitud
+        clínica del paciente para el tratamiento.
+      }
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+        @if (isEdit()) {
+          <div class="sm:col-span-2 rounded-lg bg-surface-alt px-4 py-3">
+            <span class="text-xs font-medium uppercase tracking-wide text-muted">Paciente</span>
+            <p class="text-sm font-medium text-ink">{{ appointment()?.client?.name }}</p>
+          </div>
+        } @else {
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700">Paciente</label>
+            <app-select
+              [options]="clientOptions()"
+              [selected]="form.controls.client_id.value"
+              [invalid]="hasFieldError('client_id')"
+              placeholder="Selecciona un paciente…"
+              (selectionChange)="form.controls.client_id.setValue($event)"
+            />
+            @if (hasValidationError('client_id', 'required')) {
+              <p class="mt-1.5 text-xs text-error-500">Selecciona el paciente de la cita.</p>
+            }
+          </div>
+        }
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Tratamiento</label>
+          <app-select
+            [options]="treatmentOptions()"
+            [selected]="form.controls.treatment_id.value"
+            [invalid]="hasFieldError('treatment_id')"
+            placeholder="Selecciona un tratamiento…"
+            (selectionChange)="onTreatmentChange($event)"
+          />
+          @if (hasValidationError('treatment_id', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Selecciona el tratamiento.</p>
+          } @else if (selectedDuration() !== null) {
+            <p class="mt-1.5 text-xs text-muted">Duración estimada: {{ selectedDuration() }} min.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Profesional</label>
+          <app-select
+            [options]="workerOptions()"
+            [selected]="form.controls.worker_id.value"
+            [invalid]="hasFieldError('worker_id')"
+            placeholder="Selecciona un profesional…"
+            (selectionChange)="onWorkerChange($event)"
+          />
+          @if (hasValidationError('worker_id', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Selecciona el profesional que atiende.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Sala</label>
+          <app-select
+            [options]="roomOptions()"
+            [selected]="form.controls.room_id.value"
+            [invalid]="hasFieldError('room_id')"
+            placeholder="Selecciona una sala…"
+            (selectionChange)="form.controls.room_id.setValue($event)"
+          />
+          @if (hasValidationError('room_id', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Selecciona la sala.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Máquina (opcional)</label>
+          <app-select
+            [options]="machineOptions()"
+            [selected]="form.controls.machine_id.value"
+            placeholder="Sin máquina"
+            (selectionChange)="form.controls.machine_id.setValue($event)"
+          />
+        </div>
+
+        <div>
+          <app-date-picker
+            label="Fecha"
+            formControlName="date"
+            placeholder="Selecciona una fecha"
+            [invalid]="hasFieldError('date')"
+          />
+          @if (hasValidationError('date', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica la fecha de la cita.</p>
+          }
+        </div>
+
+        <div>
+          <app-time-picker label="Hora de inicio" formControlName="time" [invalid]="hasFieldError('time')" />
+          @if (hasValidationError('time', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica la hora de inicio.</p>
+          }
+        </div>
+
+        @if (!isEdit()) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700">Estado</label>
+            <app-select
+              [options]="createStatusOptions()"
+              [selected]="form.controls.status_id.value"
+              [invalid]="hasFieldError('status_id')"
+              placeholder="Selecciona un estado…"
+              (selectionChange)="form.controls.status_id.setValue($event)"
+            />
+            @if (hasValidationError('status_id', 'required')) {
+              <p class="mt-1.5 text-xs text-error-500">Selecciona el estado inicial.</p>
+            }
+          </div>
+        }
+
+        <div>
+          <app-input
+            label="Precio reservado (opcional)"
+            type="number"
+            formControlName="reserved_price"
+            placeholder="Tarifa del tratamiento"
+            [min]="0"
+            [step]="0.01"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Ayudantes (opcional)</label>
+          <app-multi-select
+            [options]="assistantOptions()"
+            [selectedIds]="form.controls.assistant_ids.value"
+            placeholder="Selecciona profesionales de apoyo…"
+            (selectionChange)="form.controls.assistant_ids.setValue($event)"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <app-textarea
+            label="Notas (opcional)"
+            formControlName="notes"
+            [rows]="3"
+            placeholder="Indicaciones de la cita…"
+            [invalid]="hasFieldError('notes')"
+          />
+          @if (hasValidationError('notes', 'maxlength')) {
+            <p class="mt-1.5 text-xs text-error-500">Las notas no pueden superar los 5000 caracteres.</p>
+          }
+        </div>
+      </div>
+
+      @if (isEdit() && canManage() && statusActions().length > 0) {
+        <div class="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+          @for (action of statusActions(); track action.status_id) {
+            <button
+              type="button"
+              (click)="statusChange.emit(action.status_id)"
+              [disabled]="submitting()"
+              class="inline-flex items-center justify-center rounded-lg border px-3.5 py-2 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60"
+              [class]="
+                action.tone === 'success'
+                  ? 'border-success-200 bg-success-50 text-success-600 hover:bg-success-100'
+                  : action.tone === 'danger'
+                    ? 'border-error-200 bg-error-50 text-error-600 hover:bg-error-100'
+                    : 'border-gray-200 bg-white text-ink hover:bg-gray-50'
+              "
+            >
+              {{ action.label }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        @if (isEdit() && canManage()) {
+          <button
+            type="button"
+            (click)="remove.emit()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-error-600 transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Eliminar cita
+          </button>
+        } @else {
+          <span></span>
+        }
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            (click)="close.emit()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ canManage() ? 'Cancelar' : 'Cerrar' }}
+          </button>
+          @if (canManage()) {
+            <button
+              type="submit"
+              [disabled]="submitting()"
+              class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+            >
+              {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Crear cita' }}
+            </button>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+</app-modal>
