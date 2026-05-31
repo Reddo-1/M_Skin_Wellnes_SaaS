@@ -19,6 +19,12 @@ export class WorkerScheduleService {
     return await this.api.getCollection<WorkerSchedule>('/worker-schedules', { worker_id: workerId });
   }
 
+  //todos los horarios del centro (para el overlay de disponibilidad del cuadrante)
+  async listCenter(): Promise<WorkerSchedule[]> {
+    const page = await this.api.getCollection<WorkerSchedule>('/worker-schedules');
+    return page.data;
+  }
+
   async create(data: WorkerScheduleData): Promise<WorkerSchedule> {
     return await this.api.postResource<WorkerSchedule>('/worker-schedules', data);
   }

@@ -33,6 +33,12 @@ export class WorkerAbsenceService {
     return await this.api.getCollection<WorkerAbsence>('/worker-absences', { worker_id: workerId });
   }
 
+  //ausencias del centro en un rango de fechas (overlay del cuadrante)
+  async listCenter(from: string, to: string): Promise<WorkerAbsence[]> {
+    const page = await this.api.getCollection<WorkerAbsence>('/worker-absences', { from, to });
+    return page.data;
+  }
+
   async create(data: WorkerAbsenceCreateData): Promise<WorkerAbsence[]> {
     return await this.api.postResource<WorkerAbsence[]>('/worker-absences', data);
   }

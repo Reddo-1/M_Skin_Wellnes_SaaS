@@ -21,6 +21,15 @@ export class WorkerExtraAvailabilityService {
     });
   }
 
+  //disponibilidad extra del centro en un rango de fechas (overlay del cuadrante)
+  async listCenter(from: string, to: string): Promise<WorkerExtraAvailability[]> {
+    const page = await this.api.getCollection<WorkerExtraAvailability>(
+      '/worker-extra-availabilities',
+      { from, to },
+    );
+    return page.data;
+  }
+
   async create(data: WorkerExtraAvailabilityData): Promise<WorkerExtraAvailability> {
     return await this.api.postResource<WorkerExtraAvailability>('/worker-extra-availabilities', data);
   }
