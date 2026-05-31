@@ -32,6 +32,7 @@ import { WorkerAbsenceService } from '../../../core/services/worker-absence.serv
 import { WorkerExtraAvailabilityService } from '../../../core/services/worker-extra-availability.service';
 import { WorkerScheduleService } from '../../../core/services/worker-schedule.service';
 import { apiError, loadResourceError } from '../../../core/utils/form.util';
+import { formatLocalDate, pad, toOffsetIso } from '../../../core/utils/datetime.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import {
   AppointmentFormValue,
@@ -59,7 +60,8 @@ const STATUS_FALLBACK: EventStyle = { bg: '#f2f4f7', border: '#98a2b3', text: '#
 const DAY_START = '07:00:00';
 const DAY_END = '22:00:00';
 
-const pad = (value: number): string => value.toString().padStart(2, '0');
+//estados en los que la cita se puede arrastrar/redimensionar en el cuadrante
+const EDITABLE_STATUSES = ['pendiente', 'confirmada'];
 
 @Component({
   selector: 'app-cuadrante',
@@ -132,13 +134,15 @@ export class CuadranteComponent {
     for (const appointment of this.appointments()) {
       const resourceId = appointment.worker ? String(appointment.worker.id) : '';
       if (!visible.has(resourceId)) continue;
-      const style = STATUS_STYLE[this.normalize(appointment.status?.name)] ?? STATUS_FALLBACK;
+      const status = this.normalize(appointment.status?.name);
+      const style = STATUS_STYLE[status] ?? STATUS_FALLBACK;
       events.push({
         id: `appt-${appointment.id}`,
         resourceId,
         title: `${appointment.treatment?.name ?? 'Cita'} · ${appointment.client?.name ?? ''}`,
         start: appointment.starts_at ?? undefined,
         end: appointment.ends_at ?? undefined,
+        editable: EDITABLE_STATUSES.includes(status),
         backgroundColor: style.bg,
         borderColor: style.border,
         textColor: style.text,
@@ -240,25 +244,35 @@ export class CuadranteComponent {
 
   private async loadCatalogs(): Promise<void> {
     try {
-      const [workers, clients, treatments, rooms, machines] = await Promise.all([
-        this.workerService.list({ is_active: true, per_page: 200 }),
+      const [clients, treatments, rooms, machines] = await Promise.all([
         this.clientService.list({ is_active: true, per_page: 200 }),
         this.treatmentService.list({ is_active: true, per_page: 200 }),
         this.roomService.list({ is_active: true, per_page: 200 }),
         this.machineService.list({ is_active: true, per_page: 200 }),
       ]);
-      this.workers.set(workers.data);
       this.clients.set(clients.data);
       this.treatments.set(treatments.data);
       this.rooms.set(rooms.data);
       this.machines.set(machines.data);
+      await this.loadWorkers();
     } catch {
       this.errorMessage.set(loadResourceError('los datos del cuadrante'));
     }
   }
 
+  //solo admin/recepcion/rrhh pueden listar el personal; un profesional usa su propia ficha como unica columna
+  private async loadWorkers(): Promise<void> {
+    if (this.seesAllColumns()) {
+      const workers = await this.workerService.list({ is_active: true, per_page: 200 });
+      this.workers.set(workers.data);
+    } else {
+      const self = this.auth.user();
+      this.workers.set(self ? [self] : []);
+    }
+  }
+
   private onDatesSet(arg: DatesSetArg): void {
-    const day = this.formatLocalDate(arg.start);
+    const day = formatLocalDate(arg.start);
     this.currentDay.set(day);
     this.currentFrom.set(arg.startStr);
     this.currentTo.set(arg.endStr);
@@ -272,20 +286,42 @@ export class CuadranteComponent {
     this.errorMessage.set(null);
     try {
       const workerId = this.seesAllColumns() ? undefined : this.auth.user()?.id;
-      const [appointments, schedules, absences, extras] = await Promise.all([
-        this.appointmentService.listRange(this.currentFrom(), this.currentTo(), workerId),
-        this.scheduleService.listCenter(),
+      const appointments = await this.appointmentService.listRange(
+        this.currentFrom(),
+        this.currentTo(),
+        workerId,
+      );
+      this.appointments.set(appointments);
+    } catch {
+      this.errorMessage.set(loadResourceError('el cuadrante'));
+      this.loading.set(false);
+      return;
+    }
+    await this.loadAvailability(day);
+    this.loading.set(false);
+  }
+
+  //overlay de disponibilidad: solo para quien puede leer horarios (admin/rrhh); el resto ve el cuadrante sin fondo
+  private async loadAvailability(day: string): Promise<void> {
+    if (!this.auth.hasPermission('worker_schedules.view')) {
+      this.schedules.set([]);
+      this.absences.set([]);
+      this.extras.set([]);
+      return;
+    }
+    try {
+      const [schedules, absences, extras] = await Promise.all([
+        this.scheduleService.listCenter(this.isoWeekday(day)),
         this.absenceService.listCenter(day, day),
         this.extraService.listCenter(day, day),
       ]);
-      this.appointments.set(appointments);
       this.schedules.set(schedules);
       this.absences.set(absences);
       this.extras.set(extras);
     } catch {
-      this.errorMessage.set(loadResourceError('el cuadrante'));
-    } finally {
-      this.loading.set(false);
+      this.schedules.set([]);
+      this.absences.set([]);
+      this.extras.set([]);
     }
   }
 
@@ -302,7 +338,7 @@ export class CuadranteComponent {
     this.editingAppointment.set(null);
     this.prefill.set({
       worker_id: Number(resourceId),
-      date: this.formatLocalDate(arg.start),
+      date: formatLocalDate(arg.start),
       time: `${pad(arg.start.getHours())}:${pad(arg.start.getMinutes())}`,
     });
     this.modalOpen.set(true);
@@ -323,7 +359,7 @@ export class CuadranteComponent {
     this.modalOpen.set(false);
   }
 
-  async submit(value: AppointmentFormValue): Promise<void> {
+  protected async submit(value: AppointmentFormValue): Promise<void> {
     const editing = this.editingAppointment();
     this.submitting.set(true);
     try {
@@ -353,7 +389,7 @@ export class CuadranteComponent {
     }
   }
 
-  async changeStatus(statusId: number): Promise<void> {
+  protected async changeStatus(statusId: number): Promise<void> {
     const editing = this.editingAppointment();
     if (editing === null) return;
     this.submitting.set(true);
@@ -369,7 +405,7 @@ export class CuadranteComponent {
     }
   }
 
-  async removeAppointment(): Promise<void> {
+  protected async removeAppointment(): Promise<void> {
     const editing = this.editingAppointment();
     if (editing === null) return;
     const confirmed = await this.notifications.modal.confirm({
@@ -403,8 +439,8 @@ export class CuadranteComponent {
     try {
       await this.appointmentService.update(id, {
         worker_id: resourceId !== undefined ? Number(resourceId) : undefined,
-        starts_at: this.toOffsetIso(arg.event.start),
-        ends_at: arg.event.end ? this.toOffsetIso(arg.event.end) : undefined,
+        starts_at: toOffsetIso(arg.event.start),
+        ends_at: arg.event.end ? toOffsetIso(arg.event.end) : undefined,
       });
       this.notifications.toast.success('Cita reprogramada.');
       await this.loadDay();
@@ -415,13 +451,17 @@ export class CuadranteComponent {
   }
 
   private async onEventResize(arg: EventResizeDoneArg): Promise<void> {
-    if (arg.event.end === null) {
+    if (arg.event.start === null || arg.event.end === null) {
       arg.revert();
       return;
     }
     const id = arg.event.extendedProps['id'] as number;
     try {
-      await this.appointmentService.update(id, { ends_at: this.toOffsetIso(arg.event.end) });
+      //se envia tambien starts_at (aunque no cambie) para que el guard del back interprete inicio y fin en la misma zona
+      await this.appointmentService.update(id, {
+        starts_at: toOffsetIso(arg.event.start),
+        ends_at: toOffsetIso(arg.event.end),
+      });
       this.notifications.toast.success('Duración de la cita actualizada.');
       await this.loadDay();
     } catch (error) {
@@ -444,17 +484,5 @@ export class CuadranteComponent {
     const parsed = new Date(`${day}T00:00:00`);
     const js = parsed.getDay();
     return js === 0 ? 7 : js;
-  }
-
-  private formatLocalDate(value: Date): string {
-    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
-  }
-
-  private toOffsetIso(value: Date): string {
-    const offsetMinutes = -value.getTimezoneOffset();
-    const sign = offsetMinutes >= 0 ? '+' : '-';
-    const abs = Math.abs(offsetMinutes);
-    const stamp = `${this.formatLocalDate(value)}T${pad(value.getHours())}:${pad(value.getMinutes())}:00`;
-    return `${stamp}${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
   }
 }

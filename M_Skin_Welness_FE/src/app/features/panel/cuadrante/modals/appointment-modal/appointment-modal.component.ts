@@ -14,6 +14,7 @@ import { MultiSelectComponent } from '../../../../../shared/ui/multi-select/mult
 import { SelectComponent, SelectOption } from '../../../../../shared/ui/select/select.component';
 import { TextareaComponent } from '../../../../../shared/ui/textarea/textarea.component';
 import { TimePickerComponent } from '../../../../../shared/ui/time-picker/time-picker.component';
+import { formatLocalDate, pad, toOffsetIso } from '../../../../../core/utils/datetime.util';
 
 export interface AppointmentFormValue {
   client_id: number;
@@ -50,8 +51,6 @@ interface StatusAction {
   label: string;
   tone: 'success' | 'danger' | 'neutral';
 }
-
-const pad = (value: number): string => value.toString().padStart(2, '0');
 
 @Component({
   selector: 'app-appointment-modal',
@@ -264,8 +263,8 @@ export class AppointmentModalComponent {
       worker_id: Number(raw.worker_id),
       room_id: Number(raw.room_id),
       machine_id: raw.machine_id === '' ? null : Number(raw.machine_id),
-      starts_at: this.toOffsetIso(start),
-      ends_at: this.toOffsetIso(end),
+      starts_at: toOffsetIso(start),
+      ends_at: toOffsetIso(end),
       status_id: Number(raw.status_id),
       reserved_price: raw.reserved_price,
       notes: raw.notes.trim() === '' ? null : raw.notes,
@@ -300,20 +299,13 @@ export class AppointmentModalComponent {
   private splitIso(iso: string | null): { date: string; time: string } {
     if (iso === null) return { date: this.today(), time: '' };
     const parsed = new Date(iso);
-    const date = `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}`;
-    return { date, time: `${pad(parsed.getHours())}:${pad(parsed.getMinutes())}` };
-  }
-
-  private toOffsetIso(value: Date): string {
-    const offsetMinutes = -value.getTimezoneOffset();
-    const sign = offsetMinutes >= 0 ? '+' : '-';
-    const abs = Math.abs(offsetMinutes);
-    const stamp = `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}:00`;
-    return `${stamp}${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+    return {
+      date: formatLocalDate(parsed),
+      time: `${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`,
+    };
   }
 
   private today(): string {
-    const now = new Date();
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    return formatLocalDate(new Date());
   }
 }
