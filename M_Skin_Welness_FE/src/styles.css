@@ -118,10 +118,152 @@
   scrollbar-width: none;
 }
 
-/* FullCalendar — barra de herramientas compacta en móvil (evita que prev/next/hoy se apilen) */
+/* FullCalendar — estilo TailAdmin (toolbar, cabeceras, rejilla y eventos), adaptado a la marca */
+.fc .fc-view-harness {
+  @apply max-w-full overflow-x-auto;
+}
+.fc .fc-scrollgrid-section > * {
+  border-right-width: 0;
+  border-bottom-width: 0;
+}
+.fc .fc-scrollgrid {
+  border-left-width: 0;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  @apply flex-col gap-4 px-5 pt-5 sm:flex-row;
+}
+.fc-button-group {
+  @apply gap-2;
+}
+.fc .fc-button {
+  @apply !rounded-lg border border-gray-200 bg-transparent text-sm font-medium capitalize text-gray-700 hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none;
+}
+.fc-button-group .fc-button {
+  @apply flex h-10 w-10 items-center justify-center;
+}
+.fc-button-group .fc-button.fc-prev-button:before {
+  @apply inline-block mt-1;
+  content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.0068 6L9.75684 12.25L16.0068 18.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fc-button-group .fc-button.fc-next-button:before {
+  @apply inline-block mt-1;
+  content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.50684 19L15.7568 12.75L9.50684 6.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fc-button-group .fc-button .fc-icon {
+  @apply hidden;
+}
+.fc-today-button {
+  @apply !h-10 !rounded-lg !border !border-gray-200 !bg-transparent !px-4 !text-sm !font-medium !text-gray-700 hover:!bg-gray-50 focus:!shadow-none disabled:!cursor-not-allowed disabled:!opacity-50;
+}
+.fc-addEventButton-button,
+.fc-newAppointmentButton-button {
+  @apply !h-10 !rounded-lg !border-0 !bg-brand-500 !px-4 !text-sm !font-medium !text-white hover:!bg-brand-600 focus:!shadow-none;
+}
+.fc-toolbar-title {
+  @apply !text-lg !font-medium text-ink;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child {
+  @apply rounded-lg bg-gray-100 p-0.5;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button {
+  @apply !h-auto !w-auto rounded-md !border-0 bg-transparent !px-5 !py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:!shadow-none;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button.fc-button-active {
+  @apply bg-white text-gray-900;
+}
+.fc-theme-standard th {
+  @apply !border-x-0 border-t !border-gray-200 bg-gray-50 !text-left;
+}
+.fc-theme-standard td,
+.fc-theme-standard .fc-scrollgrid {
+  @apply !border-gray-200;
+}
+.fc .fc-col-header-cell-cushion {
+  @apply !px-5 !py-4 text-sm font-medium uppercase text-gray-400;
+}
+.fc .fc-daygrid-day.fc-day-today {
+  @apply bg-transparent;
+}
+.fc .fc-daygrid-day {
+  @apply p-2;
+}
+.fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
+  @apply rounded-sm bg-gray-100;
+}
+.fc .fc-daygrid-day-number {
+  @apply !p-3 text-sm font-medium text-gray-700;
+}
+.fc .fc-daygrid-day-top {
+  @apply !flex-row;
+}
+.fc .fc-day-other .fc-daygrid-day-top {
+  opacity: 1;
+}
+.fc .fc-day-other .fc-daygrid-day-top .fc-daygrid-day-number {
+  @apply text-gray-400;
+}
+.fc .fc-timegrid-now-indicator-line {
+  @apply border-brand-500;
+}
+.event-fc-color {
+  @apply rounded-lg py-2.5 pl-4 pr-3;
+}
+.event-fc-color .fc-event-title {
+  @apply p-0 text-sm font-normal text-gray-700;
+}
+.fc-daygrid-event-dot {
+  @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
+}
+.fc-event {
+  @apply focus:shadow-none;
+}
+.fc-timegrid-event {
+  @apply rounded-lg;
+}
+.fc-daygrid-event.fc-event-start {
+  @apply !ml-3;
+}
+.event-fc-color.fc-bg-success {
+  @apply border-success-50 bg-success-50;
+}
+.event-fc-color.fc-bg-danger {
+  @apply border-error-50 bg-error-50;
+}
+.event-fc-color.fc-bg-primary {
+  @apply border-brand-50 bg-brand-50;
+}
+.event-fc-color.fc-bg-warning {
+  @apply border-warning-50 bg-warning-50;
+}
+.event-fc-color.fc-bg-success .fc-daygrid-event-dot {
+  @apply bg-success-500;
+}
+.event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
+  @apply bg-error-500;
+}
+.event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
+  @apply bg-brand-500;
+}
+.event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
+  @apply bg-warning-500;
+}
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+  @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500;
+}
+.fc .fc-timegrid-axis-cushion {
+  @apply text-sm font-medium text-gray-500;
+}
+.custom-calendar .fc-h-event {
+  background-color: transparent;
+  border: none;
+  color: black;
+}
+
+/* compacta la barra en móvil (evita que prev/next/hoy se apilen) */
 @media (max-width: 767px) {
   .fc .fc-toolbar.fc-header-toolbar {
-    margin-bottom: 0.75rem;
+    @apply px-4 pt-4;
+    margin-bottom: 0.25rem;
   }
   .fc .fc-toolbar-chunk {
     display: flex;
@@ -131,9 +273,5 @@
   .fc .fc-toolbar-title {
     font-size: 1.05rem;
     line-height: 1.2;
-  }
-  .fc .fc-button {
-    padding: 0.25em 0.5em;
-    font-size: 0.78rem;
   }
 }
