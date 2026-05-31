@@ -255,6 +255,17 @@
   color: black;
 }
 
+/* descanso interno de la franja: banda rayada "no disponible" en los calendarios */
+.fc-break-bg {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(102, 112, 133, 0.22) 5px,
+    rgba(102, 112, 133, 0.22) 10px
+  );
+}
+
 /* compacta la barra en móvil (evita que prev/next/hoy se apilen) */
 @media (max-width: 767px) {
   .fc .fc-toolbar.fc-header-toolbar {

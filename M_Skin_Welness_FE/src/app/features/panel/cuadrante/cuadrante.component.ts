@@ -156,15 +156,26 @@ export class CuadranteComponent {
         const resourceId = String(schedule.worker_id);
         if (!visible.has(resourceId)) continue;
         if (schedule.weekday !== weekday || !this.scheduleActiveOn(schedule, day)) continue;
-        if (!schedule.time_slot) continue;
+        const slot = schedule.time_slot;
+        if (!slot) continue;
         events.push({
           resourceId,
-          start: `${day}T${schedule.time_slot.start_time}`,
-          end: `${day}T${schedule.time_slot.end_time}`,
+          start: `${day}T${slot.start_time}`,
+          end: `${day}T${slot.end_time}`,
           display: 'background',
           backgroundColor: '#f2f4f7',
           extendedProps: { kind: 'window' },
         });
+        if (slot.break_start && slot.break_end) {
+          events.push({
+            resourceId,
+            start: `${day}T${slot.break_start}`,
+            end: `${day}T${slot.break_end}`,
+            display: 'background',
+            classNames: ['fc-break-bg'],
+            extendedProps: { kind: 'break' },
+          });
+        }
       }
 
       for (const absence of this.absences()) {

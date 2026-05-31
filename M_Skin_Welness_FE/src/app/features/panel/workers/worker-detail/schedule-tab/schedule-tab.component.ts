@@ -88,18 +88,41 @@ export class ScheduleTabComponent {
     const events: EventInput[] = [];
 
     for (const schedule of this.schedules()) {
-      events.push({
-        title: schedule.time_slot?.name ?? 'Franja',
-        daysOfWeek: [schedule.weekday === 7 ? 0 : schedule.weekday],
-        startTime: schedule.time_slot?.start_time ?? undefined,
-        endTime: schedule.time_slot?.end_time ?? undefined,
-        startRecur: schedule.start_date ?? undefined,
-        endRecur: schedule.end_date ? this.dayAfter(schedule.end_date) : undefined,
+      const slot = schedule.time_slot;
+      const daysOfWeek = [schedule.weekday === 7 ? 0 : schedule.weekday];
+      const startRecur = schedule.start_date ?? undefined;
+      const endRecur = schedule.end_date ? this.dayAfter(schedule.end_date) : undefined;
+      const block = {
+        title: slot?.name ?? 'Franja',
+        daysOfWeek,
+        startRecur,
+        endRecur,
         backgroundColor: '#dbeafe',
         borderColor: '#3b82f6',
         textColor: '#1e3a8a',
         extendedProps: { kind: 'schedule', id: schedule.id },
-      });
+      };
+
+      if (slot?.break_start && slot?.break_end) {
+        //se parte la franja en dos bloques dejando el descanso como hueco + banda rayada
+        events.push({ ...block, startTime: slot.start_time, endTime: slot.break_start });
+        events.push({ ...block, startTime: slot.break_end, endTime: slot.end_time });
+        events.push({
+          daysOfWeek,
+          startRecur,
+          endRecur,
+          startTime: slot.break_start,
+          endTime: slot.break_end,
+          display: 'background',
+          classNames: ['fc-break-bg'],
+        });
+      } else {
+        events.push({
+          ...block,
+          startTime: slot?.start_time ?? undefined,
+          endTime: slot?.end_time ?? undefined,
+        });
+      }
     }
 
     for (const absence of this.absences()) {
