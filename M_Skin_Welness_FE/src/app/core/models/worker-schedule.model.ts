@@ -8,6 +8,8 @@ export interface WorkerScheduleTimeSlot {
   name: string | null;
   start_time: string;
   end_time: string;
+  break_start: string | null;
+  break_end: string | null;
 }
 
 export interface WorkerSchedule {
