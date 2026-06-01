@@ -7,9 +7,9 @@ import { Component, effect, input, output } from '@angular/core';
 })
 export class ModalComponent {
   readonly isOpen = input.required<boolean>();
-  readonly showCloseButton = input<boolean>(true);
   readonly isFullscreen = input<boolean>(false);
   readonly panelClass = input<string>('');
+  readonly widthClass = input<string>('max-w-[600px]');
 
   readonly close = output<void>();
 

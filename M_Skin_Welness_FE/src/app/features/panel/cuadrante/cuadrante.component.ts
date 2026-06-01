@@ -22,7 +22,6 @@ import { WorkerExtraAvailability } from '../../../core/models/worker-extra-avail
 import { WorkerSchedule } from '../../../core/models/worker-schedule.model';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { ClientService } from '../../../core/services/client.service';
 import { MachineService } from '../../../core/services/machine.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RoomService } from '../../../core/services/room.service';
@@ -74,7 +73,6 @@ export class CuadranteComponent {
   private readonly notifications = inject(NotificationService);
   private readonly appointmentService = inject(AppointmentService);
   private readonly workerService = inject(WorkerService);
-  private readonly clientService = inject(ClientService);
   private readonly treatmentService = inject(TreatmentService);
   private readonly roomService = inject(RoomService);
   private readonly machineService = inject(MachineService);
@@ -83,7 +81,6 @@ export class CuadranteComponent {
   private readonly extraService = inject(WorkerExtraAvailabilityService);
 
   protected readonly workers = signal<User[]>([]);
-  protected readonly clients = signal<User[]>([]);
   protected readonly treatments = signal<Treatment[]>([]);
   protected readonly rooms = signal<Room[]>([]);
   protected readonly machines = signal<Machine[]>([]);
@@ -255,13 +252,11 @@ export class CuadranteComponent {
 
   private async loadCatalogs(): Promise<void> {
     try {
-      const [clients, treatments, rooms, machines] = await Promise.all([
-        this.clientService.list({ is_active: true, per_page: 200 }),
+      const [treatments, rooms, machines] = await Promise.all([
         this.treatmentService.list({ is_active: true, per_page: 200 }),
         this.roomService.list({ is_active: true, per_page: 200 }),
         this.machineService.list({ is_active: true, per_page: 200 }),
       ]);
-      this.clients.set(clients.data);
       this.treatments.set(treatments.data);
       this.rooms.set(rooms.data);
       this.machines.set(machines.data);
