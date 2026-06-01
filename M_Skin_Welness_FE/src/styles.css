@@ -261,9 +261,48 @@
     45deg,
     transparent,
     transparent 5px,
-    rgba(102, 112, 133, 0.22) 5px,
-    rgba(102, 112, 133, 0.22) 10px
+    rgba(102, 112, 133, 0.35) 5px,
+    rgba(102, 112, 133, 0.35) 10px
   );
+}
+
+/* bandas de estado del horario del profesional en el cuadrante: tintes marcados + etiqueta de esquina */
+.custom-calendar .fc-bg-event.fc-band {
+  opacity: 1;
+}
+.custom-calendar .fc-bg-event.fc-band-jornada {
+  background-color: rgba(102, 112, 133, 0.12);
+}
+.custom-calendar .fc-bg-event.fc-band-absence {
+  background-color: rgba(240, 68, 56, 0.2);
+}
+.custom-calendar .fc-bg-event.fc-band-extra {
+  background-color: rgba(18, 183, 106, 0.2);
+}
+.custom-calendar .fc-bg-event.fc-band .fc-event-title {
+  padding: 3px 5px;
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.custom-calendar .fc-band-jornada .fc-event-title,
+.custom-calendar .fc-band.fc-break-bg .fc-event-title {
+  color: #475467;
+}
+.custom-calendar .fc-band-absence .fc-event-title {
+  color: #b42318;
+}
+.custom-calendar .fc-band-extra .fc-event-title {
+  color: #027a48;
+}
+
+/* en el cuadrante (un día por columnas) "hoy" teñiría todas las columnas; se quita y queda solo la línea de hora actual */
+.custom-calendar .fc-timegrid-col.fc-day-today,
+.custom-calendar .fc-day-today {
+  background-color: transparent;
 }
 
 /* compacta la barra en móvil (evita que prev/next/hoy se apilen) */

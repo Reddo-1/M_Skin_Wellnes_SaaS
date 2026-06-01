@@ -160,7 +160,8 @@ export class CuadranteComponent {
           start: `${day}T${slot.start_time}`,
           end: `${day}T${slot.end_time}`,
           display: 'background',
-          backgroundColor: '#f2f4f7',
+          title: 'Jornada',
+          classNames: ['fc-band', 'fc-band-jornada'],
           extendedProps: { kind: 'window' },
         });
         if (slot.break_start && slot.break_end) {
@@ -169,7 +170,8 @@ export class CuadranteComponent {
             start: `${day}T${slot.break_start}`,
             end: `${day}T${slot.break_end}`,
             display: 'background',
-            classNames: ['fc-break-bg'],
+            title: 'Descanso',
+            classNames: ['fc-band', 'fc-break-bg'],
             extendedProps: { kind: 'break' },
           });
         }
@@ -183,7 +185,8 @@ export class CuadranteComponent {
           start: absence.is_full_day ? `${day}T${DAY_START}` : `${day}T${absence.start_time}`,
           end: absence.is_full_day ? `${day}T${DAY_END}` : `${day}T${absence.end_time}`,
           display: 'background',
-          backgroundColor: 'rgba(240, 68, 56, 0.12)',
+          title: 'Ausencia',
+          classNames: ['fc-band', 'fc-band-absence'],
           extendedProps: { kind: 'absence' },
         });
       }
@@ -196,7 +199,8 @@ export class CuadranteComponent {
           start: `${day}T${extra.start_time}`,
           end: `${day}T${extra.end_time}`,
           display: 'background',
-          backgroundColor: 'rgba(18, 183, 106, 0.14)',
+          title: 'Extra',
+          classNames: ['fc-band', 'fc-band-extra'],
           extendedProps: { kind: 'extra' },
         });
       }
