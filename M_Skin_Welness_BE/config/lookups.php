@@ -2,12 +2,11 @@
 
 return [
     'session_statuses' => [
-        'pendiente' => 1,
-        'confirmada' => 2,
-        'en_curso' => 3,
-        'realizada' => 4,
-        'cancelada' => 5,
-        'no_presentada' => 6,
+        'confirmada' => 1,
+        'en_curso' => 2,
+        'realizada' => 3,
+        'cancelada' => 4,
+        'no_presentada' => 5,
     ],
 
     'sale_statuses' => [

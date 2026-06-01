@@ -41,7 +41,6 @@ class StoreAppointmentRequest extends FormRequest
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
             'booking_source' => ['required'],
-            'status_id' => ['required', 'integer', Rule::exists('session_statuses', 'id')],
             'reserved_price' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'assistant_ids' => ['nullable', 'array'],

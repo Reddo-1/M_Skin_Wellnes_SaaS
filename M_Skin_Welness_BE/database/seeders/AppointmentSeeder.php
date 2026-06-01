@@ -32,7 +32,7 @@ class AppointmentSeeder extends Seeder
         $rooms = Room::query()->where('center_id', $centerId)->pluck('id', 'name');
 
         $statusIds = [];
-        foreach (['pendiente', 'confirmada', 'en_curso', 'realizada', 'cancelada', 'no_presentada'] as $code) {
+        foreach (['confirmada', 'en_curso', 'realizada', 'cancelada', 'no_presentada'] as $code) {
             $statusIds[$code] = (int) config('lookups.session_statuses.'.$code);
         }
 
@@ -157,6 +157,6 @@ class AppointmentSeeder extends Seeder
 
         $r = mt_rand(1, 100);
 
-        return $r <= 60 ? 'confirmada' : ($r <= 90 ? 'pendiente' : 'cancelada');
+        return $r <= 90 ? 'confirmada' : 'cancelada';
     }
 }

@@ -80,16 +80,23 @@ class AppointmentService
             ->where('is_active', true)
             ->first();
 
-        if ($treatmentConsent === null) {
+        //el wizard crea el registro al consentir; si no existe o no consintió, no se agenda
+        if ($treatmentConsent === null || ! $treatmentConsent->treatment_consent) {
             throw ValidationException::withMessages([
-                'treatment_id' => ['El paciente no ha sido valorado para este tratamiento. El diagnosticador debe valorarlo antes de programar la cita.'],
+                'treatment_id' => ['El paciente no ha consentido este tratamiento.'],
             ]);
         }
 
-        //is_suitable=false NO bloquea: el paciente puede insistir bajo su responsabilidad si consintió igual
-        if (! $treatmentConsent->treatment_consent) {
+        //aptitud: null = sin valorar, false = no apto; ambos bloquean (solo se agenda si el diagnosticador lo marcó apto)
+        if ($treatmentConsent->is_suitable === null) {
             throw ValidationException::withMessages([
-                'treatment_id' => ['El paciente no ha consentido este tratamiento.'],
+                'treatment_id' => ['El paciente está pendiente de valoración clínica para este tratamiento.'],
+            ]);
+        }
+
+        if ($treatmentConsent->is_suitable === false) {
+            throw ValidationException::withMessages([
+                'treatment_id' => ['El paciente no es apto para este tratamiento según la valoración clínica.'],
             ]);
         }
     }
@@ -165,7 +172,8 @@ class AppointmentService
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'booking_source' => $data['booking_source'],
-                'status_id' => (int) $data['status_id'],
+                //las citas nacen confirmadas (el estado pendiente ya no existe)
+                'status_id' => (int) config('lookups.session_statuses.confirmada'),
                 'reserved_price' => $data['reserved_price'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
