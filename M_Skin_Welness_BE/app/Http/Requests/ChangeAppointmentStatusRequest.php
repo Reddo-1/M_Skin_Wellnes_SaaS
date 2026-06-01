@@ -24,6 +24,7 @@ class ChangeAppointmentStatusRequest extends FormRequest
             'products.*.product_id' => [
                 'required_with:products',
                 'integer',
+                'distinct',
                 Rule::exists('products', 'id')->where('center_id', $centerId),
             ],
             'products.*.quantity' => ['required_with:products', 'numeric', 'gt:0'],

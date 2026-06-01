@@ -87,12 +87,19 @@ class AppointmentController extends Controller
     //endpoint dedicado: el service dispara side effects (stock, validaciones) en cada transición
     public function changeStatus(ChangeAppointmentStatusRequest $request, Appointment $appointment): AppointmentResource
     {
+        $products = $request->validated('products', []);
+
+        //adjuntar productos consumidos consume stock: exige el permiso separado de productos
+        if ($products !== []) {
+            $this->authorize('attachProducts', $appointment);
+        }
+
         return AppointmentResource::make(
             $this->service->changeStatus(
                 $appointment,
                 (int) $request->validated('status_id'),
                 $request->user()->id,
-                $request->validated('products', []),
+                $products,
             )
         );
     }
