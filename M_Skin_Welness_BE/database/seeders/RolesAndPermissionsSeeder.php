@@ -96,6 +96,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $treatmentConsentsPermissions = [
             'treatment_consents.view',
             'treatment_consents.create',
+            //la aptitud (is_suitable) la edita SOLO el diagnosticador desde la ficha
+            'treatment_consents.update',
         ];
 
         $clientConsentsPermissions = [
@@ -225,6 +227,10 @@ class RolesAndPermissionsSeeder extends Seeder
                 [
                     'appointments.create',
                     'appointments.update',
+                    //lectura de disponibilidad del personal para agendar desde el cuadrante
+                    'worker_schedules.view',
+                    'worker_absences.view',
+                    'worker_extra_availabilities.view',
                     'users.view',
                     'users.create_client',
                     'users.update',
@@ -265,7 +271,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 ['client_profiles.create', 'client_profiles.update'],
                 ['skin_evaluations.create', 'skin_evaluations.update'],
                 ['client_consents.create'],
-                ['treatment_consents.create'],
+                ['treatment_consents.create', 'treatment_consents.update'],
                 ['user_files.upload', 'user_files.delete'],
             ),
             'dermo_esteticien' => array_merge($staffPermissions, $practitionerExtraPermissions),
