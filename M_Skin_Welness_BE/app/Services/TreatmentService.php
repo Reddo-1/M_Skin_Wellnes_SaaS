@@ -38,13 +38,7 @@ class TreatmentService
     public function create(int $centerId, array $data): Treatment
     {
         return DB::transaction(function () use ($centerId, $data) {
-            $treatment = Treatment::create([
-                'center_id' => $centerId,
-                'name' => $data['name'],
-                'duration_minutes' => $data['duration_minutes'],
-                'price' => $data['price'],
-                'is_active' => $data['is_active'] ?? true,
-            ]);
+            $treatment = Treatment::create([...$data, 'center_id' => $centerId]);
 
             //sincronizamos máquinas y roles autorizados si llegan en el body
             $this->syncMachines($treatment, $centerId, $data);

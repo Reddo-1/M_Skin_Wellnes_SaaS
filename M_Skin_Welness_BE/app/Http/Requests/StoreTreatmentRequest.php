@@ -23,6 +23,7 @@ class StoreTreatmentRequest extends FormRequest
                 Rule::unique('treatments', 'name')->where('center_id', $centerId),
             ],
             'duration_minutes' => ['required', 'integer', 'min:1'],
+            'margin_minutes' => ['sometimes', 'integer', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
             'machine_ids' => ['sometimes', 'array'],

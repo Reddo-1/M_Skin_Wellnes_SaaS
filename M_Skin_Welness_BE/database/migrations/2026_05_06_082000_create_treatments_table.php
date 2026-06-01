@@ -14,6 +14,8 @@ return new class extends Migration
             $table->foreignId('center_id');
             $table->string('name', 120);
             $table->integer('duration_minutes');
+            //minutos extra de margen (limpieza/preparacion) que se reservan ademas de la duracion
+            $table->integer('margin_minutes')->default(0);
             $table->decimal('price', 10, 2);
             $table->boolean('is_active')->default(true);
             $table->timestampsTz();
@@ -30,6 +32,11 @@ return new class extends Migration
         DB::statement("
             ALTER TABLE treatments
             ADD CONSTRAINT chk_treatments_duration CHECK (duration_minutes > 0)
+        ");
+
+        DB::statement("
+            ALTER TABLE treatments
+            ADD CONSTRAINT chk_treatments_margin CHECK (margin_minutes >= 0)
         ");
 
         DB::statement("

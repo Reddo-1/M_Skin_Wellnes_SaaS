@@ -15,6 +15,7 @@ class Treatment extends Model
         'center_id',
         'name',
         'duration_minutes',
+        'margin_minutes',
         'price',
         'is_active',
     ];
@@ -23,6 +24,7 @@ class Treatment extends Model
     {
         return [
             'duration_minutes' => 'integer',
+            'margin_minutes' => 'integer',
             'price' => 'decimal:2',
             'is_active' => 'boolean',
         ];

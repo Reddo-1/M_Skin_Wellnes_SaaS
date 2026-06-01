@@ -25,6 +25,7 @@ class UpdateTreatmentRequest extends FormRequest
                     ->ignore($treatmentId),
             ],
             'duration_minutes' => ['sometimes', 'integer', 'min:1'],
+            'margin_minutes' => ['sometimes', 'integer', 'min:0'],
             'price' => ['sometimes', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
             'machine_ids' => ['sometimes', 'array'],

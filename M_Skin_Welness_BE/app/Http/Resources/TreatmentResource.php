@@ -16,6 +16,7 @@ class TreatmentResource extends JsonResource
             'center_id' => $this->center_id,
             'name' => $this->name,
             'duration_minutes' => $this->duration_minutes,
+            'margin_minutes' => $this->margin_minutes,
             'price' => $this->price,
             'is_active' => $this->is_active,
             'machines' => $this->whenLoaded('machines', function () {
