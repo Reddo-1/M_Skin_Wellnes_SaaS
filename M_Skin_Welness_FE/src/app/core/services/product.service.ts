@@ -23,12 +23,14 @@ export class ProductService {
     is_sellable?: boolean;
     search?: string;
     page?: number;
+    per_page?: number;
   }): Promise<Paginated<Product>> {
     const params: QueryParams = {};
     if (filters.is_active !== undefined) params['is_active'] = filters.is_active;
     if (filters.is_sellable !== undefined) params['is_sellable'] = filters.is_sellable;
     if (filters.search !== undefined && filters.search !== '') params['search'] = filters.search;
     if (filters.page !== undefined) params['page'] = filters.page;
+    if (filters.per_page !== undefined) params['per_page'] = filters.per_page;
     return await this.api.getCollection<Product>('/products', params);
   }
 

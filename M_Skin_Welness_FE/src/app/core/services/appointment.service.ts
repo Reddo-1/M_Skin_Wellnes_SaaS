@@ -25,6 +25,12 @@ export interface AppointmentUpdateData {
   assistant_ids?: number[];
 }
 
+//productos consumidos en la sesion (en dosis), se adjuntan al cerrar la cita
+export interface AppointmentProductLine {
+  product_id: number;
+  quantity: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
   private readonly api = inject(ApiService);
@@ -54,9 +60,14 @@ export class AppointmentService {
     return await this.api.putResource<AppointmentSummary>(`/appointments/${id}`, data);
   }
 
-  async changeStatus(id: number, statusId: number): Promise<AppointmentSummary> {
+  async changeStatus(
+    id: number,
+    statusId: number,
+    products: AppointmentProductLine[] = [],
+  ): Promise<AppointmentSummary> {
     return await this.api.postResource<AppointmentSummary>(`/appointments/${id}/status`, {
       status_id: statusId,
+      products,
     });
   }
 

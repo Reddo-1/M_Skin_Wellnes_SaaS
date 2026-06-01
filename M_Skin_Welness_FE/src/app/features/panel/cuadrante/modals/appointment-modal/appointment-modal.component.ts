@@ -4,13 +4,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AppointmentSummary } from '../../../../../core/models/appointment.model';
 import { Machine } from '../../../../../core/models/machine.model';
+import { Product } from '../../../../../core/models/product.model';
 import { Room } from '../../../../../core/models/room.model';
 import { Treatment } from '../../../../../core/models/treatment.model';
 import { User } from '../../../../../core/models/user.model';
 import { WorkerSchedule } from '../../../../../core/models/worker-schedule.model';
 import { WorkerAbsence } from '../../../../../core/models/worker-absence.model';
 import { WorkerExtraAvailability } from '../../../../../core/models/worker-extra-availability.model';
-import { AppointmentService } from '../../../../../core/services/appointment.service';
+import { AppointmentProductLine, AppointmentService } from '../../../../../core/services/appointment.service';
 import { ClientService } from '../../../../../core/services/client.service';
 import { ConsentService, TreatmentConsentSummary } from '../../../../../core/services/consent.service';
 import { LookupService } from '../../../../../core/services/lookup.service';
@@ -20,6 +21,7 @@ import { WorkerScheduleService } from '../../../../../core/services/worker-sched
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { formatLocalDate, pad, toOffsetIso } from '../../../../../core/utils/datetime.util';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
+import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../shared/ui/multi-select/multi-select.component';
 import {
@@ -67,6 +69,7 @@ const SLOT_STEP_MINUTES = 15;
     SearchSelectComponent,
     MultiSelectComponent,
     DatePickerComponent,
+    InputComponent,
     TextareaComponent,
   ],
   templateUrl: './appointment-modal.component.html',
@@ -80,6 +83,7 @@ export class AppointmentModalComponent {
   readonly treatments = input<Treatment[]>([]);
   readonly rooms = input<Room[]>([]);
   readonly machines = input<Machine[]>([]);
+  readonly products = input<Product[]>([]);
   readonly canManage = input<boolean>(false);
   readonly canChangeStatus = input<boolean>(false);
   readonly canViewClient = input<boolean>(false);
@@ -87,6 +91,7 @@ export class AppointmentModalComponent {
   readonly close = output<void>();
   readonly formSubmit = output<AppointmentFormValue>();
   readonly statusChange = output<number>();
+  readonly finishSession = output<AppointmentProductLine[]>();
   readonly remove = output<void>();
 
   private readonly fb = inject(FormBuilder);
@@ -119,6 +124,10 @@ export class AppointmentModalComponent {
   protected readonly availabilityLoading = signal(false);
   private lastBundleDate = '';
 
+  //cierre de sesión con productos consumidos (en dosis)
+  protected readonly finalizing = signal(false);
+  protected readonly productLines = signal<{ id: number; name: string; quantity: number }[]>([]);
+
   protected readonly form = this.fb.nonNullable.group({
     client_id: ['', Validators.required],
     treatment_id: ['', Validators.required],
@@ -129,6 +138,12 @@ export class AppointmentModalComponent {
     time: ['', Validators.required],
     notes: ['', Validators.maxLength(5000)],
     assistant_ids: this.fb.nonNullable.control<number[]>([]),
+  });
+
+  //selector de productos consumidos en el paso de cierre de sesión
+  protected readonly pickForm = this.fb.nonNullable.group({
+    product_id: [''],
+    quantity: this.fb.control<number | null>(null),
   });
 
   //tick reactivo del form; el valor se lee crudo (no opcional) dentro de un computed
@@ -346,6 +361,21 @@ export class AppointmentModalComponent {
     return null;
   });
 
+  protected readonly isConfirmed = computed(
+    () => this.normalize(this.appointment()?.status?.name ?? '') === 'confirmada',
+  );
+  protected readonly isInProgress = computed(
+    () => this.normalize(this.appointment()?.status?.name ?? '') === 'en_curso',
+  );
+
+  //productos activos aún no añadidos a la sesión
+  protected readonly availableProductOptions = computed<SelectOption[]>(() => {
+    const added = new Set(this.productLines().map((line) => line.id));
+    return this.products()
+      .filter((product) => !added.has(product.id))
+      .map((product) => ({ value: String(product.id), label: product.name }));
+  });
+
   //acciones de estado segun el estado actual (Iniciar/Finalizar se gestionan aparte, con productos)
   protected readonly statusActions = computed<StatusAction[]>(() => {
     const current = this.appointment();
@@ -368,6 +398,8 @@ export class AppointmentModalComponent {
   constructor() {
     effect(() => {
       if (!this.isOpen()) return;
+      this.finalizing.set(false);
+      this.productLines.set([]);
       const current = this.appointment();
       const prefill = this.prefill();
       if (current !== null) {
@@ -550,6 +582,44 @@ export class AppointmentModalComponent {
   protected clientDetailLink(): string | null {
     const id = this.appointment()?.client?.id;
     return id !== undefined ? `/panel/clientes/${id}` : null;
+  }
+
+  //inicia la sesión (confirmada -> en curso)
+  protected startSession(): void {
+    const statusId = this.statusIdFor('en_curso');
+    if (statusId !== null) this.statusChange.emit(statusId);
+  }
+
+  protected openFinalize(): void {
+    this.productLines.set([]);
+    this.pickForm.reset({ product_id: '', quantity: null });
+    this.finalizing.set(true);
+  }
+
+  protected cancelFinalize(): void {
+    this.finalizing.set(false);
+  }
+
+  protected addProductLine(): void {
+    const productId = this.pickForm.controls.product_id.value;
+    const quantity = this.pickForm.controls.quantity.value;
+    if (productId === '' || quantity === null || quantity <= 0) return;
+    const product = this.products().find((item) => String(item.id) === productId);
+    if (!product) return;
+    this.productLines.update((lines) => [...lines, { id: product.id, name: product.name, quantity }]);
+    this.pickForm.reset({ product_id: '', quantity: null });
+  }
+
+  protected removeProductLine(id: number): void {
+    this.productLines.update((lines) => lines.filter((line) => line.id !== id));
+  }
+
+  //cierra la sesión (en curso -> realizada) adjuntando los productos consumidos
+  protected confirmFinalize(): void {
+    if (this.submitting()) return;
+    this.finishSession.emit(
+      this.productLines().map((line) => ({ product_id: line.id, quantity: line.quantity })),
+    );
   }
 
   protected hasFieldError(field: AppointmentField): boolean {

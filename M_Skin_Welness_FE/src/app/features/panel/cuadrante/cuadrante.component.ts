@@ -7,15 +7,18 @@ import listPlugin from '@fullcalendar/list';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import { AppointmentSummary } from '../../../core/models/appointment.model';
 import { Machine } from '../../../core/models/machine.model';
+import { Product } from '../../../core/models/product.model';
 import { Room } from '../../../core/models/room.model';
 import { Treatment } from '../../../core/models/treatment.model';
 import { User } from '../../../core/models/user.model';
 import { WorkerAbsence } from '../../../core/models/worker-absence.model';
 import { WorkerExtraAvailability } from '../../../core/models/worker-extra-availability.model';
 import { WorkerSchedule } from '../../../core/models/worker-schedule.model';
-import { AppointmentService } from '../../../core/services/appointment.service';
+import { AppointmentProductLine, AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { LookupService } from '../../../core/services/lookup.service';
 import { MachineService } from '../../../core/services/machine.service';
+import { ProductService } from '../../../core/services/product.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RoomService } from '../../../core/services/room.service';
 import { TreatmentService } from '../../../core/services/treatment.service';
@@ -65,6 +68,8 @@ export class CuadranteComponent {
   private readonly treatmentService = inject(TreatmentService);
   private readonly roomService = inject(RoomService);
   private readonly machineService = inject(MachineService);
+  private readonly productService = inject(ProductService);
+  private readonly lookup = inject(LookupService);
   private readonly scheduleService = inject(WorkerScheduleService);
   private readonly absenceService = inject(WorkerAbsenceService);
   private readonly extraService = inject(WorkerExtraAvailabilityService);
@@ -73,6 +78,7 @@ export class CuadranteComponent {
   protected readonly treatments = signal<Treatment[]>([]);
   protected readonly rooms = signal<Room[]>([]);
   protected readonly machines = signal<Machine[]>([]);
+  protected readonly products = signal<Product[]>([]);
 
   protected readonly appointments = signal<AppointmentSummary[]>([]);
   private readonly schedules = signal<WorkerSchedule[]>([]);
@@ -241,14 +247,16 @@ export class CuadranteComponent {
 
   private async loadCatalogs(): Promise<void> {
     try {
-      const [treatments, rooms, machines] = await Promise.all([
+      const [treatments, rooms, machines, products] = await Promise.all([
         this.treatmentService.list({ is_active: true, per_page: 200 }),
         this.roomService.list({ is_active: true, per_page: 200 }),
         this.machineService.list({ is_active: true, per_page: 200 }),
+        this.productService.list({ is_active: true, per_page: 200 }),
       ]);
       this.treatments.set(treatments.data);
       this.rooms.set(rooms.data);
       this.machines.set(machines.data);
+      this.products.set(products.data);
       await this.loadWorkers();
     } catch {
       this.errorMessage.set(loadResourceError('los datos del cuadrante'));
@@ -378,6 +386,27 @@ export class CuadranteComponent {
       await this.appointmentService.changeStatus(editing.id, statusId);
       this.modalOpen.set(false);
       this.notifications.toast.success('Estado de la cita actualizado.');
+      await this.loadDay();
+    } catch (error) {
+      this.notifications.toast.error(apiError(error));
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  //cierre de sesión: pasa la cita a realizada adjuntando los productos consumidos
+  protected async finishSession(products: AppointmentProductLine[]): Promise<void> {
+    const editing = this.editingAppointment();
+    if (editing === null) return;
+    const realizadaId = this.lookup
+      .sessionStatuses()
+      .find((status) => this.normalize(status.name) === 'realizada')?.id;
+    if (realizadaId === undefined) return;
+    this.submitting.set(true);
+    try {
+      await this.appointmentService.changeStatus(editing.id, realizadaId, products);
+      this.modalOpen.set(false);
+      this.notifications.toast.success('Sesión finalizada.');
       await this.loadDay();
     } catch (error) {
       this.notifications.toast.error(apiError(error));

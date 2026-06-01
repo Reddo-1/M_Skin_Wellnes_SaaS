@@ -68,11 +68,13 @@
   [treatments]="treatments()"
   [rooms]="rooms()"
   [machines]="machines()"
+  [products]="products()"
   [canManage]="canManage()"
   [canChangeStatus]="canChangeStatus()"
   [canViewClient]="canViewClient()"
   (close)="closeModal()"
   (formSubmit)="submit($event)"
   (statusChange)="changeStatus($event)"
+  (finishSession)="finishSession($event)"
   (remove)="removeAppointment()"
 />
