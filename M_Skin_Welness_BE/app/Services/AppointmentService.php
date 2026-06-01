@@ -250,10 +250,11 @@ class AppointmentService
         });
     }
 
-    //cambia el estado de la cita; el id del estado llega directamente del FE
-    public function changeStatus(Appointment $appointment, int $statusId, int $actorId): Appointment
+    //cambia el estado de la cita; el id del estado llega directamente del FE.
+    //al cerrar la sesion (realizada) pueden llegar los productos consumidos para adjuntarlos y descontar stock
+    public function changeStatus(Appointment $appointment, int $statusId, int $actorId, array $products = []): Appointment
     {
-        return DB::transaction(function () use ($appointment, $statusId, $actorId) {
+        return DB::transaction(function () use ($appointment, $statusId, $actorId, $products) {
             $cancelledId = (int) config('lookups.session_statuses.cancelada');
             $doneId = (int) config('lookups.session_statuses.realizada');
             $previousStatusId = (int) $appointment->status_id;
@@ -272,8 +273,11 @@ class AppointmentService
 
             $appointment->save();
 
-            //consumo de stock solo al pasar A 'realizada' por primera vez
+            //al pasar A 'realizada' por primera vez: adjunta los productos consumidos y descuenta su stock
             if ($statusId === $doneId && $previousStatusId !== $doneId) {
+                foreach ($products as $line) {
+                    $this->appointmentProducts->attach($appointment, (int) $line['product_id'], (float) $line['quantity']);
+                }
                 $this->appointmentProducts->applyStockConsumption($appointment, $actorId);
             }
 
