@@ -1,15 +1,8 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import {
-  CalendarOptions,
-  DateSelectArg,
-  DatesSetArg,
-  EventClickArg,
-  EventDropArg,
-  EventInput,
-} from '@fullcalendar/core';
+import { CalendarOptions, DatesSetArg, EventClickArg, EventInput } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
-import interactionPlugin, { EventResizeDoneArg } from '@fullcalendar/interaction';
+import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import { AppointmentSummary } from '../../../core/models/appointment.model';
@@ -31,7 +24,7 @@ import { WorkerAbsenceService } from '../../../core/services/worker-absence.serv
 import { WorkerExtraAvailabilityService } from '../../../core/services/worker-extra-availability.service';
 import { WorkerScheduleService } from '../../../core/services/worker-schedule.service';
 import { apiError, loadResourceError } from '../../../core/utils/form.util';
-import { formatLocalDate, pad, toOffsetIso } from '../../../core/utils/datetime.util';
+import { formatLocalDate } from '../../../core/utils/datetime.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import {
   AppointmentFormValue,
@@ -47,7 +40,6 @@ interface EventStyle {
 
 //colores de cita por estado, alineados a la paleta de marca y semanticos
 const STATUS_STYLE: Record<string, EventStyle> = {
-  pendiente: { bg: '#fffaeb', border: '#f79009', text: '#b54708' },
   confirmada: { bg: '#fef4ee', border: '#e6621f', text: '#c84c14' },
   en_curso: { bg: '#fde6d3', border: '#c84c14', text: '#6b2b10' },
   realizada: { bg: '#ecfdf3', border: '#12b76a', text: '#039855' },
@@ -58,9 +50,6 @@ const STATUS_FALLBACK: EventStyle = { bg: '#f2f4f7', border: '#98a2b3', text: '#
 
 const DAY_START = '07:00:00';
 const DAY_END = '22:00:00';
-
-//estados en los que la cita se puede arrastrar/redimensionar en el cuadrante
-const EDITABLE_STATUSES = ['pendiente', 'confirmada'];
 
 @Component({
   selector: 'app-cuadrante',
@@ -105,6 +94,8 @@ export class CuadranteComponent {
 
   protected readonly canCreate = computed(() => this.auth.hasPermission('appointments.create'));
   protected readonly canManage = computed(() => this.auth.hasPermission('appointments.update'));
+  protected readonly canChangeStatus = computed(() => this.auth.hasPermission('appointments.change_status'));
+  protected readonly canViewClient = computed(() => this.auth.hasPermission('clients.view'));
 
   //admin/recepcion/rrhh ven todas las columnas; un profesional solo la suya
   private readonly seesAllColumns = computed(() => {
@@ -139,7 +130,6 @@ export class CuadranteComponent {
         title: `${appointment.treatment?.name ?? 'Cita'} · ${appointment.client?.name ?? ''}`,
         start: appointment.starts_at ?? undefined,
         end: appointment.ends_at ?? undefined,
-        editable: EDITABLE_STATUSES.includes(status),
         backgroundColor: style.bg,
         borderColor: style.border,
         textColor: style.text,
@@ -211,7 +201,6 @@ export class CuadranteComponent {
 
   protected readonly calendarOptions = computed<CalendarOptions>(() => {
     const mobile = this.isMobile();
-    const manage = this.canManage();
     return {
       plugins: [resourceTimeGridPlugin, interactionPlugin, listPlugin],
       schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
@@ -232,14 +221,10 @@ export class CuadranteComponent {
       datesSet: (arg) => this.onDatesSet(arg),
       resources: this.resources(),
       events: this.calendarEvents(),
-      selectable: manage,
-      selectMirror: true,
-      select: (arg) => this.onSelect(arg),
-      editable: manage,
-      eventResourceEditable: manage,
+      //sin arrastrar/redimensionar/seleccionar: toda la gestión va por el modal
+      selectable: false,
+      editable: false,
       eventClick: (arg) => this.onEventClick(arg),
-      eventDrop: (arg) => this.onEventDrop(arg),
-      eventResize: (arg) => this.onEventResize(arg),
     };
   });
 
@@ -337,20 +322,8 @@ export class CuadranteComponent {
 
   protected openCreate(): void {
     this.editingAppointment.set(null);
-    this.prefill.set(null);
-    this.modalOpen.set(true);
-  }
-
-  private onSelect(arg: DateSelectArg): void {
-    if (!this.canManage()) return;
-    const resourceId = arg.resource?.id;
-    if (resourceId === undefined) return;
-    this.editingAppointment.set(null);
-    this.prefill.set({
-      worker_id: Number(resourceId),
-      date: formatLocalDate(arg.start),
-      time: `${pad(arg.start.getHours())}:${pad(arg.start.getMinutes())}`,
-    });
+    //la nueva cita arranca en el día que se está viendo en el cuadrante
+    this.prefill.set(this.currentDay() ? { date: this.currentDay() } : null);
     this.modalOpen.set(true);
   }
 
@@ -375,13 +348,11 @@ export class CuadranteComponent {
     try {
       if (editing) {
         await this.appointmentService.update(editing.id, {
-          treatment_id: value.treatment_id,
           room_id: value.room_id,
           worker_id: value.worker_id,
           machine_id: value.machine_id,
           starts_at: value.starts_at,
           ends_at: value.ends_at,
-          reserved_price: value.reserved_price,
           notes: value.notes,
           assistant_ids: value.assistant_ids,
         });
@@ -436,47 +407,6 @@ export class CuadranteComponent {
       this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
-    }
-  }
-
-  private async onEventDrop(arg: EventDropArg): Promise<void> {
-    if (arg.event.start === null) {
-      arg.revert();
-      return;
-    }
-    const id = arg.event.extendedProps['id'] as number;
-    const resourceId = arg.event.getResources()[0]?.id;
-    try {
-      await this.appointmentService.update(id, {
-        worker_id: resourceId !== undefined ? Number(resourceId) : undefined,
-        starts_at: toOffsetIso(arg.event.start),
-        ends_at: arg.event.end ? toOffsetIso(arg.event.end) : undefined,
-      });
-      this.notifications.toast.success('Cita reprogramada.');
-      await this.loadDay();
-    } catch (error) {
-      arg.revert();
-      this.notifications.toast.error(apiError(error));
-    }
-  }
-
-  private async onEventResize(arg: EventResizeDoneArg): Promise<void> {
-    if (arg.event.start === null || arg.event.end === null) {
-      arg.revert();
-      return;
-    }
-    const id = arg.event.extendedProps['id'] as number;
-    try {
-      //se envia tambien starts_at (aunque no cambie) para que el guard del back interprete inicio y fin en la misma zona
-      await this.appointmentService.update(id, {
-        starts_at: toOffsetIso(arg.event.start),
-        ends_at: toOffsetIso(arg.event.end),
-      });
-      this.notifications.toast.success('Duración de la cita actualizada.');
-      await this.loadDay();
-    } catch (error) {
-      arg.revert();
-      this.notifications.toast.error(apiError(error));
     }
   }
 

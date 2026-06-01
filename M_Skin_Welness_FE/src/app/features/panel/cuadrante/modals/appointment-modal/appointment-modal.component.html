@@ -1,19 +1,14 @@
-<app-modal
-  [isOpen]="isOpen()"
-  [isFullscreen]="isMobile()"
-  widthClass="max-w-4xl"
-  (close)="close.emit()"
->
-  <div class="flex max-h-[90vh] w-full flex-col overflow-hidden bg-white sm:max-h-[85vh] sm:rounded-3xl">
+<app-modal [isOpen]="isOpen()" widthClass="max-w-4xl" (close)="close.emit()">
+  <div class="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white">
     <div class="shrink-0 border-b border-gray-100 px-6 py-5 pr-14 sm:px-8">
       <h3 class="text-xl font-semibold text-ink">
         {{ isEdit() ? 'Editar cita' : 'Nueva cita' }}
       </h3>
       <p class="mt-1 text-sm text-muted">
         @if (isEdit()) {
-          Modifica los datos de la cita. Para cambiar de paciente, cancela y crea una nueva.
+          El paciente y el tratamiento no se pueden cambiar. Para otro tratamiento, cancela y crea una nueva.
         } @else {
-          Programa una cita. Solo verás tratamientos y horas válidos para el paciente y el profesional.
+          Programa una cita. Solo verás tratamientos aptos del paciente y profesionales autorizados.
         }
       </p>
     </div>
@@ -24,9 +19,19 @@
           <h4 class="text-sm font-semibold text-ink">Paciente</h4>
           <div class="mt-3">
             @if (isEdit()) {
-              <div class="rounded-lg bg-surface-alt px-4 py-3">
-                <span class="text-xs font-medium uppercase tracking-wide text-muted">Paciente</span>
-                <p class="text-sm font-medium text-ink">{{ appointment()?.client?.name }}</p>
+              <div class="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-4 py-3">
+                <div>
+                  <span class="text-xs font-medium uppercase tracking-wide text-muted">Paciente</span>
+                  <p class="text-sm font-medium text-ink">{{ appointment()?.client?.name }}</p>
+                </div>
+                @if (canViewClient() && clientDetailLink(); as link) {
+                  <a
+                    [routerLink]="link"
+                    class="shrink-0 text-sm font-medium text-brand-600 transition hover:underline"
+                  >
+                    Ver ficha clínica
+                  </a>
+                }
               </div>
             } @else {
               <app-search-select
@@ -51,37 +56,48 @@
           <h4 class="text-sm font-semibold text-ink">Servicio</h4>
           <div class="mt-3 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">Profesional</label>
-              <app-select
-                [options]="workerOptions()"
-                [selected]="form.controls.worker_id.value"
-                [invalid]="hasFieldError('worker_id')"
-                placeholder="Selecciona un profesional…"
-                (selectionChange)="onWorkerChange($event)"
-              />
-              @if (hasValidationError('worker_id', 'required')) {
-                <p class="mt-1.5 text-xs text-error-500">Selecciona el profesional que atiende.</p>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Tratamiento</label>
+              @if (isEdit()) {
+                <div class="flex min-h-11 items-center rounded-lg border border-gray-200 bg-surface-alt px-3.5 text-sm text-ink">
+                  {{ appointment()?.treatment?.name }} · {{ appointment()?.treatment?.duration_minutes }} min
+                </div>
+              } @else {
+                <app-select
+                  [options]="treatmentOptions()"
+                  [selected]="form.controls.treatment_id.value"
+                  [disabled]="treatmentDisabled()"
+                  [invalid]="hasFieldError('treatment_id')"
+                  placeholder="Selecciona un tratamiento…"
+                  (selectionChange)="onTreatmentChange($event)"
+                />
+                @if (treatmentDisabled()) {
+                  <p class="mt-1.5 text-xs text-muted">Elige primero el paciente.</p>
+                } @else if (treatmentHint(); as hint) {
+                  <p class="mt-1.5 text-xs text-warning-600">{{ hint }}</p>
+                } @else if (hasValidationError('treatment_id', 'required')) {
+                  <p class="mt-1.5 text-xs text-error-500">Selecciona el tratamiento.</p>
+                } @else if (selectedDuration() !== null) {
+                  <p class="mt-1.5 text-xs text-muted">Bloque reservado: {{ selectedDuration() }} min.</p>
+                }
               }
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">Tratamiento</label>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Profesional</label>
               <app-select
-                [options]="treatmentOptions()"
-                [selected]="form.controls.treatment_id.value"
-                [disabled]="treatmentDisabled()"
-                [invalid]="hasFieldError('treatment_id')"
-                placeholder="Selecciona un tratamiento…"
-                (selectionChange)="onTreatmentChange($event)"
+                [options]="workerOptions()"
+                [selected]="form.controls.worker_id.value"
+                [disabled]="workerDisabled()"
+                [invalid]="hasFieldError('worker_id')"
+                placeholder="Selecciona un profesional…"
+                (selectionChange)="onWorkerChange($event)"
               />
-              @if (treatmentDisabled()) {
-                <p class="mt-1.5 text-xs text-muted">Elige primero paciente y profesional.</p>
-              } @else if (treatmentHint(); as hint) {
+              @if (workerDisabled()) {
+                <p class="mt-1.5 text-xs text-muted">Disponible al elegir el tratamiento.</p>
+              } @else if (workerHint(); as hint) {
                 <p class="mt-1.5 text-xs text-warning-600">{{ hint }}</p>
-              } @else if (hasValidationError('treatment_id', 'required')) {
-                <p class="mt-1.5 text-xs text-error-500">Selecciona el tratamiento.</p>
-              } @else if (selectedDuration() !== null) {
-                <p class="mt-1.5 text-xs text-muted">Duración estimada: {{ selectedDuration() }} min.</p>
+              } @else if (hasValidationError('worker_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Selecciona el profesional que atiende.</p>
               }
             </div>
 
@@ -156,40 +172,13 @@
                 <p class="mt-1.5 text-xs text-error-500">Indica la hora de inicio.</p>
               }
             </div>
-
-            @if (!isEdit()) {
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">Estado</label>
-                <app-select
-                  [options]="createStatusOptions()"
-                  [selected]="form.controls.status_id.value"
-                  [invalid]="hasFieldError('status_id')"
-                  placeholder="Selecciona un estado…"
-                  (selectionChange)="form.controls.status_id.setValue($event)"
-                />
-                @if (hasValidationError('status_id', 'required')) {
-                  <p class="mt-1.5 text-xs text-error-500">Selecciona el estado inicial.</p>
-                }
-              </div>
-            }
           </div>
         </section>
 
         <section>
           <h4 class="text-sm font-semibold text-ink">Detalles</h4>
-          <div class="mt-3 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+          <div class="mt-3 space-y-4">
             <div>
-              <app-input
-                label="Precio reservado (opcional)"
-                type="number"
-                formControlName="reserved_price"
-                placeholder="Tarifa del tratamiento"
-                [min]="0"
-                [step]="0.01"
-              />
-            </div>
-
-            <div class="sm:col-span-2">
               <label class="mb-1.5 block text-sm font-medium text-gray-700">Ayudantes (opcional)</label>
               <app-multi-select
                 [options]="assistantOptions()"
@@ -199,7 +188,7 @@
               />
             </div>
 
-            <div class="sm:col-span-2">
+            <div>
               <app-textarea
                 label="Notas (opcional)"
                 formControlName="notes"
@@ -216,7 +205,7 @@
       </div>
 
       <div class="shrink-0 space-y-3 border-t border-gray-100 px-6 py-4 sm:px-8">
-        @if (isEdit() && canManage() && statusActions().length > 0) {
+        @if (isEdit() && canChangeStatus() && statusActions().length > 0) {
           <div class="flex flex-wrap gap-2">
             @for (action of statusActions(); track action.status_id) {
               <button

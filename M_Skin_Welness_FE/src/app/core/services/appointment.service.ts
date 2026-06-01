@@ -11,20 +11,16 @@ export interface AppointmentCreateData {
   starts_at: string;
   ends_at: string;
   booking_source: string;
-  status_id: number;
-  reserved_price: number | null;
   notes: string | null;
   assistant_ids: number[];
 }
 
 export interface AppointmentUpdateData {
-  treatment_id?: number;
   room_id?: number;
   worker_id?: number;
   machine_id?: number | null;
   starts_at?: string;
   ends_at?: string;
-  reserved_price?: number | null;
   notes?: string | null;
   assistant_ids?: number[];
 }

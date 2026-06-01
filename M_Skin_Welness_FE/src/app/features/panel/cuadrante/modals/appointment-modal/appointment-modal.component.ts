@@ -1,11 +1,12 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AppointmentSummary } from '../../../../../core/models/appointment.model';
 import { Machine } from '../../../../../core/models/machine.model';
 import { Room } from '../../../../../core/models/room.model';
 import { Treatment } from '../../../../../core/models/treatment.model';
-import { User, UserRole } from '../../../../../core/models/user.model';
+import { User } from '../../../../../core/models/user.model';
 import { WorkerSchedule } from '../../../../../core/models/worker-schedule.model';
 import { WorkerAbsence } from '../../../../../core/models/worker-absence.model';
 import { WorkerExtraAvailability } from '../../../../../core/models/worker-extra-availability.model';
@@ -19,7 +20,6 @@ import { WorkerScheduleService } from '../../../../../core/services/worker-sched
 import { hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { formatLocalDate, pad, toOffsetIso } from '../../../../../core/utils/datetime.util';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
-import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { MultiSelectComponent } from '../../../../../shared/ui/multi-select/multi-select.component';
 import {
@@ -37,41 +37,21 @@ export interface AppointmentFormValue {
   machine_id: number | null;
   starts_at: string;
   ends_at: string;
-  status_id: number;
-  reserved_price: number | null;
   notes: string | null;
   assistant_ids: number[];
 }
 
 export interface AppointmentPrefill {
-  worker_id: number;
   date: string;
-  time: string;
 }
 
-type AppointmentField =
-  | 'client_id'
-  | 'treatment_id'
-  | 'worker_id'
-  | 'room_id'
-  | 'date'
-  | 'time'
-  | 'status_id'
-  | 'notes';
+type AppointmentField = 'client_id' | 'treatment_id' | 'worker_id' | 'room_id' | 'date' | 'time' | 'notes';
 
 interface StatusAction {
   status_id: number;
   label: string;
   tone: 'success' | 'danger' | 'neutral';
 }
-
-//roles que realizan tratamientos: un usuario es agendable si tiene al menos uno
-const PRACTITIONER_ROLES: UserRole[] = [
-  'diagnosticador',
-  'dermo_esteticien',
-  'fisioterapeuta',
-  'manicurista',
-];
 
 //granularidad de los inicios de cita ofrecidos
 const SLOT_STEP_MINUTES = 15;
@@ -81,12 +61,12 @@ const SLOT_STEP_MINUTES = 15;
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     ModalComponent,
     SelectComponent,
     SearchSelectComponent,
     MultiSelectComponent,
     DatePickerComponent,
-    InputComponent,
     TextareaComponent,
   ],
   templateUrl: './appointment-modal.component.html',
@@ -101,6 +81,8 @@ export class AppointmentModalComponent {
   readonly rooms = input<Room[]>([]);
   readonly machines = input<Machine[]>([]);
   readonly canManage = input<boolean>(false);
+  readonly canChangeStatus = input<boolean>(false);
+  readonly canViewClient = input<boolean>(false);
 
   readonly close = output<void>();
   readonly formSubmit = output<AppointmentFormValue>();
@@ -117,7 +99,6 @@ export class AppointmentModalComponent {
   private readonly extraService = inject(WorkerExtraAvailabilityService);
 
   protected readonly isEdit = computed(() => this.appointment() !== null);
-  protected readonly isMobile = signal(false);
 
   //buscador de paciente (servidor)
   protected readonly clientResults = signal<SearchSelectOption[]>([]);
@@ -146,8 +127,6 @@ export class AppointmentModalComponent {
     machine_id: [''],
     date: ['', Validators.required],
     time: ['', Validators.required],
-    status_id: ['', Validators.required],
-    reserved_price: this.fb.control<number | null>(null),
     notes: ['', Validators.maxLength(5000)],
     assistant_ids: this.fb.nonNullable.control<number[]>([]),
   });
@@ -159,41 +138,25 @@ export class AppointmentModalComponent {
     return this.form.getRawValue();
   });
 
-  //solo staff con algún rol asistencial puede atender una cita
-  private readonly practitioners = computed(() =>
-    this.workers().filter((worker) => worker.roles.some((role) => PRACTITIONER_ROLES.includes(role))),
-  );
-
-  protected readonly workerOptions = computed<SelectOption[]>(() =>
-    this.practitioners().map((worker) => ({ value: String(worker.id), label: worker.name })),
-  );
-
-  private readonly selectedWorker = computed<User | null>(
-    () => this.workers().find((worker) => String(worker.id) === this.formValue().worker_id) ?? null,
-  );
-
   protected readonly selectedTreatment = computed<Treatment | null>(
-    () =>
-      this.treatments().find((item) => String(item.id) === this.formValue().treatment_id) ?? null,
+    () => this.treatments().find((item) => String(item.id) === this.formValue().treatment_id) ?? null,
   );
 
-  protected readonly selectedDuration = computed<number | null>(
-    () => this.selectedTreatment()?.duration_minutes ?? null,
-  );
+  //bloque reservado = duracion + margen del tratamiento
+  protected readonly selectedDuration = computed<number | null>(() => {
+    const treatment = this.selectedTreatment();
+    return treatment ? treatment.duration_minutes + treatment.margin_minutes : null;
+  });
 
-  //tratamientos elegibles: autorizados por el rol del profesional y consentidos+aptos por el paciente
+  //tratamientos elegibles del paciente: consentidos y aptos (el profesional se elige despues, segun el tratamiento)
   private readonly eligibleTreatments = computed<Treatment[]>(() => {
-    const worker = this.selectedWorker();
-    if (worker === null || this.formValue().client_id === '') return [];
+    if (this.formValue().client_id === '') return [];
     const consentByTreatment = new Map(
       this.clientConsents().map((consent) => [consent.treatment_id, consent]),
     );
     return this.treatments().filter((treatment) => {
-      const roleOk = treatment.authorized_roles.some((role) =>
-        worker.roles.some((workerRole) => workerRole === role.name),
-      );
       const consent = consentByTreatment.get(treatment.id);
-      return roleOk && consent?.treatment_consent === true && consent?.is_suitable === true;
+      return consent?.treatment_consent === true && consent?.is_suitable === true;
     });
   });
 
@@ -202,7 +165,6 @@ export class AppointmentModalComponent {
       value: String(treatment.id),
       label: `${treatment.name} · ${treatment.duration_minutes} min`,
     }));
-    //en edición, el tratamiento actual debe seguir visible aunque cambien consentimientos
     const current = this.appointment()?.treatment;
     if (current && !options.some((option) => option.value === String(current.id))) {
       options.unshift({
@@ -219,7 +181,34 @@ export class AppointmentModalComponent {
     if (!this.hasGeneralConsent()) {
       return 'Este paciente no tiene firmado el consentimiento general del centro.';
     }
-    return 'Este paciente no tiene tratamientos consentidos y aptos para este profesional.';
+    return 'Este paciente no tiene tratamientos consentidos y aptos.';
+  });
+
+  //profesionales que pueden realizar el tratamiento elegido (rol autorizado)
+  private readonly authorizedWorkers = computed<User[]>(() => {
+    const treatment = this.selectedTreatment();
+    if (treatment === null) return [];
+    const roleNames = new Set(treatment.authorized_roles.map((role) => role.name));
+    return this.workers().filter((worker) => worker.roles.some((role) => roleNames.has(role)));
+  });
+
+  protected readonly workerOptions = computed<SelectOption[]>(() => {
+    const options = this.authorizedWorkers().map((worker) => ({
+      value: String(worker.id),
+      label: worker.name,
+    }));
+    const current = this.appointment()?.worker;
+    if (current && !options.some((option) => option.value === String(current.id))) {
+      options.unshift({ value: String(current.id), label: current.name });
+    }
+    return options;
+  });
+
+  protected readonly workerHint = computed<string | null>(() => {
+    if (this.workerDisabled()) return null;
+    return this.authorizedWorkers().length === 0
+      ? 'Ningún profesional del centro está autorizado para este tratamiento.'
+      : null;
   });
 
   //máquinas compatibles con el tratamiento elegido (objeto completo, para conocer su sala fija)
@@ -240,9 +229,7 @@ export class AppointmentModalComponent {
   );
 
   private readonly selectedMachine = computed<Machine | null>(
-    () =>
-      this.compatibleMachines().find((machine) => String(machine.id) === this.formValue().machine_id) ??
-      null,
+    () => this.compatibleMachines().find((machine) => String(machine.id) === this.formValue().machine_id) ?? null,
   );
 
   //una máquina fija ata la cita a su sala
@@ -257,10 +244,9 @@ export class AppointmentModalComponent {
       .map((worker) => ({ id: worker.id, name: worker.name })),
   );
 
-  //bloqueo progresivo de secciones
-  protected readonly treatmentDisabled = computed(
-    () => this.formValue().client_id === '' || this.formValue().worker_id === '',
-  );
+  //bloqueo progresivo de secciones: paciente -> tratamiento -> profesional -> maquina/sala -> hora
+  protected readonly treatmentDisabled = computed(() => this.formValue().client_id === '');
+  protected readonly workerDisabled = computed(() => this.formValue().treatment_id === '');
   protected readonly machineDisabled = computed(() => this.formValue().treatment_id === '');
   protected readonly roomDisabled = computed(
     () => this.formValue().treatment_id === '' || this.roomLocked(),
@@ -284,7 +270,7 @@ export class AppointmentModalComponent {
     if (workerId === null || date === '' || treatment === null || roomId === null) return [];
 
     const weekday = this.isoWeekday(date);
-    const duration = treatment.duration_minutes;
+    const duration = treatment.duration_minutes + treatment.margin_minutes;
 
     const windows: [number, number][] = [];
     for (const schedule of this.schedules()) {
@@ -311,12 +297,12 @@ export class AppointmentModalComponent {
     }
 
     const merged = this.mergeWindows(windows);
-    if (merged.length === 0) return this.withCurrentTime([], value.time);
+    if (merged.length === 0) return this.withCurrentTime([]);
 
     const absent: [number, number][] = [];
     for (const absence of this.absences()) {
       if (absence.worker_id !== workerId || absence.date !== date) continue;
-      if (absence.is_full_day) return this.withCurrentTime([], value.time);
+      if (absence.is_full_day) return this.withCurrentTime([]);
       if (absence.start_time && absence.end_time) {
         absent.push([this.toMinutes(absence.start_time), this.toMinutes(absence.end_time)]);
       }
@@ -345,7 +331,7 @@ export class AppointmentModalComponent {
         times.push(this.minutesToHHMM(start));
       }
     }
-    return this.withCurrentTime(times, value.time);
+    return this.withCurrentTime(times);
   });
 
   protected readonly timeOptions = computed<SelectOption[]>(() =>
@@ -360,29 +346,14 @@ export class AppointmentModalComponent {
     return null;
   });
 
-  //estados con los que se puede dar de alta una cita desde el cuadrante
-  protected readonly createStatusOptions = computed<SelectOption[]>(() =>
-    this.lookup
-      .sessionStatuses()
-      .filter((status) => ['pendiente', 'confirmada'].includes(this.normalize(status.name)))
-      .map((status) => ({ value: String(status.id), label: status.name })),
-  );
-
-  //acciones de estado segun el estado actual (iniciar/finalizar viven en el mapa)
+  //acciones de estado segun el estado actual (Iniciar/Finalizar se gestionan aparte, con productos)
   protected readonly statusActions = computed<StatusAction[]>(() => {
     const current = this.appointment();
     if (current?.status == null) return [];
     const targets: { code: string; label: string; tone: StatusAction['tone'] }[] = [];
-    switch (this.normalize(current.status.name)) {
-      case 'pendiente':
-        targets.push({ code: 'confirmada', label: 'Confirmar', tone: 'success' });
-        targets.push({ code: 'no_presentada', label: 'No presentada', tone: 'neutral' });
-        targets.push({ code: 'cancelada', label: 'Cancelar', tone: 'danger' });
-        break;
-      case 'confirmada':
-        targets.push({ code: 'no_presentada', label: 'No presentada', tone: 'neutral' });
-        targets.push({ code: 'cancelada', label: 'Cancelar', tone: 'danger' });
-        break;
+    if (this.normalize(current.status.name) === 'confirmada') {
+      targets.push({ code: 'no_presentada', label: 'No presentada', tone: 'neutral' });
+      targets.push({ code: 'cancelada', label: 'Cancelar', tone: 'danger' });
     }
     return targets
       .map((target) => {
@@ -395,13 +366,6 @@ export class AppointmentModalComponent {
   });
 
   constructor() {
-    effect((onCleanup) => {
-      const update = () => this.isMobile.set(window.innerWidth < 768);
-      update();
-      window.addEventListener('resize', update);
-      onCleanup(() => window.removeEventListener('resize', update));
-    });
-
     effect(() => {
       if (!this.isOpen()) return;
       const current = this.appointment();
@@ -416,8 +380,6 @@ export class AppointmentModalComponent {
           machine_id: current.machine ? String(current.machine.id) : '',
           date,
           time,
-          status_id: current.status ? String(current.status.id) : '',
-          reserved_price: current.reserved_price !== null ? Number(current.reserved_price) : null,
           notes: current.notes ?? '',
           assistant_ids: current.assistants?.map((assistant) => assistant.id) ?? [],
         });
@@ -425,21 +387,15 @@ export class AppointmentModalComponent {
         if (current.client) void this.loadConsents(current.client.id);
         if (date !== '') void this.loadDayBundle(date);
       } else {
-        const confirmada =
-          this.createStatusOptions().find((option) => this.optionIsConfirmada(option))?.value ??
-          this.createStatusOptions()[0]?.value ??
-          '';
         const date = prefill?.date ?? this.today();
         this.form.reset({
           client_id: '',
           treatment_id: '',
-          worker_id: prefill ? String(prefill.worker_id) : '',
+          worker_id: '',
           room_id: '',
           machine_id: '',
           date,
-          time: prefill?.time ?? '',
-          status_id: confirmada,
-          reserved_price: null,
+          time: '',
           notes: '',
           assistant_ids: [],
         });
@@ -475,9 +431,25 @@ export class AppointmentModalComponent {
     this.form.controls.client_id.setValue(option.value);
     this.selectedClientLabel.set(option.label);
     await this.loadConsents(Number(option.value));
+    //si el tratamiento ya elegido deja de ser elegible para el nuevo paciente, se limpia toda la cadena
     if (!this.isTreatmentEligible(this.form.controls.treatment_id.value)) {
-      this.clearTreatmentCascade();
+      this.clearFromTreatment();
     }
+  }
+
+  protected onTreatmentChange(value: string): void {
+    this.form.controls.treatment_id.setValue(value);
+    //descartar el profesional si ya no está autorizado para el nuevo tratamiento
+    if (!this.isWorkerAuthorized(this.form.controls.worker_id.value, value)) {
+      this.form.controls.worker_id.setValue('');
+    }
+    //descartar la máquina si ya no es compatible con el nuevo tratamiento
+    const treatment = this.treatments().find((item) => String(item.id) === value);
+    const compatibleIds = new Set(treatment?.machines.map((machine) => machine.id) ?? []);
+    if (this.form.controls.machine_id.value !== '' && !compatibleIds.has(Number(this.form.controls.machine_id.value))) {
+      this.form.controls.machine_id.setValue('');
+    }
+    this.form.controls.time.setValue('');
   }
 
   protected onWorkerChange(value: string): void {
@@ -486,25 +458,6 @@ export class AppointmentModalComponent {
     this.form.controls.assistant_ids.setValue(
       this.form.controls.assistant_ids.value.filter((id) => id !== numeric),
     );
-    if (!this.isTreatmentEligible(this.form.controls.treatment_id.value)) {
-      this.clearTreatmentCascade();
-    }
-    this.form.controls.time.setValue('');
-  }
-
-  protected onTreatmentChange(value: string): void {
-    this.form.controls.treatment_id.setValue(value);
-    const treatment = this.treatments().find((item) => String(item.id) === value);
-    //prefijar el precio reservado con la tarifa del tratamiento si esta vacio
-    if (this.form.controls.reserved_price.value === null && treatment) {
-      this.form.controls.reserved_price.setValue(Number(treatment.price));
-    }
-    //descartar la máquina elegida si ya no es compatible con el nuevo tratamiento
-    const machineValue = this.form.controls.machine_id.value;
-    const compatibleIds = new Set(treatment?.machines.map((machine) => machine.id) ?? []);
-    if (machineValue !== '' && !compatibleIds.has(Number(machineValue))) {
-      this.form.controls.machine_id.setValue('');
-    }
     this.form.controls.time.setValue('');
   }
 
@@ -577,9 +530,9 @@ export class AppointmentModalComponent {
     }
     const raw = this.form.getRawValue();
     const treatment = this.treatments().find((item) => String(item.id) === raw.treatment_id);
-    const duration = treatment?.duration_minutes ?? 0;
+    const total = treatment ? treatment.duration_minutes + treatment.margin_minutes : 0;
     const start = new Date(`${raw.date}T${raw.time}:00`);
-    const end = new Date(start.getTime() + duration * 60000);
+    const end = new Date(start.getTime() + total * 60000);
 
     this.formSubmit.emit({
       client_id: Number(raw.client_id),
@@ -589,11 +542,14 @@ export class AppointmentModalComponent {
       machine_id: raw.machine_id === '' ? null : Number(raw.machine_id),
       starts_at: toOffsetIso(start),
       ends_at: toOffsetIso(end),
-      status_id: Number(raw.status_id),
-      reserved_price: raw.reserved_price,
       notes: raw.notes.trim() === '' ? null : raw.notes,
       assistant_ids: raw.assistant_ids,
     });
+  }
+
+  protected clientDetailLink(): string | null {
+    const id = this.appointment()?.client?.id;
+    return id !== undefined ? `/panel/clientes/${id}` : null;
   }
 
   protected hasFieldError(field: AppointmentField): boolean {
@@ -609,14 +565,25 @@ export class AppointmentModalComponent {
     return this.eligibleTreatments().some((treatment) => String(treatment.id) === treatmentId);
   }
 
-  private clearTreatmentCascade(): void {
+  private isWorkerAuthorized(workerId: string, treatmentId: string): boolean {
+    if (workerId === '' || treatmentId === '') return false;
+    const treatment = this.treatments().find((item) => String(item.id) === treatmentId);
+    const worker = this.workers().find((item) => String(item.id) === workerId);
+    if (!treatment || !worker) return false;
+    const roleNames = new Set(treatment.authorized_roles.map((role) => role.name));
+    return worker.roles.some((role) => roleNames.has(role));
+  }
+
+  private clearFromTreatment(): void {
     this.form.controls.treatment_id.setValue('');
+    this.form.controls.worker_id.setValue('');
     this.form.controls.machine_id.setValue('');
     this.form.controls.time.setValue('');
   }
 
-  private withCurrentTime(times: string[], current: string): string[] {
+  private withCurrentTime(times: string[]): string[] {
     const unique = Array.from(new Set(times)).sort();
+    const current = this.formValue().time;
     if (this.isEdit() && current !== '' && !unique.includes(current)) {
       return [current, ...unique].sort();
     }
@@ -639,11 +606,6 @@ export class AppointmentModalComponent {
 
   private overlaps(start: number, end: number, intervals: [number, number][]): boolean {
     return intervals.some(([from, to]) => start < to && end > from);
-  }
-
-  private optionIsConfirmada(option: SelectOption): boolean {
-    const status = this.lookup.sessionStatuses().find((item) => String(item.id) === option.value);
-    return status ? this.normalize(status.name) === 'confirmada' : false;
   }
 
   private statusIdFor(code: string): number | null {
