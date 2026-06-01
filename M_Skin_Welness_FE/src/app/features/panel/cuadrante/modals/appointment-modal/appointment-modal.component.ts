@@ -400,6 +400,15 @@ export class AppointmentModalComponent {
       if (!this.isOpen()) return;
       this.finalizing.set(false);
       this.productLines.set([]);
+      //invalida las cachés de instancia para que cada apertura recargue datos frescos
+      this.lastBundleDate = '';
+      this.lastConsentClientId = 0;
+      this.schedules.set([]);
+      this.absences.set([]);
+      this.extras.set([]);
+      this.dayAppointments.set([]);
+      this.clientConsents.set([]);
+      this.hasGeneralConsent.set(false);
       const current = this.appointment();
       const prefill = this.prefill();
       if (current !== null) {
