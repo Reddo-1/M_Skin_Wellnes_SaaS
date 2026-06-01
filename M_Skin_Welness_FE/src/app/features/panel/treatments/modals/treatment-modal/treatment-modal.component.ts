@@ -12,13 +12,14 @@ import { ToggleComponent } from '../../../../../shared/ui/toggle/toggle.componen
 export interface TreatmentFormValue {
   name: string;
   duration_minutes: number;
+  margin_minutes: number;
   price: number;
   is_active: boolean;
   machine_ids: number[];
   role_ids: number[];
 }
 
-type TreatmentField = 'name' | 'duration_minutes' | 'price';
+type TreatmentField = 'name' | 'duration_minutes' | 'margin_minutes' | 'price';
 
 @Component({
   selector: 'app-treatment-modal',
@@ -47,6 +48,7 @@ export class TreatmentModalComponent {
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
     duration_minutes: [30, [Validators.required, Validators.min(1)]],
+    margin_minutes: [0, [Validators.required, Validators.min(0)]],
     price: [0, [Validators.required, Validators.min(0)]],
     is_active: [true],
     machine_ids: this.fb.nonNullable.control<number[]>([]),
@@ -60,6 +62,7 @@ export class TreatmentModalComponent {
       this.form.reset({
         name: current?.name ?? '',
         duration_minutes: current?.duration_minutes ?? 30,
+        margin_minutes: current?.margin_minutes ?? 0,
         price: current ? Number(current.price) : 0,
         is_active: current?.is_active ?? true,
         machine_ids: current?.machines.map((machine) => machine.id) ?? [],

@@ -13,6 +13,7 @@ export interface Treatment {
   center_id: number;
   name: string;
   duration_minutes: number;
+  margin_minutes: number;
   price: string;
   is_active: boolean;
   machines: LookupItem[];

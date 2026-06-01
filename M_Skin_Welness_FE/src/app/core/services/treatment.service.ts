@@ -6,6 +6,7 @@ import { ApiService, QueryParams } from './api.service';
 export interface TreatmentData {
   name: string;
   duration_minutes: number;
+  margin_minutes: number;
   price: number;
   is_active: boolean;
   machine_ids: number[];

@@ -13,6 +13,7 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { TreatmentModalComponent, TreatmentFormValue } from './modals/treatment-modal/treatment-modal.component';
+import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -25,7 +26,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
 @Component({
   selector: 'app-treatments-list',
   standalone: true,
-  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TableScrollHintComponent, TreatmentModalComponent],
+  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TableScrollHintComponent, TreatmentModalComponent, LoadingOverlayComponent],
   templateUrl: './treatments-list.component.html',
 })
 export class TreatmentsListComponent {
@@ -95,6 +96,7 @@ export class TreatmentsListComponent {
     const payload: TreatmentData = {
       name: value.name,
       duration_minutes: value.duration_minutes,
+      margin_minutes: value.margin_minutes,
       price: value.price,
       is_active: value.is_active,
       machine_ids: value.machine_ids,

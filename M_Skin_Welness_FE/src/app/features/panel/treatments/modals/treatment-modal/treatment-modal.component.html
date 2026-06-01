@@ -4,7 +4,7 @@
       {{ isEdit() ? 'Editar tratamiento' : 'Nuevo tratamiento' }}
     </h3>
     <p class="mt-1 text-sm text-muted">
-      Define el servicio, su duración y precio, las máquinas que utiliza y los roles autorizados a ejecutarlo.
+      Define el servicio, su duración, margen y precio, las máquinas que utiliza y los roles autorizados a ejecutarlo.
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
@@ -39,6 +39,24 @@
           }
           @if (hasValidationError('duration_minutes', 'min')) {
             <p class="mt-1.5 text-xs text-error-500">La duración debe ser de al menos 1 minuto.</p>
+          }
+        </div>
+
+        <div>
+          <app-input
+            label="Margen (minutos)"
+            [required]="true"
+            type="number"
+            [min]="0"
+            formControlName="margin_minutes"
+            [invalid]="hasFieldError('margin_minutes')"
+          />
+          @if (hasValidationError('margin_minutes', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica el margen.</p>
+          } @else if (hasValidationError('margin_minutes', 'min')) {
+            <p class="mt-1.5 text-xs text-error-500">El margen no puede ser negativo.</p>
+          } @else {
+            <p class="mt-1.5 text-xs text-muted">Tiempo extra reservado además de la duración.</p>
           }
         </div>
 
