@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{Appointment, ClientConsent, TreatmentConsent, WorkerSchedule};
+use App\Models\{Appointment, ClientConsent, Treatment, TreatmentConsent, WorkerSchedule};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -162,6 +162,9 @@ class AppointmentService
                 treatmentId: (int) $data['treatment_id'],
             );
 
+            //precio reservado = tarifa del tratamiento en este momento (historico, congela el importe)
+            $reservedPrice = Treatment::forCenter($centerId)->whereKey((int) $data['treatment_id'])->value('price');
+
             $appointment = Appointment::create([
                 'center_id' => $centerId,
                 'treatment_id' => $data['treatment_id'],
@@ -174,7 +177,7 @@ class AppointmentService
                 'booking_source' => $data['booking_source'],
                 //las citas nacen confirmadas (el estado pendiente ya no existe)
                 'status_id' => (int) config('lookups.session_statuses.confirmada'),
-                'reserved_price' => $data['reserved_price'] ?? null,
+                'reserved_price' => $reservedPrice,
                 'notes' => $data['notes'] ?? null,
             ]);
 

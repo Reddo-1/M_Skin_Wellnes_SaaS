@@ -18,10 +18,7 @@ class UpdateAppointmentRequest extends FormRequest
         $centerId = (int) $this->attributes->get('center_id');
 
         return [
-            'treatment_id' => [
-                'sometimes',
-                Rule::exists('treatments', 'id')->where('center_id', $centerId),
-            ],
+            //el tratamiento de una cita no se puede cambiar (el precio reservado se fija al crearla)
             'room_id' => [
                 'sometimes',
                 Rule::exists('rooms', 'id')->where('center_id', $centerId),
@@ -37,7 +34,6 @@ class UpdateAppointmentRequest extends FormRequest
             ],
             'starts_at' => ['sometimes', 'date'],
             'ends_at' => ['sometimes', 'date', 'after:starts_at'],
-            'reserved_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'notes' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'assistant_ids' => ['sometimes', 'array'],
             'assistant_ids.*' => [
