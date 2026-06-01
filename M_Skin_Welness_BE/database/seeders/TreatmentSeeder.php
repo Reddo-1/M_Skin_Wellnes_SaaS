@@ -23,19 +23,11 @@ class TreatmentSeeder extends Seeder
         $laserMachineId    = Machine::query()->where('center_id', $centerId)->where('name', 'Láser diodo LD-200')->value('id');
         $pressureMachineId = Machine::query()->where('center_id', $centerId)->where('name', 'Presoterapia móvil')->value('id');
 
-        $diagnoRoleId = Role::query()->where('name', 'diagnosticador')->value('id');
         $dermoRoleId  = Role::query()->where('name', 'dermo_esteticien')->value('id');
         $fisioRoleId  = Role::query()->where('name', 'fisioterapeuta')->value('id');
         $maniRoleId   = Role::query()->where('name', 'manicurista')->value('id');
 
         $treatments = [
-            [
-                'name' => 'Diagnóstico inicial',
-                'duration_minutes' => 30,
-                'price' => 0.00,
-                'machine_ids' => [],
-                'role_ids' => [$diagnoRoleId],
-            ],
             [
                 'name' => 'Limpieza facial profunda',
                 'duration_minutes' => 60,
