@@ -123,7 +123,7 @@
 
 /* FullCalendar — estilo TailAdmin (toolbar, cabeceras, rejilla y eventos), adaptado a la marca */
 .fc .fc-view-harness {
-  @apply max-w-full overflow-x-auto;
+  @apply max-w-full overflow-x-auto border-x border-b border-gray-200;
 }
 .fc .fc-scrollgrid-section > * {
   border-right-width: 0;
@@ -251,6 +251,11 @@
 }
 .fc .fc-timegrid-axis-cushion {
   @apply text-sm font-medium text-gray-500;
+}
+
+/* en el cuadrante (resource timegrid sin franja all-day) el eje de horas se encoge al ancho del número; el px-3 de TailAdmin no cabe en ese hueco y empuja la hora a la derecha. Se reduce el padding lateral para que quede pegada a la izquierda */
+.custom-calendar .fc-timegrid-slot-label-frame {
+  @apply !px-1;
 }
 .custom-calendar .fc-h-event {
   background-color: transparent;
