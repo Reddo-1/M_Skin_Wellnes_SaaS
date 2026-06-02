@@ -19,10 +19,12 @@ class AppointmentService
         int $centerId,
         CarbonImmutable $startsAt,
         CarbonImmutable $endsAt,
+        int $clientId,
         int $workerId,
         int $roomId,
         //si tienen el ? delante es que accepta un entero o puede llegar un null
         ?int $machineId,
+        array $assistantIds = [],
         ?int $ignoreId = null,
     ): void {
         $base = Appointment::query()
@@ -35,6 +37,7 @@ class AppointmentService
         }
 
         $checks = [
+            'client_id'  => ['id' => $clientId,  'message' => 'El paciente ya tiene una cita en ese rango de horas.'],
             'worker_id'  => ['id' => $workerId,  'message' => 'El trabajador ya tiene una cita en ese rango de horas'],
             'room_id'    => ['id' => $roomId,    'message' => 'La sala ya está en uso ese intervalo de horas.'],
             'machine_id' => ['id' => $machineId, 'message' => 'Esa maquina ya está en uso ese intervalo de horas.'],
@@ -52,8 +55,49 @@ class AppointmentService
             }
         }
 
+        //un ayudante no puede estar ocupado en ese rango, ni como profesional ni como ayudante de otra cita
+        if ($assistantIds !== []) {
+            $assistantBusy = (clone $base)
+                ->where(function ($q) use ($assistantIds) {
+                    $q->whereIn('worker_id', $assistantIds)
+                      ->orWhereHas('assistants', fn ($a) => $a->whereIn('users.id', $assistantIds));
+                })
+                ->exists();
+
+            if ($assistantBusy) {
+                $errors['assistant_ids'] = 'Alguno de los ayudantes ya tiene una cita en ese rango de horas.';
+            }
+        }
+
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
+        }
+    }
+
+    //si el tratamiento usa máquina(s), la cita debe reservar una de las compatibles (y libre, que valida guardAgainstConflicts)
+    private function guardAgainstMachineRequirement(int $centerId, int $treatmentId, ?int $machineId): void
+    {
+        $compatibleIds = DB::table('machine_treatment')
+            ->where('center_id', $centerId)
+            ->where('treatment_id', $treatmentId)
+            ->pluck('machine_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($compatibleIds === []) {
+            return;
+        }
+
+        if ($machineId === null) {
+            throw ValidationException::withMessages([
+                'machine_id' => ['Este tratamiento requiere una máquina.'],
+            ]);
+        }
+
+        if (! in_array($machineId, $compatibleIds, true)) {
+            throw ValidationException::withMessages([
+                'machine_id' => ['La máquina seleccionada no es válida para este tratamiento.'],
+            ]);
         }
     }
 
@@ -140,13 +184,23 @@ class AppointmentService
             $startsAt = CarbonImmutable::parse($data['starts_at']);
             $endsAt = CarbonImmutable::parse($data['ends_at']);
 
+            $machineId = isset($data['machine_id']) ? (int) $data['machine_id'] : null;
+
+            $this->guardAgainstMachineRequirement(
+                centerId: $centerId,
+                treatmentId: (int) $data['treatment_id'],
+                machineId: $machineId,
+            );
+
             $this->guardAgainstConflicts(
                 centerId: $centerId,
                 startsAt: $startsAt,
                 endsAt: $endsAt,
+                clientId: (int) $data['client_id'],
                 workerId: (int) $data['worker_id'],
                 roomId: (int) $data['room_id'],
-                machineId: isset($data['machine_id']) ? (int) $data['machine_id'] : null,
+                machineId: $machineId,
+                assistantIds: array_map('intval', $data['assistant_ids'] ?? []),
             );
 
             $this->guardAgainstWorkerBreak(
@@ -206,13 +260,30 @@ class AppointmentService
                 ? CarbonImmutable::parse($data['ends_at'])
                 : CarbonImmutable::instance($appointment->ends_at);
 
+            $machineId = array_key_exists('machine_id', $data)
+                ? ($data['machine_id'] !== null ? (int) $data['machine_id'] : null)
+                : $appointment->machine_id;
+
+            //el tratamiento de una cita es inmutable: su requisito de máquina se valida contra el tratamiento ya guardado
+            $this->guardAgainstMachineRequirement(
+                centerId: $appointment->center_id,
+                treatmentId: (int) $appointment->treatment_id,
+                machineId: $machineId,
+            );
+
+            $assistantIds = array_key_exists('assistant_ids', $data)
+                ? array_map('intval', $data['assistant_ids'] ?? [])
+                : $appointment->assistants()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+
             $this->guardAgainstConflicts(
                 centerId: $appointment->center_id,
                 startsAt: $startsAt,
                 endsAt: $endsAt,
+                clientId: (int) $appointment->client_id,
                 workerId: (int) ($data['worker_id'] ?? $appointment->worker_id),
                 roomId: (int) ($data['room_id'] ?? $appointment->room_id),
-                machineId: array_key_exists('machine_id', $data)? ($data['machine_id'] !== null ? (int) $data['machine_id'] : null): $appointment->machine_id,
+                machineId: $machineId,
+                assistantIds: $assistantIds,
                 ignoreId: $appointment->id,
             );
 

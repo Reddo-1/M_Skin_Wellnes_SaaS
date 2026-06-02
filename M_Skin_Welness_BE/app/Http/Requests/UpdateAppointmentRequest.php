@@ -39,6 +39,7 @@ class UpdateAppointmentRequest extends FormRequest
             'assistant_ids.*' => [
                 'integer',
                 Rule::exists('users', 'id')->where('center_id', $centerId),
+                'different:worker_id',
             ],
         ];
     }
