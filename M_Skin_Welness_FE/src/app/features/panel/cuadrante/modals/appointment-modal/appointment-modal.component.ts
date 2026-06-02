@@ -568,7 +568,13 @@ export class AppointmentModalComponent {
       this.schedules.set(schedules);
       this.absences.set(absences);
       this.extras.set(extras);
-      this.dayAppointments.set(appointments);
+      //canceladas y no presentadas no ocupan recursos: se excluyen de la disponibilidad (espeja scopeNotCancelled del back)
+      this.dayAppointments.set(
+        appointments.filter((item) => {
+          const status = this.normalize(item.status?.name ?? '');
+          return status !== 'cancelada' && status !== 'no_presentada';
+        }),
+      );
     } catch {
       this.schedules.set([]);
       this.absences.set([]);
