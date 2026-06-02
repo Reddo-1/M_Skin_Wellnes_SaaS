@@ -47,7 +47,7 @@ export interface AppointmentPrefill {
   date: string;
 }
 
-type AppointmentField = 'client_id' | 'treatment_id' | 'worker_id' | 'room_id' | 'date' | 'time' | 'notes';
+type AppointmentField = 'client_id' | 'treatment_id' | 'worker_id' | 'room_id' | 'machine_id' | 'date' | 'time' | 'notes';
 
 interface StatusAction {
   status_id: number;
@@ -234,10 +234,13 @@ export class AppointmentModalComponent {
     return this.machines().filter((machine) => ids.has(machine.id));
   });
 
-  protected readonly machineOptions = computed<SelectOption[]>(() => [
-    { value: '', label: 'Sin máquina' },
-    ...this.compatibleMachines().map((machine) => ({ value: String(machine.id), label: machine.name })),
-  ]);
+  //si el tratamiento tiene máquina(s) compatible(s), la cita está obligada a usar una (sin opción "Sin máquina")
+  protected readonly machineRequired = computed(() => this.compatibleMachines().length > 0);
+
+  protected readonly machineOptions = computed<SelectOption[]>(() => {
+    const compatible = this.compatibleMachines().map((machine) => ({ value: String(machine.id), label: machine.name }));
+    return this.machineRequired() ? compatible : [{ value: '', label: 'Sin máquina' }, ...compatible];
+  });
 
   protected readonly roomOptions = computed<SelectOption[]>(() =>
     this.rooms().map((room) => ({ value: String(room.id), label: room.name })),
@@ -253,11 +256,18 @@ export class AppointmentModalComponent {
     return machine !== null && !machine.is_mobile && machine.fixed_room_id !== null;
   });
 
-  protected readonly assistantOptions = computed(() =>
-    this.workers()
-      .filter((worker) => String(worker.id) !== this.formValue().worker_id)
-      .map((worker) => ({ id: worker.id, name: worker.name })),
-  );
+  //ayudantes ofrecidos: solo profesionales libres en el hueco elegido (jornada cubierta y sin otra cita)
+  protected readonly assistantOptions = computed(() => {
+    const value = this.formValue();
+    const treatment = this.selectedTreatment();
+    if (value.time === '' || value.date === '' || treatment === null) return [];
+    const start = this.toMinutes(value.time);
+    const end = start + treatment.duration_minutes + treatment.margin_minutes;
+    return this.workers()
+      .filter((worker) => String(worker.id) !== value.worker_id)
+      .filter((worker) => this.isWorkerAvailable(worker.id, value.date, start, end))
+      .map((worker) => ({ id: worker.id, name: worker.name }));
+  });
 
   //bloqueo progresivo de secciones: paciente -> tratamiento -> profesional -> maquina/sala -> hora
   protected readonly treatmentDisabled = computed(() => this.formValue().client_id === '');
@@ -271,7 +281,8 @@ export class AppointmentModalComponent {
       this.formValue().worker_id === '' ||
       this.formValue().date === '' ||
       this.formValue().treatment_id === '' ||
-      this.formValue().room_id === '',
+      this.formValue().room_id === '' ||
+      (this.machineRequired() && this.formValue().machine_id === ''),
   );
 
   //inicios de cita disponibles para el profesional, con sala y máquina libres
@@ -284,34 +295,8 @@ export class AppointmentModalComponent {
     const machineId = value.machine_id === '' ? null : Number(value.machine_id);
     if (workerId === null || date === '' || treatment === null || roomId === null) return [];
 
-    const weekday = this.isoWeekday(date);
     const duration = treatment.duration_minutes + treatment.margin_minutes;
-
-    const windows: [number, number][] = [];
-    for (const schedule of this.schedules()) {
-      if (
-        schedule.worker_id !== workerId ||
-        schedule.weekday !== weekday ||
-        !this.scheduleActiveOn(schedule, date) ||
-        !schedule.time_slot
-      ) {
-        continue;
-      }
-      const start = this.toMinutes(schedule.time_slot.start_time);
-      const end = this.toMinutes(schedule.time_slot.end_time);
-      if (schedule.time_slot.break_start && schedule.time_slot.break_end) {
-        windows.push([start, this.toMinutes(schedule.time_slot.break_start)]);
-        windows.push([this.toMinutes(schedule.time_slot.break_end), end]);
-      } else {
-        windows.push([start, end]);
-      }
-    }
-    for (const extra of this.extras()) {
-      if (extra.worker_id !== workerId || extra.date !== date) continue;
-      windows.push([this.toMinutes(extra.start_time), this.toMinutes(extra.end_time)]);
-    }
-
-    const merged = this.mergeWindows(windows);
+    const merged = this.mergeWindows(this.scheduleWindows(workerId, date));
     if (merged.length === 0) return this.withCurrentTime([]);
 
     const absent: [number, number][] = [];
@@ -352,6 +337,9 @@ export class AppointmentModalComponent {
   protected readonly timeOptions = computed<SelectOption[]>(() =>
     this.availableStartTimes().map((time) => ({ value: time, label: time })),
   );
+
+  //los ayudantes solo se ofrecen una vez fijada la hora (su disponibilidad depende del hueco concreto)
+  protected readonly timeSelected = computed(() => this.formValue().time !== '');
 
   protected readonly timeHint = computed<string | null>(() => {
     if (this.timeDisabled() || this.availabilityLoading()) return null;
@@ -448,6 +436,37 @@ export class AppointmentModalComponent {
         if (date !== '') void this.loadDayBundle(date);
       }
     });
+
+    //la máquina es obligatoria solo cuando el tratamiento la usa; el validador se ajusta al tratamiento elegido
+    effect(() => {
+      const control = this.form.controls.machine_id;
+      if (this.machineRequired()) {
+        control.setValidators(Validators.required);
+      } else {
+        control.clearValidators();
+      }
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+
+    //la hora elegida debe seguir siendo un hueco válido; si deja de serlo (cambia profesional, sala, fecha o máquina), se limpia
+    effect(() => {
+      const available = this.availableStartTimes();
+      const time = this.form.controls.time.value;
+      if (time !== '' && !available.includes(time)) {
+        this.form.controls.time.setValue('');
+      }
+    });
+
+    //los ayudantes elegidos deben seguir disponibles en el hueco actual; se descartan los que dejen de estarlo
+    effect(() => {
+      if (this.availabilityLoading() || this.formValue().time === '') return;
+      const optionIds = new Set(this.assistantOptions().map((option) => option.id));
+      const current = this.form.controls.assistant_ids.value;
+      const next = current.filter((id) => optionIds.has(id));
+      if (next.length !== current.length) {
+        this.form.controls.assistant_ids.setValue(next);
+      }
+    });
   }
 
   protected async onClientSearch(query: string): Promise<void> {
@@ -490,16 +509,15 @@ export class AppointmentModalComponent {
     if (this.form.controls.machine_id.value !== '' && !compatibleIds.has(Number(this.form.controls.machine_id.value))) {
       this.form.controls.machine_id.setValue('');
     }
-    this.form.controls.time.setValue('');
   }
 
+  //al reasignar no se resetea la hora: si el nuevo profesional sigue libre en ese hueco, se conserva (lo valida el effect de hora)
   protected onWorkerChange(value: string): void {
     this.form.controls.worker_id.setValue(value);
     const numeric = Number(value);
     this.form.controls.assistant_ids.setValue(
       this.form.controls.assistant_ids.value.filter((id) => id !== numeric),
     );
-    this.form.controls.time.setValue('');
   }
 
   protected onMachineChange(value: string): void {
@@ -508,17 +526,10 @@ export class AppointmentModalComponent {
     if (machine && !machine.is_mobile && machine.fixed_room_id !== null) {
       this.form.controls.room_id.setValue(String(machine.fixed_room_id));
     }
-    this.form.controls.time.setValue('');
-  }
-
-  protected onRoomChange(value: string): void {
-    this.form.controls.room_id.setValue(value);
-    this.form.controls.time.setValue('');
   }
 
   protected onDateChange(date: string | null): void {
     if (date === null || date === '') return;
-    this.form.controls.time.setValue('');
     void this.loadDayBundle(date);
   }
 
@@ -541,6 +552,11 @@ export class AppointmentModalComponent {
   private async loadDayBundle(date: string): Promise<void> {
     if (date === this.lastBundleDate) return;
     this.lastBundleDate = date;
+    //limpia el bundle previo: mientras carga, la disponibilidad no debe usar datos de la fecha anterior
+    this.schedules.set([]);
+    this.absences.set([]);
+    this.extras.set([]);
+    this.dayAppointments.set([]);
     this.availabilityLoading.set(true);
     try {
       const [schedules, absences, extras, appointments] = await Promise.all([
@@ -660,13 +676,79 @@ export class AppointmentModalComponent {
     this.form.controls.time.setValue('');
   }
 
+  //conserva la hora original de la cita aunque no caiga en la rejilla, pero solo en su profesional y fecha originales
+  //(al reasignar profesional o cambiar de fecha, el hueco debe recalcularse de cero)
   private withCurrentTime(times: string[]): string[] {
     const unique = Array.from(new Set(times)).sort();
-    const current = this.formValue().time;
-    if (this.isEdit() && current !== '' && !unique.includes(current)) {
-      return [current, ...unique].sort();
+    const appointment = this.appointment();
+    const value = this.formValue();
+    const sameSlot =
+      appointment?.worker != null &&
+      String(appointment.worker.id) === value.worker_id &&
+      this.splitIso(appointment.starts_at).date === value.date;
+    if (sameSlot && value.time !== '' && !unique.includes(value.time)) {
+      return [value.time, ...unique].sort();
     }
     return unique;
+  }
+
+  //franjas de trabajo del profesional ese día (jornada con descanso partido + disponibilidades extra)
+  private scheduleWindows(workerId: number, date: string): [number, number][] {
+    const weekday = this.isoWeekday(date);
+    const windows: [number, number][] = [];
+    for (const schedule of this.schedules()) {
+      if (
+        schedule.worker_id !== workerId ||
+        schedule.weekday !== weekday ||
+        !this.scheduleActiveOn(schedule, date) ||
+        !schedule.time_slot
+      ) {
+        continue;
+      }
+      const start = this.toMinutes(schedule.time_slot.start_time);
+      const end = this.toMinutes(schedule.time_slot.end_time);
+      if (schedule.time_slot.break_start && schedule.time_slot.break_end) {
+        windows.push([start, this.toMinutes(schedule.time_slot.break_start)]);
+        windows.push([this.toMinutes(schedule.time_slot.break_end), end]);
+      } else {
+        windows.push([start, end]);
+      }
+    }
+    for (const extra of this.extras()) {
+      if (extra.worker_id !== workerId || extra.date !== date) continue;
+      windows.push([this.toMinutes(extra.start_time), this.toMinutes(extra.end_time)]);
+    }
+    return windows;
+  }
+
+  //un profesional está disponible en [start, end] si la jornada lo cubre, no está ausente y no tiene otra cita (como titular o ayudante)
+  private isWorkerAvailable(workerId: number, date: string, start: number, end: number): boolean {
+    const merged = this.mergeWindows(this.scheduleWindows(workerId, date));
+    if (!merged.some(([from, to]) => start >= from && end <= to)) return false;
+
+    for (const absence of this.absences()) {
+      if (absence.worker_id !== workerId || absence.date !== date) continue;
+      if (absence.is_full_day) return false;
+      if (
+        absence.start_time &&
+        absence.end_time &&
+        this.overlaps(start, end, [[this.toMinutes(absence.start_time), this.toMinutes(absence.end_time)]])
+      ) {
+        return false;
+      }
+    }
+
+    const editingId = this.appointment()?.id ?? null;
+    for (const item of this.dayAppointments()) {
+      if (editingId !== null && item.id === editingId) continue;
+      const itemStart = this.minutesOfIso(item.starts_at);
+      const itemEnd = this.minutesOfIso(item.ends_at);
+      if (itemStart === null || itemEnd === null) continue;
+      const involvesWorker =
+        item.worker?.id === workerId || (item.assistants?.some((assistant) => assistant.id === workerId) ?? false);
+      if (involvesWorker && start < itemEnd && end > itemStart) return false;
+    }
+    return true;
   }
 
   private mergeWindows(windows: [number, number][]): [number, number][] {

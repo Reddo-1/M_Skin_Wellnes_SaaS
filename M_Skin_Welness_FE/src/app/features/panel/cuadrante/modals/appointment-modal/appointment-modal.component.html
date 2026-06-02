@@ -16,7 +16,7 @@
     </div>
 
     @if (finalizing()) {
-      <div class="flex min-h-0 flex-1 flex-col" [formGroup]="pickForm">
+      <div class="flex min-h-0 flex-1 flex-col sm:min-h-[34rem]" [formGroup]="pickForm">
         <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
           <p class="text-sm text-muted">
             Añade los productos consumidos (en dosis). Puedes finalizar sin productos.
@@ -179,16 +179,23 @@
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">Máquina (opcional)</label>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                {{ machineRequired() ? 'Máquina' : 'Máquina (opcional)' }}
+              </label>
               <app-select
                 [options]="machineOptions()"
                 [selected]="form.controls.machine_id.value"
                 [disabled]="machineDisabled()"
-                placeholder="Sin máquina"
+                [invalid]="hasFieldError('machine_id')"
+                [placeholder]="machineRequired() ? 'Selecciona una máquina…' : 'Sin máquina'"
                 (selectionChange)="onMachineChange($event)"
               />
               @if (machineDisabled()) {
                 <p class="mt-1.5 text-xs text-muted">Disponible al elegir el tratamiento.</p>
+              } @else if (hasValidationError('machine_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Este tratamiento requiere una máquina.</p>
+              } @else if (machineRequired()) {
+                <p class="mt-1.5 text-xs text-muted">Este tratamiento se realiza con máquina.</p>
               }
             </div>
 
@@ -200,7 +207,7 @@
                 [disabled]="roomDisabled()"
                 [invalid]="hasFieldError('room_id')"
                 placeholder="Selecciona una sala…"
-                (selectionChange)="onRoomChange($event)"
+                (selectionChange)="form.controls.room_id.setValue($event)"
               />
               @if (roomLocked()) {
                 <p class="mt-1.5 text-xs text-muted">Definida por la máquina seleccionada.</p>
@@ -260,9 +267,15 @@
               <app-multi-select
                 [options]="assistantOptions()"
                 [selectedIds]="form.controls.assistant_ids.value"
+                [disabled]="!timeSelected()"
                 placeholder="Selecciona profesionales de apoyo…"
                 (selectionChange)="form.controls.assistant_ids.setValue($event)"
               />
+              @if (!timeSelected()) {
+                <p class="mt-1.5 text-xs text-muted">Elige primero la hora para ver los ayudantes disponibles.</p>
+              } @else if (assistantOptions().length === 0) {
+                <p class="mt-1.5 text-xs text-muted">No hay profesionales libres en ese hueco.</p>
+              }
             </div>
 
             <div>
