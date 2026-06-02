@@ -41,11 +41,11 @@ interface EventStyle {
   text: string;
 }
 
-//colores de cita por estado, alineados a la paleta de marca y semanticos
+//ciclo de vida de la cita en verde: intensidad alta (confirmada) -> más alta (en curso) -> muy baja (realizada)
 const STATUS_STYLE: Record<string, EventStyle> = {
-  confirmada: { bg: '#fef4ee', border: '#e6621f', text: '#c84c14' },
-  en_curso: { bg: '#fde6d3', border: '#c84c14', text: '#6b2b10' },
-  realizada: { bg: '#ecfdf3', border: '#12b76a', text: '#039855' },
+  confirmada: { bg: '#d1fadf', border: '#12b76a', text: '#027a48' },
+  en_curso: { bg: '#6ce9a6', border: '#039855', text: '#05603a' },
+  realizada: { bg: '#ecfdf3', border: '#a6f4c5', text: '#12b76a' },
   cancelada: { bg: '#f2f4f7', border: '#98a2b3', text: '#667085' },
   no_presentada: { bg: '#fef3f2', border: '#f04438', text: '#d92d20' },
 };
