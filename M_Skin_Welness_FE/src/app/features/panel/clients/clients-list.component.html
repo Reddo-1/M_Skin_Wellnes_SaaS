@@ -83,13 +83,13 @@
                 <p class="font-semibold text-ink">{{ client.name }}</p>
               </td>
               <td class="px-5 py-3 text-muted">
-                {{ client.email ?? '—' }}
+                {{ client.email ?? 'N/D' }}
               </td>
               <td class="px-5 py-3 text-muted">
-                {{ client.phone ?? '—' }}
+                {{ client.phone ?? 'N/D' }}
               </td>
               <td class="px-5 py-3 text-muted">
-                {{ (client.birth_date | date:'dd/MM/yyyy') ?? '—' }}
+                {{ (client.birth_date | date:'dd/MM/yyyy') ?? 'N/D' }}
               </td>
               <td class="px-5 py-3">
                 @if (client.is_active) {

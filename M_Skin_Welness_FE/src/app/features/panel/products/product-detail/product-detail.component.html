@@ -72,13 +72,13 @@
         <div>
           <dt class="text-xs uppercase tracking-wide text-muted">Precio de venta</dt>
           <dd class="mt-1 text-sm font-semibold text-ink">
-            {{ product.sale_price != null ? (product.sale_price | currency:'EUR':'symbol':'1.2-2') : '—' }}
+            {{ product.sale_price != null ? (product.sale_price | currency:'EUR':'symbol':'1.2-2') : 'N/D' }}
           </dd>
         </div>
         <div>
           <dt class="text-xs uppercase tracking-wide text-muted">Precio de coste</dt>
           <dd class="mt-1 text-sm font-semibold text-ink">
-            {{ product.cost_price != null ? (product.cost_price | currency:'EUR':'symbol':'1.2-2') : '—' }}
+            {{ product.cost_price != null ? (product.cost_price | currency:'EUR':'symbol':'1.2-2') : 'N/D' }}
           </dd>
         </div>
         <div>
@@ -183,7 +183,7 @@
 
               @for (movement of movements(); track movement.id) {
                 <tr class="transition hover:bg-gray-50">
-                  <td class="px-5 py-3 text-muted">{{ (movement.created_at | date:'dd/MM/yyyy HH:mm') ?? '—' }}</td>
+                  <td class="px-5 py-3 text-muted">{{ (movement.created_at | date:'dd/MM/yyyy HH:mm') ?? 'N/D' }}</td>
                   <td class="px-5 py-3">
                     <span class="inline-flex items-center rounded-full bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink">
                       {{ movement.type?.name | normalize }}
@@ -193,8 +193,8 @@
                     {{ +movement.quantity >= 0 ? '+' : '' }}{{ movement.quantity | number:'1.0-3' }}
                   </td>
                   <td class="px-5 py-3 text-muted">{{ movement.new_quantity | number:'1.0-3' }}</td>
-                  <td class="px-5 py-3 text-muted">{{ movement.user?.name ?? '—' }}</td>
-                  <td class="px-5 py-3 text-muted">{{ movement.reason ?? '—' }}</td>
+                  <td class="px-5 py-3 text-muted">{{ movement.user?.name ?? 'N/D' }}</td>
+                  <td class="px-5 py-3 text-muted">{{ movement.reason ?? 'N/D' }}</td>
                 </tr>
               }
             </tbody>

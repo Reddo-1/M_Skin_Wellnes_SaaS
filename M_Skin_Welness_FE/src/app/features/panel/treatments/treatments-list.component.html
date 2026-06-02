@@ -80,7 +80,7 @@
               <td class="px-5 py-3 text-muted">{{ treatment.price | currency:'EUR':'symbol':'1.2-2' }}</td>
               <td class="px-5 py-3">
                 @if (treatment.authorized_roles.length === 0) {
-                  <span class="text-muted">—</span>
+                  <span class="text-muted">N/D</span>
                 } @else {
                   <div class="flex flex-wrap gap-1">
                     @for (role of treatment.authorized_roles; track role.id) {
@@ -93,7 +93,7 @@
               </td>
               <td class="px-5 py-3">
                 @if (treatment.machines.length === 0) {
-                  <span class="text-muted">—</span>
+                  <span class="text-muted">N/D</span>
                 } @else {
                   <div class="flex flex-wrap gap-1">
                     @for (machine of treatment.machines; track machine.id) {

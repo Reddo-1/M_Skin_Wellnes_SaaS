@@ -154,12 +154,12 @@
                 @if (product.sale_price != null) {
                   {{ product.sale_price | currency:'EUR':'symbol':'1.2-2' }}
                 } @else {
-                  <span class="text-muted">—</span>
+                  <span class="text-muted">N/D</span>
                 }
               </td>
               <td class="px-5 py-3">
                 @if (product.stock === undefined) {
-                  <span class="text-muted">—</span>
+                  <span class="text-muted">N/D</span>
                 } @else {
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-ink">{{ (+product.stock.current_quantity / product.doses_per_package) | number:'1.0-2' }}</span>
