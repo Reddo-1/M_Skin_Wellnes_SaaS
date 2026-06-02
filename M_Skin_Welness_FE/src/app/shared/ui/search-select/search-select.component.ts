@@ -8,7 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, debounceTime } from 'rxjs';
 
 export interface SearchSelectOption {
@@ -41,13 +41,16 @@ export class SearchSelectComponent {
   protected readonly isOpen = signal(false);
   protected readonly query = signal('');
 
-  //entrada de cada pulsación; el debounce de RxJS la agrupa antes de pedir resultados al padre
+  //entrada de cada pulsación; debounceTime la agrupa y toSignal devuelve el valor al mundo signal (undefined hasta el primer tecleo)
   private readonly queryChanges = new Subject<string>();
+  private readonly debouncedQuery = toSignal(this.queryChanges.pipe(debounceTime(250)));
 
   constructor() {
-    this.queryChanges
-      .pipe(debounceTime(250), takeUntilDestroyed())
-      .subscribe((value) => this.searchInput.emit(value));
+    //pide resultados al padre cuando cambia la búsqueda con debounce
+    effect(() => {
+      const value = this.debouncedQuery();
+      if (value !== undefined) this.searchInput.emit(value);
+    });
 
     effect((onCleanup) => {
       if (!this.isOpen()) return;
