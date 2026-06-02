@@ -27,7 +27,7 @@ class ProductController extends Controller
             ->with('stock')
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->when($request->filled('is_sellable'), fn ($q) => $q->where('is_sellable', $request->boolean('is_sellable')))
-            ->when($request->filled('search'), fn ($q) => $q->where('name', 'ilike', '%'.$request->string('search').'%'))
+            ->when($request->filled('search'), fn ($q) => $q->whereRaw('unaccent(name) ILIKE unaccent(?)', ['%'.$request->string('search').'%']))
             ->orderBy('name');
 
         return ProductResource::collection($query->paginate(10));

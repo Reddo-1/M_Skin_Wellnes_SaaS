@@ -1,5 +1,5 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProductService, ProductData } from '../../../core/services/product.service';
@@ -12,6 +12,8 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { ProductModalComponent, ProductFormValue } from './modals/product-modal/product-modal.component';
+import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -32,7 +34,9 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     SegmentedControlComponent,
     TableScrollHintComponent,
     ProductModalComponent,
-  ],
+    LoadingOverlayComponent,
+    SearchInputComponent
+],
   templateUrl: './products-list.component.html',
 })
 export class ProductsListComponent {
@@ -58,23 +62,8 @@ export class ProductsListComponent {
 
   protected readonly showcase = computed(() => this.auth.effectiveRoles().includes('cliente'));
 
-  private searchInitialized = false;
-
   constructor() {
     void this.load();
-
-    effect((onCleanup) => {
-      this.searchInput();
-      if (!this.searchInitialized) {
-        this.searchInitialized = true;
-        return;
-      }
-      const timer = setTimeout(() => {
-        this.page.set(1);
-        void this.load();
-      }, 300);
-      onCleanup(() => clearTimeout(timer));
-    });
   }
 
   protected isRowBusy(id: number): boolean {
@@ -86,8 +75,10 @@ export class ProductsListComponent {
     return Number(product.stock.current_quantity) < Number(product.minimum_stock);
   }
 
-  protected onSearchInput(value: string): void {
+  protected onSearch(value: string): void {
     this.searchInput.set(value);
+    this.page.set(1);
+    void this.load();
   }
 
   protected onActiveFilterChange(value: ActiveFilter): void {

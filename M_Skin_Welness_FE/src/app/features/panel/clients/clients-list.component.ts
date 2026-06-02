@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ClientService, CreateClientData, UpdateClientData } from '../../../core/services/client.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -14,6 +14,8 @@ import { SegmentedControlComponent, SegmentedControlOption } from '../../../shar
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { ClientModalComponent, ClientFormValue } from './modals/client-modal/client-modal.component';
 import { ActivateOnlineModalComponent, ActivateOnlineFormValue } from './modals/activate-online-modal/activate-online-modal.component';
+import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -34,7 +36,9 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     ActivateOnlineModalComponent,
     SegmentedControlComponent,
     TableScrollHintComponent,
-  ],
+    LoadingOverlayComponent,
+    SearchInputComponent
+],
   templateUrl: './clients-list.component.html',
 })
 export class ClientsListComponent {
@@ -69,29 +73,16 @@ export class ClientsListComponent {
 
   constructor() {
     void this.load();
-
-    effect((onCleanup) => {
-      this.searchInput();
-      if (!this.searchInitialized) {
-        this.searchInitialized = true;
-        return;
-      }
-      const timer = setTimeout(() => {
-        this.page.set(1);
-        void this.load();
-      }, 300);
-      onCleanup(() => clearTimeout(timer));
-    });
   }
-
-  private searchInitialized = false;
 
   protected isRowBusy(userId: number): boolean {
     return this.busyRowIds().has(userId);
   }
 
-  protected onSearchInput(value: string): void {
+  protected onSearch(value: string): void {
     this.searchInput.set(value);
+    this.page.set(1);
+    void this.load();
   }
 
   protected onActiveFilterChange(value: ActiveFilter): void {

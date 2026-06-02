@@ -38,7 +38,7 @@ class UserController extends Controller
             ->when($request->filled('search'), function ($q) use ($request) {
                 $term = '%'.$request->string('search').'%';
                 $q->where(function ($qq) use ($term) {
-                    $qq->where('name', 'ilike', $term)
+                    $qq->whereRaw('unaccent(name) ILIKE unaccent(?)', [$term])
                        ->orWhere('email', 'ilike', $term);
                 });
             })
