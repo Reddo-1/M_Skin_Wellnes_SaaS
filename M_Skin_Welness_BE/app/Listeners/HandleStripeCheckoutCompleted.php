@@ -3,17 +3,18 @@
 namespace App\Listeners;
 
 use App\Models\{Center, Plan, User};
-use App\Services\AuditLogService;
+use App\Services\{AuditLogService, SubscriptionInvoiceMailer};
 use Carbon\Carbon;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\{DB, Log};
 use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Events\WebhookReceived;
 
 class HandleStripeCheckoutCompleted
 {
-    public function __construct(private readonly AuditLogService $auditLogs)
-    {
+    public function __construct(
+        private readonly AuditLogService $auditLogs,
+        private readonly SubscriptionInvoiceMailer $invoiceMailer,
+    ) {
     }
 
     public function handle(WebhookReceived $event): void
@@ -43,7 +44,10 @@ class HandleStripeCheckoutCompleted
             Log::error('Plan no encontrado al completar checkout', ['plan_id' => $metadata['pending_plan_id'] ?? null]);
             return;
         }
-        DB::transaction(function () use ($metadata, $plan, $stripeCustomerId, $stripeSubscriptionId) {
+        $createdUser = null;
+        $firstInvoiceId = null;
+
+        DB::transaction(function () use ($metadata, $plan, $stripeCustomerId, $stripeSubscriptionId, &$createdUser, &$firstInvoiceId) {
             $center = Center::create([
                 'uuid' => $metadata['pending_center_uuid'],
                 'name' => $metadata['pending_center_name'],
@@ -69,7 +73,7 @@ class HandleStripeCheckoutCompleted
 
             $user->assignRole('administrador');
 
-            $this->syncSubscription($user, $stripeSubscriptionId);
+            $firstInvoiceId = $this->syncSubscription($user, $stripeSubscriptionId);
 
             $this->auditLogs->record(
                 action: 'center.created',
@@ -93,10 +97,17 @@ class HandleStripeCheckoutCompleted
             );
 
             $user->sendEmailVerificationNotification();
+
+            $createdUser = $user;
         });
+
+        //la factura del alta se envía tras el commit (el usuario ya existe seguro; evita la carrera con el webhook invoice.payment_succeeded)
+        if ($createdUser !== null && $firstInvoiceId !== null) {
+            $this->invoiceMailer->send($createdUser, $firstInvoiceId);
+        }
     }
 
-    private function syncSubscription(User $user, string $stripeSubscriptionId): void
+    private function syncSubscription(User $user, string $stripeSubscriptionId): ?string
     {
         $stripeSubscription = Cashier::stripe()->subscriptions->retrieve($stripeSubscriptionId, [
             'expand' => ['items.data.price'],
