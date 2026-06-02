@@ -8,6 +8,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, debounceTime } from 'rxjs';
 
 export interface SearchSelectOption {
   value: string;
@@ -39,9 +41,14 @@ export class SearchSelectComponent {
   protected readonly isOpen = signal(false);
   protected readonly query = signal('');
 
-  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  //entrada de cada pulsación; el debounce de RxJS la agrupa antes de pedir resultados al padre
+  private readonly queryChanges = new Subject<string>();
 
   constructor() {
+    this.queryChanges
+      .pipe(debounceTime(250), takeUntilDestroyed())
+      .subscribe((value) => this.searchInput.emit(value));
+
     effect((onCleanup) => {
       if (!this.isOpen()) return;
       this.searchBox()?.nativeElement.focus();
@@ -65,8 +72,7 @@ export class SearchSelectComponent {
 
   protected onQueryInput(value: string): void {
     this.query.set(value);
-    if (this.debounceTimer !== null) clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => this.searchInput.emit(this.query()), 250);
+    this.queryChanges.next(value);
   }
 
   protected pick(option: SearchSelectOption, event: MouseEvent): void {
