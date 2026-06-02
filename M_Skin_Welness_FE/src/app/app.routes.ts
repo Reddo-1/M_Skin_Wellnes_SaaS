@@ -80,21 +80,6 @@ export const routes: Routes = [
           import('./features/panel/cuadrante/cuadrante.component').then((m) => m.CuadranteComponent),
       },
       {
-        path: 'mapa',
-        canActivate: [
-          roleGuard([
-            'administrador',
-            'recepcionista',
-            'diagnosticador',
-            'dermo_esteticien',
-            'fisioterapeuta',
-            'manicurista',
-          ]),
-        ],
-        data: { title: 'Mapa del centro' },
-        loadComponent: placeholder,
-      },
-      {
         path: 'tratamientos',
         canActivate: [
           roleGuard([
@@ -130,6 +115,25 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/panel/machines/machines-list.component').then(
             (m) => m.MachinesListComponent,
+          ),
+      },
+      {
+        path: 'salas',
+        canActivate: [
+          roleGuard([
+            'administrador',
+            'recepcionista',
+            'rrhh',
+            'diagnosticador',
+            'dermo_esteticien',
+            'fisioterapeuta',
+            'manicurista',
+          ]),
+        ],
+        data: { title: 'Salas' },
+        loadComponent: () =>
+          import('./features/panel/rooms/rooms-list.component').then(
+            (m) => m.RoomsListComponent,
           ),
       },
       {

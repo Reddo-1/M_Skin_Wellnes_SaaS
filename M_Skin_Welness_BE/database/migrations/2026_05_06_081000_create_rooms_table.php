@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->string('name', 120);
-            $table->json('grid_position');
+            //grid_position queda nullable: lo usará el mapa del centro (post-defensa); el catálogo de salas crea salas sin posición
+            $table->json('grid_position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestampTz('created_at')->useCurrent();
 

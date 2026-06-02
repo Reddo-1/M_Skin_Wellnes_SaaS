@@ -3,7 +3,6 @@ import { UserRole } from './user.model';
 export type NavIcon =
   | 'dashboard'
   | 'calendar'
-  | 'map'
   | 'users'
   | 'briefcase'
   | 'clock'

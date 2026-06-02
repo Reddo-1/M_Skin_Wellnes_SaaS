@@ -29,20 +29,6 @@ const ALL_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Mapa del centro',
-    path: '/panel/mapa',
-    icon: 'map',
-    section: 'operativa',
-    allowedRoles: [
-      'administrador',
-      'recepcionista',
-      'diagnosticador',
-      'dermo_esteticien',
-      'fisioterapeuta',
-      'manicurista',
-    ],
-  },
-  {
     label: 'Mis citas',
     path: '/panel/mis-citas',
     icon: 'calendar',
@@ -68,6 +54,21 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Máquinas',
     path: '/panel/maquinas',
     icon: 'cpu',
+    section: 'catalogo',
+    allowedRoles: [
+      'administrador',
+      'recepcionista',
+      'rrhh',
+      'diagnosticador',
+      'dermo_esteticien',
+      'fisioterapeuta',
+      'manicurista',
+    ],
+  },
+  {
+    label: 'Salas',
+    path: '/panel/salas',
+    icon: 'building',
     section: 'catalogo',
     allowedRoles: [
       'administrador',

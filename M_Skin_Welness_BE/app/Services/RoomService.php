@@ -14,7 +14,7 @@ class RoomService
             return Room::create([
                 'center_id' => $centerId,
                 'name' => $data['name'],
-                'grid_position' => $data['grid_position'],
+                'grid_position' => $data['grid_position'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
             ]);
         });
