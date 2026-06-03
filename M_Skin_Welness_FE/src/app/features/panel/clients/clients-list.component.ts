@@ -229,7 +229,6 @@ export class ClientsListComponent {
     } catch {
       const message = loadResourceError('los clientes');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

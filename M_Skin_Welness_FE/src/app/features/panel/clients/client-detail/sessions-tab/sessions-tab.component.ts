@@ -50,7 +50,6 @@ export class SessionsTabComponent {
     } catch {
       const message = loadResourceError('las sesiones');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

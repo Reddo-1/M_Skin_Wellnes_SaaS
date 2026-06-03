@@ -75,7 +75,6 @@ export class ClientDetailComponent {
     } catch {
       const message = loadResourceError('la ficha del cliente');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

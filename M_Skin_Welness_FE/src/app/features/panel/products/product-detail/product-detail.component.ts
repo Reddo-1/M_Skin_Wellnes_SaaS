@@ -232,7 +232,6 @@ export class ProductDetailComponent {
     } catch {
       const message = loadResourceError('el producto');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

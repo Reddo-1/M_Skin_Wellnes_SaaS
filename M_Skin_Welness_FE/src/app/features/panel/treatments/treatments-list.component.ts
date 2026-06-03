@@ -193,7 +193,6 @@ export class TreatmentsListComponent {
     } catch {
       const message = loadResourceError('los tratamientos');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }
