@@ -19,9 +19,14 @@ class UserFilePolicy
         if ($user->id === $file->user_id) {
             return true;
         }
+        //un cliente puro solo accede a sus propios ficheros, nunca a los de otro cliente del centro
+        if ($user->hasRole('cliente') && $user->roles->count() === 1) {
+            return false;
+        }
 
         return $user->can('user_files.view');
     }
+
     public function create(User $user): bool
     {
         return true;
@@ -33,7 +38,7 @@ class UserFilePolicy
             return false;
         }
 
-        //cualquiera puede borrar su propio avatar
+        //el avatar propio se borra sin permiso user_files.delete
         if ($file->isAvatar() && $user->id === $file->user_id) {
             return true;
         }

@@ -16,7 +16,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserFileController extends Controller
 {
-    //inyecta el service de archivos
     public function __construct(private readonly UserFileService $service)
     {
     }
@@ -26,12 +25,17 @@ class UserFileController extends Controller
         $this->authorize('viewAny', UserFile::class);
 
         $centerId = (int) $request->attributes->get('center_id');
+        $actor = $request->user();
+        //el cliente puro solo ve sus propios ficheros, se ignora el filtro que pida
+        $restrictToSelf = $actor->hasRole('cliente') && $actor->roles->count() === 1;
 
         $query = UserFile::query()
-            //solo archivos del centro actual
             ->forCenter($centerId)
-            //filtros opcionales
-            ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
+            ->when(
+                $restrictToSelf,
+                fn ($q) => $q->where('user_id', $actor->id),
+                fn ($q) => $q->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id'))),
+            )
             ->when($request->filled('skin_evaluation_id'), fn ($q) => $q->where('skin_evaluation_id', $request->integer('skin_evaluation_id')))
             ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
             ->orderByDesc('id');
