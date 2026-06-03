@@ -36,7 +36,6 @@ export class MyAppointmentsComponent {
   protected readonly filter = signal<AppointmentFilter>('upcoming');
 
   protected readonly filterOptions = FILTER_OPTIONS;
-  protected readonly skeletons = Array.from({ length: 4 });
 
   private readonly upcoming = computed(() =>
     this.items()
