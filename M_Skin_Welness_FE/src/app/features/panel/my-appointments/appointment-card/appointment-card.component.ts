@@ -12,12 +12,12 @@ interface StatusStyle {
 const STATUS_STYLE: Record<string, StatusStyle> = {
   confirmada: { badge: 'bg-success-50 text-success-600', rail: 'bg-success-500' },
   en_curso: { badge: 'bg-brand-50 text-brand-600', rail: 'bg-brand-500' },
-  realizada: { badge: 'bg-surface-alt text-ink', rail: 'bg-success-300' },
-  cancelada: { badge: 'bg-surface-alt text-muted', rail: 'bg-gray-300' },
+  realizada: { badge: 'bg-surface-alt text-ink', rail: 'bg-gray-300' },
+  cancelada: { badge: 'bg-warning-50 text-warning-700', rail: 'bg-warning-500' },
   no_presentada: { badge: 'bg-error-50 text-error-600', rail: 'bg-error-500' },
 };
 
-const FALLBACK_STYLE: StatusStyle = { badge: 'bg-surface-alt text-muted', rail: 'bg-gray-300' };
+const FALLBACK_STYLE: StatusStyle = { badge: 'bg-surface-alt text-ink', rail: 'bg-gray-300' };
 
 @Component({
   selector: 'app-appointment-card',
