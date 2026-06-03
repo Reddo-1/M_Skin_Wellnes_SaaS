@@ -1,0 +1,93 @@
+<div class="min-h-screen bg-white">
+  <section class="relative overflow-hidden bg-brand-950 text-white">
+    <svg
+      class="pointer-events-none absolute bottom-[-220px] right-[-180px] h-[560px] w-[560px] opacity-60 animate-mandala-spin"
+      viewBox="-100 -100 200 200"
+      aria-hidden="true"
+    >
+      <g fill="none" stroke="#ffffff" stroke-width="0.6">
+        <circle r="90" opacity=".5" />
+        <circle r="75" opacity=".4" />
+        <circle r="30" />
+        <circle cx="30" cy="0" r="30" />
+        <circle cx="15" cy="25.98" r="30" />
+        <circle cx="-15" cy="25.98" r="30" />
+        <circle cx="-30" cy="0" r="30" />
+        <circle cx="-15" cy="-25.98" r="30" />
+        <circle cx="15" cy="-25.98" r="30" />
+        <circle cx="60" cy="0" r="30" />
+        <circle cx="30" cy="51.96" r="30" />
+        <circle cx="-30" cy="51.96" r="30" />
+        <circle cx="-60" cy="0" r="30" />
+        <circle cx="-30" cy="-51.96" r="30" />
+        <circle cx="30" cy="-51.96" r="30" />
+      </g>
+    </svg>
+
+    <div class="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-20 text-center sm:py-28">
+      <a routerLink="/" class="text-2xl font-semibold tracking-tight">MSkinWellness</a>
+      <h1 class="mt-10 max-w-3xl text-title-sm font-semibold leading-tight sm:text-title-lg">
+        El software para gestionar tu clínica estética
+      </h1>
+      <p class="mt-5 max-w-2xl text-base text-white/70 sm:text-lg">
+        Agenda, ficha clínica, consentimientos y suscripción en un único panel, pensado para el día a día de tu centro.
+      </p>
+      <div class="mt-10 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <a
+          routerLink="/registro"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-white/40"
+        >
+          Crea tu centro
+        </a>
+        <a
+          routerLink="/login"
+          class="inline-flex items-center justify-center rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+        >
+          Acceder
+        </a>
+      </div>
+      <p class="mt-4 text-xs text-white/60">14 días de prueba gratis · sin permanencia</p>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+      <h2 class="text-center text-2xl font-bold text-ink">Todo lo que tu centro necesita</h2>
+      <p class="mx-auto mt-3 max-w-xl text-center text-sm text-muted">
+        Una sola herramienta para la operativa diaria, la parte clínica y la administración.
+      </p>
+      <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        @for (feature of features; track feature.title) {
+          <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-500 text-2xl">
+              <app-icon [name]="feature.icon" />
+            </span>
+            <h3 class="mt-4 text-lg font-semibold text-ink">{{ feature.title }}</h3>
+            <p class="mt-2 text-sm text-muted">{{ feature.description }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-brand-50">
+    <div class="mx-auto max-w-3xl px-6 py-16 text-center">
+      <h2 class="text-2xl font-bold text-ink">Empieza hoy mismo</h2>
+      <p class="mt-2 text-sm text-muted">Crea tu centro en minutos y pruébalo 14 días gratis, sin compromiso.</p>
+      <a
+        routerLink="/registro"
+        class="mt-6 inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+      >
+        Crea tu centro
+      </a>
+    </div>
+  </section>
+
+  <footer class="border-t border-gray-200 bg-white">
+    <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-6 py-8 sm:flex-row">
+      <span class="text-sm font-semibold text-ink">MSkinWellness</span>
+      <p class="text-xs text-muted">© 2026 MSkinWellness · Software de gestión para clínicas estéticas y salones de belleza</p>
+      <a routerLink="/login" class="text-sm font-medium text-brand-500 hover:text-brand-600">Acceder</a>
+    </div>
+  </footer>
+</div>
