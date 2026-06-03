@@ -2,9 +2,6 @@ import { Routes } from '@angular/router';
 import { authGuard, panelIndexRedirect, publicOnlyGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
-const placeholder = () =>
-  import('./features/panel/placeholder/placeholder.component').then((m) => m.PlaceholderComponent);
-
 export const routes: Routes = [
   {
     path: '',
@@ -51,7 +48,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layout/panel-layout/panel-layout.component').then((m) => m.PanelLayoutComponent),
     children: [
-      //redirección a su ruta correspondiente dependiendo del rol.
       { path: '', pathMatch: 'full', canActivate: [panelIndexRedirect], children: [] },
       {
         path: 'dashboard',
@@ -140,7 +136,10 @@ export const routes: Routes = [
         path: 'mis-citas',
         canActivate: [roleGuard(['cliente'])],
         data: { title: 'Mis citas' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/my-appointments/my-appointments.component').then(
+            (m) => m.MyAppointmentsComponent,
+          ),
       },
       {
         path: 'clientes',
@@ -191,7 +190,10 @@ export const routes: Routes = [
         path: 'mi-consent',
         canActivate: [roleGuard(['cliente'])],
         data: { title: 'Mi consentimiento' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/my-consent/my-consent.component').then(
+            (m) => m.MyConsentComponent,
+          ),
       },
       {
         path: 'trabajadores',
@@ -267,16 +269,20 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'ventas',
-        canActivate: [roleGuard(['administrador', 'recepcionista'])],
-        data: { title: 'Ventas' },
-        loadComponent: placeholder,
-      },
-      {
         path: 'mi-centro',
         canActivate: [roleGuard(['administrador'])],
         data: { title: 'Mi centro' },
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/panel/mi-centro/mi-centro.component').then((m) => m.MiCentroComponent),
+      },
+      {
+        path: 'subscripcion',
+        canActivate: [roleGuard(['administrador'])],
+        data: { title: 'Subscripción' },
+        loadComponent: () =>
+          import('./features/panel/subscripcion/subscripcion.component').then(
+            (m) => m.SubscripcionComponent,
+          ),
       },
       {
         path: 'mi-perfil',

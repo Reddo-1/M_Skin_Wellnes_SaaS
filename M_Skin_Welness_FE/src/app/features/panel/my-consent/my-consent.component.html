@@ -1,0 +1,124 @@
+<div class="flex flex-col gap-6">
+  <header>
+    <h1 class="text-2xl font-bold text-ink">Mi consentimiento</h1>
+    <p class="mt-1 text-sm text-muted">Consulta el consentimiento que firmaste en el centro y descarga tu copia en PDF.</p>
+  </header>
+
+  @if (errorMessage(); as message) {
+    <app-alert variant="error" title="No se ha podido cargar" [message]="message" />
+  } @else if (loading() && data() === null) {
+    <div class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-muted">
+      Cargando tu consentimiento…
+    </div>
+  } @else if (consent(); as consent) {
+    <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-ink">Consentimiento informado</h2>
+          <p class="mt-1 text-sm text-muted">
+            Firmado el {{ (consent.signed_at | date: 'dd/MM/yyyy') ?? 'N/D' }}
+            @if (consent.reviewer; as reviewer) {
+              con <span class="text-ink">{{ reviewer.name }}</span>
+            }
+          </p>
+        </div>
+        @if (consent.pdf_url; as pdfUrl) {
+          <a
+            [href]="pdfUrl"
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition hover:bg-gray-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.25C12.41 3.25 12.75 3.59 12.75 4V13.19L15.47 10.47C15.76 10.18 16.24 10.18 16.53 10.47C16.82 10.76 16.82 11.24 16.53 11.53L12.53 15.53C12.24 15.82 11.76 15.82 11.47 15.53L7.47 11.53C7.18 11.24 7.18 10.76 7.47 10.47C7.76 10.18 8.24 10.18 8.53 10.47L11.25 13.19V4C11.25 3.59 11.59 3.25 12 3.25ZM4.75 17.5C4.75 17.09 5.09 16.75 5.5 16.75H18.5C18.91 16.75 19.25 17.09 19.25 17.5V19.5C19.25 19.91 18.91 20.25 18.5 20.25H5.5C5.09 20.25 4.75 19.91 4.75 19.5V17.5Z" fill="currentColor" />
+            </svg>
+            Descargar PDF
+          </a>
+        }
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-xl border border-gray-200 p-4">
+          <p class="text-xs uppercase tracking-wide text-muted">Fotografías clínicas</p>
+          @if (consent.clinical_photos_consent) {
+            <p class="mt-1 text-sm font-semibold text-success-600">Acepto</p>
+          } @else {
+            <p class="mt-1 text-sm font-semibold text-error-500">No acepto</p>
+          }
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4">
+          <p class="text-xs uppercase tracking-wide text-muted">Datos para marketing</p>
+          @if (consent.marketing_data_consent) {
+            <p class="mt-1 text-sm font-semibold text-success-600">Acepto</p>
+          } @else {
+            <p class="mt-1 text-sm font-semibold text-error-500">No acepto</p>
+          }
+        </div>
+        <div class="rounded-xl border border-gray-200 p-4">
+          <p class="text-xs uppercase tracking-wide text-muted">Imágenes comerciales</p>
+          @if (consent.commercial_images_consent) {
+            <p class="mt-1 text-sm font-semibold text-success-600">Acepto</p>
+          } @else {
+            <p class="mt-1 text-sm font-semibold text-error-500">No acepto</p>
+          }
+        </div>
+      </div>
+
+      @if (consent.signature_url; as signatureUrl) {
+        <div class="mt-6">
+          <p class="text-xs uppercase tracking-wide text-muted">Tu firma</p>
+          <img
+            [src]="signatureUrl"
+            alt="Tu firma"
+            class="mt-2 h-24 max-w-xs rounded-lg border border-gray-200 bg-white object-contain p-2"
+          />
+        </div>
+      }
+    </article>
+
+    <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-ink">Tratamientos</h2>
+      <p class="mt-1 text-sm text-muted">Tu aceptación de cada tratamiento y la valoración de aptitud del profesional.</p>
+
+      @if (treatments().length === 0) {
+        <p class="mt-4 text-sm text-muted">Todavía no tienes ningún tratamiento consentido.</p>
+      } @else {
+        <ul class="mt-4 flex flex-col gap-3">
+          @for (tc of treatments(); track tc.id) {
+            <li class="rounded-xl border border-gray-200 p-4">
+              <p class="text-sm font-semibold text-ink">{{ tc.treatment?.name ?? 'Tratamiento' }}</p>
+              <div class="mt-3 flex flex-wrap gap-x-8 gap-y-3">
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-muted">Tu aceptación</p>
+                  @if (tc.treatment_consent) {
+                    <span class="mt-1 inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600">Acepto</span>
+                  } @else {
+                    <span class="mt-1 inline-flex items-center rounded-full bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink">No acepto</span>
+                  }
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-muted">Aptitud</p>
+                  @if (tc.is_suitable === true) {
+                    <span class="mt-1 inline-flex items-center rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-600">Apto</span>
+                  } @else if (tc.is_suitable === false) {
+                    <span class="mt-1 inline-flex items-center rounded-full bg-error-50 px-2.5 py-1 text-xs font-semibold text-error-600">No apto</span>
+                  } @else {
+                    <span class="mt-1 inline-flex items-center rounded-full bg-surface-alt px-2.5 py-1 text-xs font-semibold text-muted">Pendiente de valorar</span>
+                  }
+                </div>
+              </div>
+              @if (tc.is_suitable === false && tc.unsuitability_reason) {
+                <p class="mt-3 text-sm text-muted">Motivo: <span class="text-ink">{{ tc.unsuitability_reason }}</span></p>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  } @else {
+    <article class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
+      <h2 class="text-base font-semibold text-ink">Aún no has firmado tu consentimiento</h2>
+      <p class="mt-2 text-sm text-muted">
+        Cuando firmes el consentimiento informado en el centro, aparecerá aquí junto a tu copia en PDF.
+      </p>
+    </article>
+  }
+</div>
