@@ -20,7 +20,7 @@ class WorkerExtraAvailabilitySeeder extends Seeder
         $today = CarbonImmutable::today('Europe/Madrid');
 
         $saturdays = [];
-        for ($d = $today->subDays(14); $d->lte($today->addDays(14)); $d = $d->addDay()) {
+        for ($d = $today->subDays(7); $d->lte($today->addDays(7)); $d = $d->addDay()) {
             if ($d->isoWeekday() === 6) {
                 $saturdays[] = $d->toDateString();
             }

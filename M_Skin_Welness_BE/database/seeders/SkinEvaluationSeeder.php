@@ -39,7 +39,7 @@ class SkinEvaluationSeeder extends Seeder
                 'user_id' => $profile->user_id,
                 'client_profile_id' => $profile->id,
                 'skin_type_id' => $skinTypeIds[array_rand($skinTypeIds)],
-                'evaluation_date' => now()->subDays(mt_rand(5, 25))->toDateString(),
+                'evaluation_date' => now()->subDays(mt_rand(1, 7))->toDateString(),
                 'professional_id' => $diagnoId,
                 'general_notes' => 'Evaluacion inicial. Estado general adecuado.',
                 'created_at' => now(),

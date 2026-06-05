@@ -17,15 +17,14 @@ class MachineSeeder extends Seeder
             return;
         }
 
-        $machineRoomId = Room::query()
+        $cabina1Id = Room::query()
             ->where('center_id', $centerId)
-            ->where('name', 'Sala Maquinaria')
+            ->where('name', 'Cabina 1')
             ->value('id');
 
         $machines = [
-            ['name' => 'Radiofrecuencia RF-100', 'is_mobile' => false, 'fixed_room_id' => $machineRoomId],
-            ['name' => 'Láser diodo LD-200',     'is_mobile' => false, 'fixed_room_id' => $machineRoomId],
-            ['name' => 'Presoterapia móvil',     'is_mobile' => true,  'fixed_room_id' => null],
+            ['name' => 'Indiba', 'is_mobile' => true,  'fixed_room_id' => null],
+            ['name' => 'Láser',  'is_mobile' => false, 'fixed_room_id' => $cabina1Id],
         ];
 
         foreach ($machines as $m) {

@@ -31,8 +31,8 @@ class WorkerScheduleSeeder extends Seeder
             'manicurista'      => 'Tarde',
         ];
 
-        //arranca antes del rango sembrado (hoy-14) para que la jornada cubra todo el cuadrante
-        $startDate = now()->subDays(40)->toDateString();
+        //arranca al inicio del rango sembrado (hoy-7) para que la jornada cubra todo el cuadrante
+        $startDate = now()->subDays(7)->toDateString();
 
         foreach ($roleSlots as $role => $slotName) {
             $slotId = $slotByName[$slotName] ?? null;

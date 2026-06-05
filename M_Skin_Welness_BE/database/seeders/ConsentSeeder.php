@@ -29,14 +29,9 @@ class ConsentSeeder extends Seeder
 
         $clients = User::role('cliente')->where('center_id', $centerId)->orderBy('id')->get();
 
-        $signedAt = now()->subDays(20);
+        $signedAt = now()->subDays(6);
 
         foreach ($clients as $index => $client) {
-            //walk-in (16-19): sin consentimiento -> sirven para probar el gate de agendado y la activacion online
-            if ($index >= 16) {
-                continue;
-            }
-
             DB::table('client_consents')->updateOrInsert(
                 ['center_id' => $centerId, 'user_id' => $client->id],
                 [
@@ -53,16 +48,13 @@ class ConsentSeeder extends Seeder
                 ]
             );
 
-            //14-15: consintieron pero sin valorar (is_suitable null) -> no agendables, prueban la aptitud en la ficha
-            $isSuitable = $index < 14 ? true : null;
-
             foreach ($treatments as $treatmentId) {
                 DB::table('treatment_consents')->updateOrInsert(
                     ['center_id' => $centerId, 'user_id' => $client->id, 'treatment_id' => $treatmentId],
                     [
                         'reviewed_by_user_id' => $diagnoId,
                         'review_date' => $signedAt->toDateString(),
-                        'is_suitable' => $isSuitable,
+                        'is_suitable' => true,
                         'unsuitability_reason' => null,
                         'treatment_consent' => true,
                         'notes' => null,

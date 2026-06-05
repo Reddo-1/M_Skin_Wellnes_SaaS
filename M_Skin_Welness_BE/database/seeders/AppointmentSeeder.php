@@ -20,12 +20,10 @@ class AppointmentSeeder extends Seeder
             return;
         }
 
-        //cada profesional: su franja y su sala "de casa"
+        //cada profesional con tratamientos: su franja y su cabina "de casa"
         $config = [
-            'diagnosticador'   => ['Mañana', 'Sala Diagnóstico'],
-            'dermo_esteticien' => ['Mañana', 'Sala Faciales'],
-            'fisioterapeuta'   => ['Tarde',  'Sala Maquinaria'],
-            'manicurista'      => ['Tarde',  'Sala Faciales'],
+            'dermo_esteticien' => ['Mañana', 'Cabina 2'],
+            'fisioterapeuta'   => ['Tarde',  'Cabina 1'],
         ];
 
         $slots = DB::table('time_slots')->where('center_id', $centerId)->get()->keyBy('name');
@@ -36,8 +34,8 @@ class AppointmentSeeder extends Seeder
             $statusIds[$code] = (int) config('lookups.session_statuses.'.$code);
         }
 
-        //solo los clientes con consent + aptitud (los 14 primeros) son agendables
-        $clientIds = User::role('cliente')->where('center_id', $centerId)->orderBy('id')->take(14)->pluck('id')->all();
+        //los 10 clientes son agendables (todos con consent + aptitud)
+        $clientIds = User::role('cliente')->where('center_id', $centerId)->orderBy('id')->pluck('id')->all();
 
         if ($clientIds === []) {
             return;
@@ -78,7 +76,7 @@ class AppointmentSeeder extends Seeder
         $now = CarbonImmutable::now('Europe/Madrid');
         $today = CarbonImmutable::today('Europe/Madrid');
 
-        for ($d = $today->subDays(14); $d->lte($today->addDays(14)); $d = $d->addDay()) {
+        for ($d = $today->subDays(7); $d->lte($today->addDays(7)); $d = $d->addDay()) {
             //L-V; los sabados se cubren con las disponibilidades extra
             if ($d->isoWeekday() > 5) {
                 continue;

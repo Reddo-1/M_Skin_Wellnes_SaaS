@@ -16,18 +16,14 @@ class RoomSeeder extends Seeder
             return;
         }
 
-        $rooms = [
-            ['name' => 'Sala Diagnóstico', 'grid_position' => ['x' => 0, 'y' => 0, 'w' => 4, 'h' => 3]],
-            ['name' => 'Sala Faciales',    'grid_position' => ['x' => 4, 'y' => 0, 'w' => 4, 'h' => 3]],
-            ['name' => 'Sala Maquinaria',  'grid_position' => ['x' => 0, 'y' => 3, 'w' => 8, 'h' => 4]],
-        ];
+        $rooms = ['Cabina 1', 'Cabina 2', 'Cabina 3'];
 
-        foreach ($rooms as $r) {
+        foreach ($rooms as $name) {
             Room::updateOrCreate(
-                ['center_id' => $centerId, 'name' => $r['name']],
+                ['center_id' => $centerId, 'name' => $name],
                 [
                     'is_active' => true,
-                    'grid_position' => $r['grid_position'],
+                    'grid_position' => null,
                 ]
             );
         }

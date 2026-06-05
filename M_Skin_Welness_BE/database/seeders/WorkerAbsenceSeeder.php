@@ -22,10 +22,10 @@ class WorkerAbsenceSeeder extends Seeder
 
         //rol, offset en dias desde hoy, dia completo, inicio, fin, tipo
         $absences = [
-            ['diagnosticador',   -9, true,  null,    null,    'justificada'],
+            ['diagnosticador',   -5, true,  null,    null,    'justificada'],
             ['dermo_esteticien',  6, false, '10:00', '12:00', 'retribuida'],
             ['fisioterapeuta',   -4, true,  null,    null,    'retribuida'],
-            ['manicurista',       8, false, '17:00', '19:00', 'injustificada'],
+            ['manicurista',       7, false, '17:00', '19:00', 'injustificada'],
             ['rrhh',              3, true,  null,    null,    'justificada'],
         ];
 

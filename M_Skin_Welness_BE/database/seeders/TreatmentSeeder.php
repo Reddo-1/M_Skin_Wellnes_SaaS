@@ -6,7 +6,6 @@ use App\Models\Center;
 use App\Models\Machine;
 use App\Models\Treatment;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
 class TreatmentSeeder extends Seeder
@@ -19,55 +18,32 @@ class TreatmentSeeder extends Seeder
             return;
         }
 
-        $rfMachineId       = Machine::query()->where('center_id', $centerId)->where('name', 'Radiofrecuencia RF-100')->value('id');
-        $laserMachineId    = Machine::query()->where('center_id', $centerId)->where('name', 'Láser diodo LD-200')->value('id');
-        $pressureMachineId = Machine::query()->where('center_id', $centerId)->where('name', 'Presoterapia móvil')->value('id');
+        $indibaMachineId = Machine::query()->where('center_id', $centerId)->where('name', 'Indiba')->value('id');
+        $laserMachineId  = Machine::query()->where('center_id', $centerId)->where('name', 'Láser')->value('id');
 
-        $dermoRoleId  = Role::query()->where('name', 'dermo_esteticien')->value('id');
-        $fisioRoleId  = Role::query()->where('name', 'fisioterapeuta')->value('id');
-        $maniRoleId   = Role::query()->where('name', 'manicurista')->value('id');
+        $dermoRoleId = Role::query()->where('name', 'dermo_esteticien')->value('id');
+        $fisioRoleId = Role::query()->where('name', 'fisioterapeuta')->value('id');
 
         $treatments = [
             [
-                'name' => 'Limpieza facial profunda',
+                'name' => 'Indiba facial',
                 'duration_minutes' => 60,
-                'price' => 45.00,
-                'machine_ids' => [],
-                'role_ids' => [$dermoRoleId],
-            ],
-            [
-                'name' => 'Tratamiento antiedad',
-                'duration_minutes' => 75,
                 'price' => 65.00,
-                'machine_ids' => [],
+                'machine_ids' => [$indibaMachineId],
                 'role_ids' => [$dermoRoleId],
             ],
             [
-                'name' => 'Radiofrecuencia corporal',
-                'duration_minutes' => 60,
-                'price' => 80.00,
-                'machine_ids' => [$rfMachineId],
+                'name' => 'Masaje relajante',
+                'duration_minutes' => 50,
+                'price' => 40.00,
+                'machine_ids' => [],
                 'role_ids' => [$fisioRoleId],
             ],
             [
-                'name' => 'Depilación láser piernas',
+                'name' => 'Depilación láser',
                 'duration_minutes' => 45,
                 'price' => 70.00,
                 'machine_ids' => [$laserMachineId],
-                'role_ids' => [$fisioRoleId],
-            ],
-            [
-                'name' => 'Manicura completa',
-                'duration_minutes' => 45,
-                'price' => 25.00,
-                'machine_ids' => [],
-                'role_ids' => [$maniRoleId],
-            ],
-            [
-                'name' => 'Drenaje linfático con presoterapia',
-                'duration_minutes' => 50,
-                'price' => 55.00,
-                'machine_ids' => [$pressureMachineId],
                 'role_ids' => [$fisioRoleId],
             ],
         ];

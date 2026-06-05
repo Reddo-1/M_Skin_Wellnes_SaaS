@@ -17,9 +17,9 @@ class TimeSlotSeeder extends Seeder
         }
 
         $slots = [
-            ['name' => 'Mañana',   'start_time' => '09:00:00', 'end_time' => '14:00:00', 'break_start' => null,       'break_end' => null],
+            ['name' => 'Mañana',   'start_time' => '10:00:00', 'end_time' => '14:00:00', 'break_start' => null,       'break_end' => null],
             ['name' => 'Tarde',    'start_time' => '16:00:00', 'end_time' => '20:00:00', 'break_start' => null,       'break_end' => null],
-            ['name' => 'Completo', 'start_time' => '09:00:00', 'end_time' => '20:00:00', 'break_start' => '14:00:00', 'break_end' => '16:00:00'],
+            ['name' => 'Completo', 'start_time' => '10:00:00', 'end_time' => '20:00:00', 'break_start' => '14:00:00', 'break_end' => '16:00:00'],
         ];
 
         foreach ($slots as $s) {
