@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class WorkerScheduleController extends Controller
 {
-    //inyecta el service de horarios
     public function __construct(private readonly WorkerScheduleService $service)
     {
     }
@@ -24,17 +23,13 @@ class WorkerScheduleController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = WorkerSchedule::query()
-            //solo del centro actual
             ->forCenter($centerId)
-            //carga trabajador y franja
             ->with(['worker', 'timeSlot'])
-            //filtros opcionales
             ->when($request->filled('worker_id'), fn ($q) => $q->where('worker_id', $request->integer('worker_id')))
             ->when($request->filled('weekday'), fn ($q) => $q->where('weekday', $request->integer('weekday')))
             ->orderBy('worker_id')
             ->orderBy('weekday');
 
-        //100 por página (los horarios son muchos)
         return WorkerScheduleResource::collection($query->paginate(100));
     }
 

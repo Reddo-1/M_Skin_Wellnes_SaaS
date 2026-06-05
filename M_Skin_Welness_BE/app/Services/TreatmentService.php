@@ -8,7 +8,6 @@ use Illuminate\Validation\ValidationException;
 
 class TreatmentService
 {
-    //Vincula las máquinas compatibles con el tratamiento
     private function syncMachines(Treatment $treatment, int $centerId, array $data): void
     {
         if (! array_key_exists('machine_ids', $data)) {
@@ -22,7 +21,6 @@ class TreatmentService
         $treatment->machines()->sync($pivotData);
     }
 
-    //Vincula los roles autorizados a ejecutar el tratamiento
     private function syncAuthorizedRoles(Treatment $treatment, int $centerId, array $data): void
     {
         if (! array_key_exists('role_ids', $data)) {
@@ -40,7 +38,6 @@ class TreatmentService
         return DB::transaction(function () use ($centerId, $data) {
             $treatment = Treatment::create([...$data, 'center_id' => $centerId]);
 
-            //sincronizamos máquinas y roles autorizados si llegan en el body
             $this->syncMachines($treatment, $centerId, $data);
             $this->syncAuthorizedRoles($treatment, $centerId, $data);
 

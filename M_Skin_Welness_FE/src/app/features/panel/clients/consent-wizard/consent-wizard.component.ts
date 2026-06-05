@@ -8,19 +8,21 @@ import { ConsentService } from '../../../../core/services/consent.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { User } from '../../../../core/models/user.model';
 import { TreatmentSummary } from '../../../../core/models/treatment.model';
-import { HttpErrorResponse } from '@angular/common/http';
+import { apiError } from '../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
 import { BooleanPipe } from '../../../../shared/pipes/boolean.pipe';
-import { InputComponent } from '../../../../shared/ui/input/input.component';
+import { RadioGroupComponent, RadioOption } from '../../../../shared/ui/radio-group/radio-group.component';
 import { TextareaComponent } from '../../../../shared/ui/textarea/textarea.component';
 
 interface TreatmentFormControls {
   treatment_id: FormControl<number>;
-  is_suitable: FormControl<boolean | null>;
-  unsuitability_reason: FormControl<string>;
   treatment_consent: FormControl<boolean | null>;
-  notes: FormControl<string>;
 }
+
+const CONSENT_OPTIONS: RadioOption<boolean>[] = [
+  { value: true, label: 'Acepta' },
+  { value: false, label: 'No acepta' },
+];
 
 @Component({
   selector: 'app-consent-wizard',
@@ -32,7 +34,7 @@ interface TreatmentFormControls {
     SignaturePadComponent,
     AlertComponent,
     BooleanPipe,
-    InputComponent,
+    RadioGroupComponent,
     TextareaComponent,
   ],
   templateUrl: './consent-wizard.component.html',
@@ -46,7 +48,7 @@ export class ConsentWizardComponent {
   private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
 
-  //Como SignaturePad se pone como componente y hay que coger el canvas que crea por debajo tenemos que hacer esto.
+  //viewChild para acceder al canvas que SignaturePad crea por debajo
   private readonly signaturePad = viewChild<SignaturePadComponent>('signaturePad');
 
   protected readonly client = signal<User | null>(null);
@@ -67,6 +69,8 @@ export class ConsentWizardComponent {
     canvasHeight: 220,
   };
 
+  protected readonly consentOptions = CONSENT_OPTIONS;
+
   protected readonly form = this.fb.nonNullable.group({
     rgpd: this.fb.nonNullable.group({
       clinical_photos_consent: this.fb.nonNullable.control<boolean | null>(null, Validators.required),
@@ -78,14 +82,13 @@ export class ConsentWizardComponent {
   });
 
   constructor() {
-    effect(async () => {
-      const raw = this.id();
-      const userId = Number(raw);
+    effect(() => {
+      const userId = Number(this.id());
       if (!Number.isInteger(userId) || userId <= 0) {
         this.loadError.set('El identificador del cliente no es válido.');
         return;
       }
-      await this.load(userId);
+      void this.load(userId);
     });
   }
 
@@ -126,10 +129,7 @@ export class ConsentWizardComponent {
       const raw = this.form.getRawValue();
       const treatmentsPayload = raw.treatments.map((entry) => ({
         treatment_id: entry.treatment_id,
-        is_suitable: entry.is_suitable!,
-        unsuitability_reason: entry.is_suitable === false ? (entry.unsuitability_reason ?? null) : null,
-        treatment_consent: entry.is_suitable === true ? !!entry.treatment_consent : false,
-        notes: entry.notes === '' ? null : entry.notes,
+        treatment_consent: entry.treatment_consent!,
       }));
 
       await this.consents.submitWizard({
@@ -147,8 +147,7 @@ export class ConsentWizardComponent {
       this.notifications.toast.success('Consentimiento firmado y archivado.');
       void this.router.navigateByUrl(`/panel/clientes/${this.id()}`);
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? 'Los datos del consent no son válidos.';
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
       this.currentStep.set(1);
     } finally {
       this.submitting.set(false);
@@ -199,22 +198,8 @@ export class ConsentWizardComponent {
   private buildTreatmentGroup(treatmentId: number): FormGroup<TreatmentFormControls> {
     return this.fb.nonNullable.group<TreatmentFormControls>({
       treatment_id: this.fb.nonNullable.control(treatmentId),
-      is_suitable: this.fb.nonNullable.control<boolean | null>(null, Validators.required),
-      unsuitability_reason: this.fb.nonNullable.control(''),
-      treatment_consent: this.fb.nonNullable.control<boolean | null>(null),
-      notes: this.fb.nonNullable.control(''),
+      treatment_consent: this.fb.nonNullable.control<boolean | null>(null, Validators.required),
     });
-  }
-
-  //al marcar "apto" preseleccionamos "acepta": en la mayoria de visitas el cliente sí consiente, ahorra un click
-  protected onSuitabilityChange(index: number, isSuitable: boolean): void {
-    const consent = this.treatmentsArray.at(index).controls.treatment_consent;
-    if (isSuitable) {
-      consent.setValue(true);
-      consent.setErrors(null);
-    } else {
-      consent.setValue(null);
-    }
   }
 
   private validateStep1(): boolean {
@@ -227,17 +212,7 @@ export class ConsentWizardComponent {
     if (rgpd.controls.commercial_images_consent.value === null) valid = false;
 
     for (const group of this.treatmentsArray.controls) {
-      const isSuitable = group.controls.is_suitable.value;
-      if (isSuitable === null) {
-        valid = false;
-        continue;
-      }
-      if (isSuitable === false) {
-        if (group.controls.unsuitability_reason.value.trim() === '') {
-          group.controls.unsuitability_reason.setErrors({ required: true });
-          valid = false;
-        }
-      } else if (group.controls.treatment_consent.value === null) {
+      if (group.controls.treatment_consent.value === null) {
         group.controls.treatment_consent.setErrors({ required: true });
         valid = false;
       }

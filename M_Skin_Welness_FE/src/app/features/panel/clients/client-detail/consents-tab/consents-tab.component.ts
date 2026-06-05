@@ -24,8 +24,8 @@ export class ConsentsTabComponent {
 
   protected readonly activeConsent = signal<ClientConsentSummary | null>(null);
   protected readonly activeTreatmentConsents = signal<TreatmentConsentSummary[]>([]);
-  protected readonly consentsLoading = signal(false);
-  protected readonly consentsError = signal<string | null>(null);
+  protected readonly loading = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
 
   //el superadmin impersonando no firma consents: su center_id es null y el reviewer del consent quedaria huerfano
   protected readonly canSignConsent = computed(() => {
@@ -44,16 +44,16 @@ export class ConsentsTabComponent {
   }
 
   private async load(userId: number): Promise<void> {
-    this.consentsLoading.set(true);
-    this.consentsError.set(null);
+    this.loading.set(true);
+    this.errorMessage.set(null);
     try {
       const active = await this.consents.activeConsentsFor(userId);
       this.activeConsent.set(active.client);
       this.activeTreatmentConsents.set(active.treatments);
     } catch {
-      this.consentsError.set('No se ha podido cargar el consentimiento del cliente.');
+      this.errorMessage.set('No se ha podido cargar el consentimiento del cliente.');
     } finally {
-      this.consentsLoading.set(false);
+      this.loading.set(false);
     }
   }
 }

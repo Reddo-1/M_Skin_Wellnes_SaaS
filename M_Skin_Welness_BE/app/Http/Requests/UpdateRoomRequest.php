@@ -24,11 +24,6 @@ class UpdateRoomRequest extends FormRequest
                     ->where('center_id', $centerId)
                     ->ignore($roomId),
             ],
-            'grid_position' => ['sometimes', 'array'],
-            'grid_position.x' => ['required_with:grid_position', 'integer', 'min:0'],
-            'grid_position.y' => ['required_with:grid_position', 'integer', 'min:0'],
-            'grid_position.w' => ['required_with:grid_position', 'integer', 'min:1'],
-            'grid_position.h' => ['required_with:grid_position', 'integer', 'min:1'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

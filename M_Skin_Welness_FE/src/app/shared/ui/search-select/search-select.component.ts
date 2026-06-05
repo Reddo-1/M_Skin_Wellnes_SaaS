@@ -41,12 +41,11 @@ export class SearchSelectComponent {
   protected readonly isOpen = signal(false);
   protected readonly query = signal('');
 
-  //entrada de cada pulsación; debounceTime la agrupa y toSignal devuelve el valor al mundo signal (undefined hasta el primer tecleo)
+  //undefined hasta el primer tecleo: el effect ignora ese valor inicial y no lanza búsqueda
   private readonly queryChanges = new Subject<string>();
   private readonly debouncedQuery = toSignal(this.queryChanges.pipe(debounceTime(250)));
 
   constructor() {
-    //pide resultados al padre cuando cambia la búsqueda con debounce
     effect(() => {
       const value = this.debouncedQuery();
       if (value !== undefined) this.searchInput.emit(value);
@@ -69,7 +68,7 @@ export class SearchSelectComponent {
     if (this.disabled()) return;
     const next = !this.isOpen();
     this.isOpen.set(next);
-    //al abrir, pide al padre la lista para la búsqueda actual (carga inicial o refresco)
+    //al abrir pide la lista aunque no se haya tecleado, para tener resultados de entrada
     if (next) this.searchInput.emit(this.query());
   }
 

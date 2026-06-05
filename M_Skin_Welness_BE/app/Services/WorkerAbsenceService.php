@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class WorkerAbsenceService
 {
-    //crea una ausencia por cada día del rango [from..to] con los mismos datos
     public function create(int $centerId, array $data): Collection
     {
         return DB::transaction(function () use ($centerId, $data) {
@@ -41,7 +40,6 @@ class WorkerAbsenceService
     public function update(WorkerAbsence $absence, array $data): WorkerAbsence
     {
         return DB::transaction(function () use ($absence, $data) {
-            //si pasa a día completo, se borran las horas
             if (array_key_exists('is_full_day', $data) && $data['is_full_day'] === true) {
                 $data['start_time'] = null;
                 $data['end_time'] = null;

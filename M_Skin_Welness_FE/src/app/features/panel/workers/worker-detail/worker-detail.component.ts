@@ -1,16 +1,15 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { WorkerService } from '../../../../core/services/worker.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { User } from '../../../../core/models/user.model';
-import { GENERIC_ERROR, loadResourceError } from '../../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
 import { WorkerDataTabComponent } from './data-tab/data-tab.component';
 import { ScheduleTabComponent } from './schedule-tab/schedule-tab.component';
 
-type WorkerTab = 'datos' | 'horario';
+type WorkerTab = 'data' | 'schedule';
 
 @Component({
   selector: 'app-worker-detail',
@@ -29,11 +28,11 @@ export class WorkerDetailComponent {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  protected readonly activeTab = signal<WorkerTab>('datos');
+  protected readonly activeTab = signal<WorkerTab>('data');
   protected readonly tabs = computed<{ key: WorkerTab; label: string }[]>(() => {
-    const tabs: { key: WorkerTab; label: string }[] = [{ key: 'datos', label: 'Datos y acceso' }];
+    const tabs: { key: WorkerTab; label: string }[] = [{ key: 'data', label: 'Datos y acceso' }];
     if (this.auth.hasPermission('worker_schedules.view')) {
-      tabs.push({ key: 'horario', label: 'Horario' });
+      tabs.push({ key: 'schedule', label: 'Horario' });
     }
     return tabs;
   });
@@ -100,8 +99,7 @@ export class WorkerDetailComponent {
         current.is_active ? 'Trabajador desactivado.' : 'Trabajador reactivado.',
       );
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingActive.set(false);
     }

@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class RoomController extends Controller
 {
-    //inyecta el service de salas
     public function __construct(private readonly RoomService $service)
     {
     }
@@ -24,9 +23,7 @@ class RoomController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = Room::query()
-            //solo del centro actual
             ->forCenter($centerId)
-            //carga máquinas fijas de cada sala
             ->with(['machines'])
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name');

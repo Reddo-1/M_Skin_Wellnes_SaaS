@@ -19,7 +19,6 @@ class WorkerExtraAvailabilitySeeder extends Seeder
 
         $today = CarbonImmutable::today('Europe/Madrid');
 
-        //sabados dentro del rango [hoy-14, hoy+14]
         $saturdays = [];
         for ($d = $today->subDays(14); $d->lte($today->addDays(14)); $d = $d->addDay()) {
             if ($d->isoWeekday() === 6) {

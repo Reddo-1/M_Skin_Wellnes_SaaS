@@ -9,7 +9,7 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { RoomModalComponent, RoomFormValue } from './modals/room-modal/room-modal.component';
-import { LoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -22,7 +22,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
 @Component({
   selector: 'app-rooms-list',
   standalone: true,
-  imports: [AlertComponent, SegmentedControlComponent, TableScrollHintComponent, RoomModalComponent, LoadingOverlayComponent],
+  imports: [AlertComponent, SegmentedControlComponent, TableScrollHintComponent, RoomModalComponent, TableLoadingOverlayComponent],
   templateUrl: './rooms-list.component.html',
 })
 export class RoomsListComponent {

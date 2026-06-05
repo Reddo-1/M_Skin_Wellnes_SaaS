@@ -10,14 +10,14 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Dashboard',
     path: '/panel/dashboard',
     icon: 'dashboard',
-    section: 'operativa',
+    section: 'operations',
     allowedRoles: ['administrador'],
   },
   {
     label: 'Cuadrante',
     path: '/panel/cuadrante',
     icon: 'calendar',
-    section: 'operativa',
+    section: 'operations',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -32,14 +32,14 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Mis citas',
     path: '/panel/mis-citas',
     icon: 'calendar',
-    section: 'operativa',
+    section: 'operations',
     allowedRoles: ['cliente'],
   },
   {
     label: 'Tratamientos',
     path: '/panel/tratamientos',
     icon: 'sparkles',
-    section: 'catalogo',
+    section: 'catalog',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -54,7 +54,7 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Máquinas',
     path: '/panel/maquinas',
     icon: 'cpu',
-    section: 'catalogo',
+    section: 'catalog',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -69,7 +69,7 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Salas',
     path: '/panel/salas',
     icon: 'building',
-    section: 'catalogo',
+    section: 'catalog',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -84,7 +84,7 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Clientes',
     path: '/panel/clientes',
     icon: 'users',
-    section: 'clinico',
+    section: 'clinical',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -98,28 +98,28 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Mi consentimiento',
     path: '/panel/mi-consent',
     icon: 'shield-check',
-    section: 'clinico',
+    section: 'clinical',
     allowedRoles: ['cliente'],
   },
   {
     label: 'Trabajadores',
     path: '/panel/trabajadores',
     icon: 'briefcase',
-    section: 'equipo',
+    section: 'team',
     allowedRoles: ['administrador', 'rrhh'],
   },
   {
     label: 'Franjas horarias',
     path: '/panel/time-slots',
     icon: 'clock',
-    section: 'equipo',
+    section: 'team',
     allowedRoles: ['administrador', 'rrhh'],
   },
   {
     label: 'Productos',
     path: '/panel/productos',
     icon: 'package',
-    section: 'inventario',
+    section: 'inventory',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -134,28 +134,28 @@ const ALL_ITEMS: NavItem[] = [
     label: 'Inventario',
     path: '/panel/inventario',
     icon: 'archive',
-    section: 'inventario',
-    allowedRoles: ['administrador', 'recepcionista'],
-  },
-  {
-    label: 'Ventas',
-    path: '/panel/ventas',
-    icon: 'shopping-bag',
-    section: 'inventario',
+    section: 'inventory',
     allowedRoles: ['administrador', 'recepcionista'],
   },
   {
     label: 'Mi centro',
     path: '/panel/mi-centro',
     icon: 'building',
-    section: 'cuenta',
+    section: 'account',
+    allowedRoles: ['administrador'],
+  },
+  {
+    label: 'Subscripción',
+    path: '/panel/subscripcion',
+    icon: 'document',
+    section: 'account',
     allowedRoles: ['administrador'],
   },
   {
     label: 'Mi perfil',
     path: '/panel/mi-perfil',
     icon: 'user',
-    section: 'cuenta',
+    section: 'account',
     allowedRoles: [
       'administrador',
       'recepcionista',
@@ -170,12 +170,12 @@ const ALL_ITEMS: NavItem[] = [
 ];
 
 const SECTIONS: { section: NavSection; label: string }[] = [
-  { section: 'operativa', label: 'Operativa' },
-  { section: 'catalogo', label: 'Catálogo' },
-  { section: 'clinico', label: 'Clínico' },
-  { section: 'equipo', label: 'Equipo' },
-  { section: 'inventario', label: 'Inventario y ventas' },
-  { section: 'cuenta', label: 'Mi cuenta' },
+  { section: 'operations', label: 'Operativa' },
+  { section: 'catalog', label: 'Catálogo' },
+  { section: 'clinical', label: 'Clínico' },
+  { section: 'team', label: 'Equipo' },
+  { section: 'inventory', label: 'Inventario' },
+  { section: 'account', label: 'Mi cuenta' },
 ];
 
 interface NavGroup {
@@ -198,16 +198,14 @@ export class PanelSidebarComponent {
     const roles = this.auth.effectiveRoles();
     const isImpersonating = this.auth.isImpersonating();
     const visible = ALL_ITEMS.filter((item) => {
-      if (isImpersonating && item.section === 'cuenta') return false;
+      if (isImpersonating && item.section === 'account') return false;
       return item.allowedRoles.some((role) => roles.includes(role));
     });
-    //Array de todas las secciones con sus respectivos tabs
     return SECTIONS.map(({ section, label }) => ({
       section,
       label,
       items: visible.filter((item) => item.section === section),
     })).filter((group) => group.items.length > 0);
-    //filtro para quitar las secciones vacias ej: cliente entra y que le aparezca equipo pero en vacio
   });
 
   protected closeMobile(): void {

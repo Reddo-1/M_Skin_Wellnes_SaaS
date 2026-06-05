@@ -11,9 +11,7 @@ class PlanController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        $this->authorize('viewAny', Plan::class);
-
-        $plans = Plan::query()->orderBy('max_workers')->get();
+        $plans = Plan::query()->where('is_active', true)->orderBy('max_workers')->get();
 
         return PlanResource::collection($plans);
     }

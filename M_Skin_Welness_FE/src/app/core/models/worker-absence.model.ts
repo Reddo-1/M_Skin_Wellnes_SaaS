@@ -1,4 +1,4 @@
-export interface WorkerAbsenceWorker {
+export interface WorkerRef {
   id: number;
   name: string;
 }
@@ -19,7 +19,7 @@ export interface WorkerAbsence {
   reason: string | null;
   absence_type_id: number | null;
   notes: string | null;
-  worker?: WorkerAbsenceWorker;
+  worker?: WorkerRef;
   absence_type?: WorkerAbsenceType | null;
   created_at: string | null;
   updated_at: string | null;

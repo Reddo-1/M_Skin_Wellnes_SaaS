@@ -19,7 +19,7 @@ class SubscriptionInvoiceMailer
             }
 
             $user->notify(new SubscriptionInvoiceNotification(
-                $invoice->pdf($this->issuerData()),
+                $invoice->pdf(self::issuerData()),
                 $invoice->number ?? $stripeInvoiceId,
                 $invoice->date()->format('d/m/Y'),
             ));
@@ -32,7 +32,7 @@ class SubscriptionInvoiceMailer
         }
     }
 
-    private function issuerData(): array
+    public static function issuerData(): array
     {
         return [
             'vendor' => config('billing.vendor'),

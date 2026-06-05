@@ -19,7 +19,7 @@ class AdminCenterService
         if (isset($filters['search']) && $filters['search'] !== '') {
             $term = '%'.$filters['search'].'%';
             $query->where(function ($q) use ($term) {
-                $q->where('name', 'ilike', $term)
+                $q->whereRaw('unaccent(name) ILIKE unaccent(?)', [$term])
                   ->orWhere('slug', 'ilike', $term);
             });
         }
@@ -47,7 +47,6 @@ class AdminCenterService
         return $base.'/impersonate?token='.urlencode($token).'&center_id='.$center->id;
     }
 
-    //Obtener todos los datos de la subscripción
     public function getSubscriptionSummary(Center $center): ?array
     {
         $billingUser = $center->billingUser;
@@ -77,7 +76,7 @@ class AdminCenterService
             'live_data_available' => true,
         ];
 
-        //Aqui es donde coje los datos de stripe y los devuelve o no si esta caida la api y/o no tiene subscripción
+        //si stripe está caído marcamos live_data_available=false en vez de romper la ficha
         try {
             $stripeSubscription = $subscription->asStripeSubscription();
             $firstItem = $stripeSubscription->items->data[0] ?? null;

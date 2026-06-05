@@ -64,7 +64,7 @@ class UserFileService
         });
     }
 
-    //variante de upload() para bytes en memoria (firma base64, PDF generado): mismo disco privado, misma estructura de paths
+    //variante de upload() para bytes en memoria (firma base64, PDF generado), no para ficheros subidos
     public function storeBinary(int $centerId, array $data, string $contents, string $extension): UserFile
     {
         return DB::transaction(function () use ($centerId, $data, $contents, $extension) {

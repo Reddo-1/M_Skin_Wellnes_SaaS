@@ -14,7 +14,7 @@ export class SearchInputComponent {
 
   protected readonly query = signal('');
 
-  //skip(1) descarta el valor inicial vacío; debounceTime agrupa las pulsaciones y toSignal devuelve el stream al mundo signal
+  //skip(1) descarta el valor inicial vacío para no emitir una búsqueda al arrancar
   private readonly debouncedQuery = toSignal(
     toObservable(this.query).pipe(skip(1), debounceTime(300)),
   );

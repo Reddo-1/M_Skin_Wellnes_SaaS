@@ -25,7 +25,6 @@ class ClientProfileSeeder extends Seeder
             'Reactiva a fragancias fuertes.',
         ];
 
-        //ficha facial para los 10 primeros clientes (con consentimiento) + corporal para la mitad
         $clients = User::role('cliente')->where('center_id', $centerId)->orderBy('id')->take(10)->get();
 
         foreach ($clients as $index => $client) {

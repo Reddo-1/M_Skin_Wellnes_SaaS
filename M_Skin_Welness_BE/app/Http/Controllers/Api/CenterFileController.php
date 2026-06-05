@@ -9,6 +9,9 @@ use App\Models\CenterFile;
 use App\Services\CenterFileService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CenterFileController extends Controller
 {
@@ -59,5 +62,16 @@ class CenterFileController extends Controller
         $this->service->delete($centerFile);
 
         return response()->json(status: 204);
+    }
+
+    public function file(CenterFile $centerFile): BinaryFileResponse
+    {
+        $disk = Storage::disk('local');
+
+        if (! $disk->exists($centerFile->path)) {
+            throw new NotFoundHttpException('La imagen ya no está disponible.');
+        }
+
+        return response()->file($disk->path($centerFile->path));
     }
 }

@@ -105,12 +105,10 @@ export class AppointmentModalComponent {
 
   protected readonly isEdit = computed(() => this.appointment() !== null);
 
-  //buscador de paciente (servidor)
   protected readonly clientResults = signal<SearchSelectOption[]>([]);
   protected readonly clientLoading = signal(false);
   protected readonly selectedClientLabel = signal<string | null>(null);
 
-  //consentimientos/aptitud del paciente elegido
   private readonly clientConsents = signal<TreatmentConsentSummary[]>([]);
   protected readonly hasGeneralConsent = signal(false);
   protected readonly consentLoading = signal(false);
@@ -163,7 +161,7 @@ export class AppointmentModalComponent {
     return treatment ? treatment.duration_minutes + treatment.margin_minutes : null;
   });
 
-  //tratamientos elegibles del paciente: consentidos y aptos (el profesional se elige despues, segun el tratamiento)
+  //tratamientos elegibles: solo los consentidos y aptos para el paciente
   private readonly eligibleTreatments = computed<Treatment[]>(() => {
     if (this.formValue().client_id === '') return [];
     const consentByTreatment = new Map(
@@ -499,11 +497,9 @@ export class AppointmentModalComponent {
 
   protected onTreatmentChange(value: string): void {
     this.form.controls.treatment_id.setValue(value);
-    //descartar el profesional si ya no está autorizado para el nuevo tratamiento
     if (!this.isWorkerAuthorized(this.form.controls.worker_id.value, value)) {
       this.form.controls.worker_id.setValue('');
     }
-    //descartar la máquina si ya no es compatible con el nuevo tratamiento
     const treatment = this.treatments().find((item) => String(item.id) === value);
     const compatibleIds = new Set(treatment?.machines.map((machine) => machine.id) ?? []);
     if (this.form.controls.machine_id.value !== '' && !compatibleIds.has(Number(this.form.controls.machine_id.value))) {
@@ -682,8 +678,7 @@ export class AppointmentModalComponent {
     this.form.controls.time.setValue('');
   }
 
-  //conserva la hora original de la cita aunque no caiga en la rejilla, pero solo en su profesional y fecha originales
-  //(al reasignar profesional o cambiar de fecha, el hueco debe recalcularse de cero)
+  //conserva la hora original solo si no cambian profesional ni fecha; al reasignar o mover de día el hueco se recalcula de cero
   private withCurrentTime(times: string[]): string[] {
     const unique = Array.from(new Set(times)).sort();
     const appointment = this.appointment();

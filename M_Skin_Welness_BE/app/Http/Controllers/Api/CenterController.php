@@ -18,8 +18,6 @@ class CenterController extends Controller
 
     public function update(UpdateCenterRequest $request, Center $center): CenterResource
     {
-        $this->authorize('update', $center);
-
         $center->fill($request->validated())->save();
 
         return CenterResource::make($center->load('plan'));

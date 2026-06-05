@@ -55,12 +55,12 @@ const DAY_START = '07:00:00';
 const DAY_END = '22:00:00';
 
 @Component({
-  selector: 'app-cuadrante',
+  selector: 'app-schedule-board',
   standalone: true,
   imports: [FullCalendarModule, AlertComponent, AppointmentModalComponent],
-  templateUrl: './cuadrante.component.html',
+  templateUrl: './schedule-board.component.html',
 })
-export class CuadranteComponent {
+export class ScheduleBoardComponent {
   protected readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
   private readonly appointmentService = inject(AppointmentService);
@@ -157,7 +157,7 @@ export class CuadranteComponent {
           end: `${day}T${slot.end_time}`,
           display: 'background',
           title: 'Jornada',
-          classNames: ['fc-band', 'fc-band-jornada'],
+          classNames: ['fc-band', 'fc-band-workday'],
           extendedProps: { kind: 'window' },
         });
         if (slot.break_start && slot.break_end) {
@@ -233,7 +233,6 @@ export class CuadranteComponent {
       eventClick: (arg) => this.onEventClick(arg),
     };
   });
-
   constructor() {
     effect((onCleanup) => {
       const update = () => this.isMobile.set(window.innerWidth < 768);

@@ -58,7 +58,6 @@ class SaleSeeder extends Seeder
                 'quantity' => 1,
             ]];
 
-            //~40% de las ventas llevan ademas un producto
             if (mt_rand(1, 100) <= 40 && $products->isNotEmpty()) {
                 $product = $products[mt_rand(0, $products->count() - 1)];
                 $lines[] = [

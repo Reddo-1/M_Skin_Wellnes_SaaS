@@ -78,11 +78,11 @@
         <div class="mt-5 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
           <div>
             <p class="text-xs uppercase tracking-wide text-muted">Tipo de piel</p>
-            <p class="mt-1 text-sm font-semibold text-ink">{{ evaluation.skin_type?.name ?? '—' }}</p>
+            <p class="mt-1 text-sm font-semibold text-ink">{{ evaluation.skin_type?.name ?? 'N/D' }}</p>
           </div>
           <div>
             <p class="text-xs uppercase tracking-wide text-muted">Profesional</p>
-            <p class="mt-1 text-sm font-semibold text-ink">{{ evaluation.professional?.name ?? '—' }}</p>
+            <p class="mt-1 text-sm font-semibold text-ink">{{ evaluation.professional?.name ?? 'N/D' }}</p>
           </div>
           <div class="sm:col-span-2">
             <p class="text-xs uppercase tracking-wide text-muted">Variaciones</p>
@@ -105,6 +105,23 @@
             <p class="text-xs uppercase tracking-wide text-muted">Observaciones</p>
             <p class="mt-1 whitespace-pre-line text-sm text-ink">{{ evaluation.general_notes }}</p>
           </div>
+        }
+
+        @if (evaluation.client_profile?.body_type; as bodyType) {
+          @if (auth.hasPermission('user_files.upload') || (evaluation.clinical_images && evaluation.clinical_images.length > 0)) {
+            <div class="mt-5 border-t border-gray-100 pt-5">
+              <p class="text-xs uppercase tracking-wide text-muted">Imágenes clínicas</p>
+              <div class="mt-2">
+                <app-clinical-images
+                  [evaluationId]="evaluation.id"
+                  [userId]="evaluation.user_id"
+                  [bodyType]="bodyType"
+                  [canManage]="auth.hasPermission('user_files.upload')"
+                  [initialImages]="evaluation.clinical_images ?? []"
+                />
+              </div>
+            </div>
+          }
         }
       </article>
     }

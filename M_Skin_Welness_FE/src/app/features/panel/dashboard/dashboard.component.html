@@ -32,8 +32,8 @@
         title="Ingresos del mes"
         [value]="(data.revenue.this_month | currency:'EUR':'symbol':'1.2-2') ?? ''"
         icon="shopping-bag"
-        [subtitle]="revenueDeltaText()"
-        [trend]="revenueDeltaTrend()"
+        [subtitle]="revenueChangeText()"
+        [trend]="revenueChangeTrend()"
       />
       <app-stat-card
         title="Nuevos clientes este mes"

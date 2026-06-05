@@ -6,15 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\{ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest};
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\AuditLogService;
+use App\Services\UserService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\{JsonResponse, Request};
-use Illuminate\Support\Facades\{DB, Hash, Password};
+use Illuminate\Support\Facades\{Hash, Password};
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly AuditLogService $auditLogs)
+    public function __construct(private readonly UserService $users)
     {
     }
 
@@ -54,30 +54,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        $data = $request->validated();
-
-        $user = DB::transaction(function () use ($data) {
-            $user = User::create([
-                'center_id' => $data['center_id'],
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'birth_date' => $data['birth_date'] ?? null,
-                'password' => $data['password'],
-                'registration_source' => 'online',
-                'is_active' => true,
-            ]);
-
-            $user->assignRole('cliente');
-
-            $this->auditLogs->record(
-                action: 'user.created',
-                centerId: $user->center_id,
-                metadata: ['user_id' => $user->id, 'role' => 'cliente', 'source' => 'self_registration'],
-            );
-
-            return $user;
-        });
+        $user = $this->users->registerSelfSignup($request->validated());
 
         event(new Registered($user));
 
@@ -100,18 +77,16 @@ class AuthController extends Controller
         return UserResource::make($user);
     }
 
-    //envia el correo de recuperacion con un link que apunta al FE
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
         Password::sendResetLink($request->only('email'));
 
         //respuesta generica a proposito: no revelamos si el email existe en BD
         return response()->json([
-            'message' => 'Si la cuenta existe, recibiras un correo con instrucciones para recuperar la contrasena.',
+            'message' => 'Si la cuenta existe, recibirás un correo con instrucciones para recuperar la contraseña.',
         ]);
     }
 
-    //cambia la contrasena usando el token recibido por correo
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
         $status = Password::reset(
@@ -137,6 +112,6 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Contrasena actualizada correctamente.']);
+        return response()->json(['message' => 'Contraseña actualizada correctamente.']);
     }
 }

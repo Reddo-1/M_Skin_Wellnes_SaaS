@@ -18,7 +18,7 @@ class UserFileResource extends JsonResource
             'user_id' => $this->user_id,
             'skin_evaluation_id' => $this->skin_evaluation_id,
             'category' => $this->category,
-            //URL firmada de 10 min; al recargar el listado se genera otra
+            //url firmada temporal: caduca a los 10 min y se regenera en cada carga
             'url' => URL::temporarySignedRoute(
                 'user-files.file',
                 now()->addMinutes(10),

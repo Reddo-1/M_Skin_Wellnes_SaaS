@@ -12,6 +12,7 @@ import { StockMovement } from '../../../../core/models/stock-movement.model';
 import { PaginatedMeta } from '../../../../core/models/paginated.model';
 import { GENERIC_ERROR, loadResourceError } from '../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
+import { TableLoadingOverlayComponent } from '../../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 import { NormalizePipe } from '../../../../shared/pipes/normalize.pipe';
 import { ProductModalComponent, ProductFormValue } from '../modals/product-modal/product-modal.component';
 import { StockEntryModalComponent, StockEntryFormValue } from './modals/stock-entry-modal/stock-entry-modal.component';
@@ -26,6 +27,7 @@ import { StockAdjustModalComponent, StockAdjustFormValue } from './modals/stock-
     DecimalPipe,
     RouterLink,
     AlertComponent,
+    TableLoadingOverlayComponent,
     NormalizePipe,
     ProductModalComponent,
     StockEntryModalComponent,

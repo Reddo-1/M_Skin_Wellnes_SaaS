@@ -26,7 +26,7 @@ export interface TreatmentConsentSummary {
   treatment_id: number;
   reviewed_by_user_id: number;
   review_date: string | null;
-  is_suitable: boolean;
+  is_suitable: boolean | null;
   unsuitability_reason: string | null;
   treatment_consent: boolean;
   notes: string | null;
@@ -42,14 +42,18 @@ export interface ConsentWizardPayload {
     marketing_data_consent: boolean;
     commercial_images_consent: boolean;
   };
+  //el wizard solo recoge el consentimiento por tratamiento; la aptitud la fija el diagnosticador después
   treatments: {
     treatment_id: number;
-    is_suitable: boolean;
-    unsuitability_reason: string | null;
     treatment_consent: boolean;
-    notes: string | null;
   }[];
   signature_base64: string;
+  notes: string | null;
+}
+
+export interface UpdateAptitudeData {
+  is_suitable: boolean;
+  unsuitability_reason: string | null;
   notes: string | null;
 }
 
@@ -57,6 +61,11 @@ export interface SignedConsent {
   id: number;
   user_id: number;
   signed_at: string | null;
+}
+
+export interface ActiveConsents {
+  client: ClientConsentSummary | null;
+  treatments: TreatmentConsentSummary[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -74,6 +83,13 @@ export class ConsentService {
     return await this.api.postResource<SignedConsent>('/consents/wizard', payload);
   }
 
+  async updateAptitude(treatmentConsentId: number, data: UpdateAptitudeData): Promise<TreatmentConsentSummary> {
+    return await this.api.putResource<TreatmentConsentSummary>(
+      `/treatment-consents/${treatmentConsentId}`,
+      data,
+    );
+  }
+
   async activeConsentsFor(userId: number): Promise<ActiveConsents> {
     const params = { user_id: userId, only_active: true };
     const [clientPage, treatmentPage] = await Promise.all([
@@ -85,9 +101,4 @@ export class ConsentService {
       treatments: treatmentPage.data,
     };
   }
-}
-
-export interface ActiveConsents {
-  client: ClientConsentSummary | null;
-  treatments: TreatmentConsentSummary[];
 }

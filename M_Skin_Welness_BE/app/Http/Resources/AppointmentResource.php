@@ -65,7 +65,6 @@ class AppointmentResource extends JsonResource
                     return [
                         'id' => $u->id,
                         'name' => $u->name,
-                        'notes' => $u->pivot->notes,
                     ];
                 })->all();
             }),

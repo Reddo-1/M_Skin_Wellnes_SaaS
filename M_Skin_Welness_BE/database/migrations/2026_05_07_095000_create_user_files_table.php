@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->foreignId('user_id');
-            //null cuando es foto_perfil; las fotos clinicas van vinculadas a una evaluacion
+            //null cuando es foto de perfil; las fotos clinicas van vinculadas a una evaluacion
             $table->unsignedBigInteger('skin_evaluation_id')->nullable();
             $table->string('category', 40);
             $table->string('path', 255);
@@ -37,14 +37,13 @@ return new class extends Migration
             $table->index(['center_id', 'skin_evaluation_id'], 'idx_user_files_center_skin_eval');
         });
 
-        //una sola foto por categoria dentro de una misma evaluacion (no aplica cuando skin_evaluation_id es null)
+        //una sola foto por categoria dentro de cada evaluacion (no aplica si skin_evaluation_id es null)
         DB::statement("
             CREATE UNIQUE INDEX uq_user_files_eval_category
             ON user_files (skin_evaluation_id, category)
             WHERE skin_evaluation_id IS NOT NULL
         ");
 
-        //un usuario tiene un solo avatar por centro
         DB::statement("
             CREATE UNIQUE INDEX uq_user_files_avatar
             ON user_files (center_id, user_id)

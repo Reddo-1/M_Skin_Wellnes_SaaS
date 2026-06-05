@@ -39,15 +39,7 @@
   } @else {
   <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
     @if (loading() && items().length > 0) {
-      <div class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-white/60">
-        <span class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm ring-1 ring-gray-200">
-          <svg class="h-4 w-4 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"></path>
-          </svg>
-          Actualizando…
-        </span>
-      </div>
+      <app-table-loading-overlay></app-table-loading-overlay>
     }
     @if (items().length > 0) {
       <app-table-scroll-hint />
@@ -82,7 +74,7 @@
                 @if (slot.break_start && slot.break_end) {
                   {{ slot.break_start.slice(0, 5) }}–{{ slot.break_end.slice(0, 5) }}
                 } @else {
-                  —
+                  N/D
                 }
               </td>
               <td class="px-5 py-3">

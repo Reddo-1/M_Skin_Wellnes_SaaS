@@ -104,8 +104,7 @@ export class ScheduleTabComponent {
       };
 
       if (slot?.break_start && slot?.break_end) {
-        //se parte la franja en dos bloques dejando el descanso como hueco + banda rayada
-        //(se omite el bloque si el descanso queda pegado a un extremo, para no pintar duracion cero)
+        //se parte la franja en dos dejando el descanso como hueco; se omite el bloque si queda pegado a un extremo (duracion cero)
         if (slot.break_start !== slot.start_time) {
           events.push({ ...block, startTime: slot.start_time, endTime: slot.break_start });
         }

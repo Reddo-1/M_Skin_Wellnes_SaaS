@@ -1,0 +1,185 @@
+<div class="flex flex-col gap-6">
+  <header>
+    <h1 class="text-2xl font-bold text-ink">Mi centro</h1>
+    <p class="mt-1 text-sm text-muted">Gestiona el nombre y el logo de tu centro y consulta tu plan.</p>
+  </header>
+
+  @if (errorMessage(); as message) {
+    <app-alert variant="error" title="No se ha podido cargar el centro" [message]="message" />
+  }
+
+  @if (loading() && center() === null) {
+    <div class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-muted">
+      Cargando los datos del centro…
+    </div>
+  } @else if (center(); as center) {
+    <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex-1">
+          <h2 class="text-lg font-semibold text-ink">Datos del centro</h2>
+          <p class="mt-1 text-sm text-muted">El nombre con el que aparece tu centro en la plataforma.</p>
+
+          <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-muted">Nombre</dt>
+              <dd class="mt-1 text-sm font-medium text-ink">{{ center.name }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-muted">Estado</dt>
+              <dd class="mt-1">
+                @if (center.is_active) {
+                  <span class="inline-flex items-center rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-600">Activo</span>
+                } @else {
+                  <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-muted">Inactivo</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <button
+          type="button"
+          (click)="openEditModal()"
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 sm:self-start"
+        >
+          Editar nombre
+        </button>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+          <span class="flex h-24 w-40 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 text-muted">
+            @if (logo(); as logo) {
+              <img [src]="logo.url" alt="Logo del centro" class="h-full w-full object-contain p-2" />
+            } @else {
+              <span class="text-xs">Sin logo</span>
+            }
+          </span>
+          <div class="text-center sm:text-left">
+            <h2 class="text-lg font-semibold text-ink">Logo del centro</h2>
+            <p class="mt-1 text-sm text-muted">Se mostrará en la plataforma y en los documentos del centro.</p>
+            <p class="mt-1 text-xs text-muted">JPG, PNG o WEBP. Máximo 5 MB.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-stretch gap-2">
+          <button
+            type="button"
+            (click)="triggerLogoPicker()"
+            [disabled]="submittingLogo()"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ submittingLogo() ? 'Subiendo…' : (logo() ? 'Cambiar logo' : 'Subir logo') }}
+          </button>
+          @if (logo()) {
+            <button
+              type="button"
+              (click)="removeLogo()"
+              [disabled]="submittingLogo()"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-error-500 shadow-sm transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Quitar logo
+            </button>
+          }
+          <input
+            #logoInput
+            type="file"
+            class="hidden"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onLogoSelected($event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex-1">
+          <h2 class="text-lg font-semibold text-ink">Plan contratado</h2>
+          <p class="mt-1 text-sm text-muted">Las características de tu plan. Para cambiarlo, ve a Subscripción.</p>
+
+          @if (center.plan; as plan) {
+            <div class="mt-6">
+              <p class="text-base font-semibold text-ink">{{ plan.name }}</p>
+              @if (plan.description) {
+                <p class="mt-1 text-sm text-muted">{{ plan.description }}</p>
+              }
+            </div>
+
+            <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-muted">Trabajadores incluidos</dt>
+                <dd class="mt-1 text-sm font-medium text-ink">{{ plan.max_workers ?? 'Sin límite' }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-muted">Acceso online de clientes</dt>
+                <dd class="mt-1 text-sm font-medium text-ink">{{ plan.allows_online_clients | boolean }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-muted">Envío de correos</dt>
+                <dd class="mt-1 text-sm font-medium text-ink">{{ plan.allows_emails | boolean }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-muted">Página pública</dt>
+                <dd class="mt-1 text-sm font-medium text-ink">{{ plan.allows_public_page | boolean }}</dd>
+              </div>
+            </dl>
+          } @else {
+            <p class="mt-6 text-sm text-muted">No hay información del plan disponible.</p>
+          }
+        </div>
+
+        <a
+          routerLink="/panel/subscripcion"
+          class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 sm:self-start"
+        >
+          Ir a Subscripción
+        </a>
+      </div>
+    </section>
+  }
+</div>
+
+<app-modal [isOpen]="editModalOpen()" (close)="closeEditModal()" panelClass="m-4">
+  <div class="w-full max-w-[480px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">Editar nombre del centro</h3>
+    <p class="mt-1 text-sm text-muted">Este es el nombre con el que se identifica tu centro.</p>
+
+    <form [formGroup]="nameForm" (ngSubmit)="submitName()" class="mt-6 space-y-5" novalidate>
+      <div>
+        <app-input
+          label="Nombre del centro"
+          [required]="true"
+          formControlName="name"
+          [invalid]="hasNameError()"
+        />
+        @if (hasNameValidation('required')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre es obligatorio.</p>
+        }
+        @if (hasNameValidation('maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+        }
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="closeEditModal()"
+          [disabled]="submittingName()"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="submittingName()"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+        >
+          {{ submittingName() ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>

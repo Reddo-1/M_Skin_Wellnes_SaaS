@@ -1,0 +1,47 @@
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+  @for (slot of slots(); track slot.category) {
+    <div class="rounded-xl border border-gray-200 p-2">
+      <p class="mb-1.5 text-xs font-medium text-muted">{{ slot.label }}</p>
+
+      @if (imageFor(slot.category); as image) {
+        <a [href]="image.url" target="_blank" rel="noopener" class="block">
+          <img [src]="image.url" [alt]="slot.label" class="h-28 w-full rounded-lg border border-gray-100 object-cover" />
+        </a>
+        @if (canManage()) {
+          <div class="mt-2 flex flex-col gap-1.5">
+            <label
+              class="block cursor-pointer rounded-lg border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-ink transition hover:bg-gray-50"
+              [class.pointer-events-none]="busyCategory() === slot.category"
+              [class.opacity-60]="busyCategory() === slot.category"
+            >
+              <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" (change)="onFileSelected(slot.category, $event)" />
+              {{ busyCategory() === slot.category ? 'Subiendo…' : 'Reemplazar' }}
+            </label>
+            <button
+              type="button"
+              (click)="removeImage(slot.category)"
+              [disabled]="busyCategory() === slot.category"
+              class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-error-500 transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Quitar
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-xs text-muted">
+          {{ busyCategory() === slot.category ? 'Subiendo…' : 'Sin imagen' }}
+        </div>
+        @if (canManage()) {
+          <label
+            class="mt-2 block cursor-pointer rounded-lg border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-ink transition hover:bg-gray-50"
+            [class.pointer-events-none]="busyCategory() === slot.category"
+            [class.opacity-60]="busyCategory() === slot.category"
+          >
+            <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" (change)="onFileSelected(slot.category, $event)" />
+            Subir
+          </label>
+        }
+      }
+    </div>
+  }
+</div>

@@ -17,7 +17,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  //Variables globales: Token y impersonationCenterId para el interceptor, User para uso general con roles
+  //token e impersonationCenterId los lee el interceptor; user lo consultan las guards por sus roles
   readonly token = signal<string | null>(this.readToken());
   readonly user = signal<User | null>(this.readUser());
   readonly impersonationCenterId = signal<number | null>(this.readImpersonationCenterId());

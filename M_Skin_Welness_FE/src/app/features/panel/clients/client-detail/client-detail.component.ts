@@ -1,7 +1,6 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ClientService } from '../../../../core/services/client.service';
-import { NotificationService } from '../../../../core/services/notification.service';
 import { User } from '../../../../core/models/user.model';
 import { loadResourceError } from '../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../shared/ui/alert/alert.component';
@@ -12,14 +11,14 @@ import { PersonalTabComponent } from './personal-tab/personal-tab.component';
 import { SessionsTabComponent } from './sessions-tab/sessions-tab.component';
 import { SkinEvaluationsTabComponent } from './skin-evaluations-tab/skin-evaluations-tab.component';
 
-type DetailTab = 'personal' | 'ficha' | 'evaluaciones' | 'consentimientos' | 'sesiones';
+type DetailTab = 'personal' | 'record' | 'evaluations' | 'consents' | 'sessions';
 
 const TABS: { key: DetailTab; label: string }[] = [
   { key: 'personal', label: 'Datos personales' },
-  { key: 'ficha', label: 'Ficha clínica' },
-  { key: 'evaluaciones', label: 'Evaluaciones de piel' },
-  { key: 'consentimientos', label: 'Consentimientos' },
-  { key: 'sesiones', label: 'Sesiones' },
+  { key: 'record', label: 'Ficha clínica' },
+  { key: 'evaluations', label: 'Evaluaciones de piel' },
+  { key: 'consents', label: 'Consentimientos' },
+  { key: 'sessions', label: 'Sesiones' },
 ];
 
 @Component({
@@ -41,7 +40,6 @@ export class ClientDetailComponent {
   readonly id = input.required<string>();
 
   private readonly clients = inject(ClientService);
-  private readonly notifications = inject(NotificationService);
 
   protected readonly tabs = TABS;
 

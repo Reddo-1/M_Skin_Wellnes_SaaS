@@ -13,8 +13,7 @@ const DEFAULT_TOAST_DURATION_MS = 5000;
 const ERROR_TOAST_DURATION_MS = 8000;
 const MAX_VISIBLE_TOASTS = 5;
 
-//El componente llama toast.* o await modal.* -> el service actualiza el signal -> NotificationContainer lo renderiza.
-//Al cerrar (timeout, click, Esc), el service vacía el signal y, si es modal, resuelve la promise pendiente.
+//toast.*/await modal.* actualizan el signal que pinta NotificationContainer; al cerrar se vacía y, si es modal, se resuelve su promise
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   readonly toasts = signal<Toast[]>([]);

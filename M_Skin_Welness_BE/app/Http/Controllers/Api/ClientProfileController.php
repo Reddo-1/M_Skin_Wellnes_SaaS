@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ClientProfileController extends Controller
 {
-    //inyecta el service de fichas clinicas
     public function __construct(private readonly ClientProfileService $service)
     {
     }
@@ -24,18 +23,14 @@ class ClientProfileController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = ClientProfile::query()
-            //solo fichas del centro actual
             ->forCenter($centerId)
-            //carga relaciones para no hacer N+1 (incluida la evaluacion actual con sus relaciones)
-            ->with(['client', 'currentEvaluation.skinType', 'currentEvaluation.variations', 'currentEvaluation.professional'])
-            //filtros opcionales
+            ->with(['client', 'currentEvaluation.skinType', 'currentEvaluation.variations', 'currentEvaluation.professional', 'currentEvaluation.files'])
             ->when($request->filled('body_type'), fn ($q) => $q->where('body_type', $request->string('body_type')))
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
-            //busqueda libre sobre el nombre o email del cliente asociado
             ->when($request->filled('search'), function ($q) use ($request) {
                 $term = '%'.$request->string('search').'%';
                 $q->whereHas('client', function ($c) use ($term) {
-                    $c->where('name', 'ilike', $term)->orWhere('email', 'ilike', $term);
+                    $c->whereRaw('unaccent(name) ILIKE unaccent(?)', [$term])->orWhere('email', 'ilike', $term);
                 });
             })
             ->orderBy('id');
@@ -59,7 +54,7 @@ class ClientProfileController extends Controller
         $this->authorize('view', $clientProfile);
 
         return ClientProfileResource::make(
-            $clientProfile->load(['client', 'currentEvaluation.skinType', 'currentEvaluation.variations', 'currentEvaluation.professional'])
+            $clientProfile->load(['client', 'currentEvaluation.skinType', 'currentEvaluation.variations', 'currentEvaluation.professional', 'currentEvaluation.files'])
         );
     }
 

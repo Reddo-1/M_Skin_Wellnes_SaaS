@@ -78,7 +78,7 @@ class Appointment extends Model
     public function assistants(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'appointment_assistants', 'appointment_id', 'user_id')
-            ->withPivot(['center_id', 'notes']);
+            ->withPivot(['center_id']);
     }
 
     public function products(): HasMany

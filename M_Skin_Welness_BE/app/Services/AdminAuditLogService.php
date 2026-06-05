@@ -10,7 +10,7 @@ class AdminAuditLogService
     public function list(array $filters, int $perPage = 25): LengthAwarePaginator
     {
         $query = AuditLog::query()
-            ->with(['center:id,name', 'actor:id,name,email', 'plan:id,name,code']);
+            ->with(['center:id,name', 'actor:id,name,email']);
 
         if (isset($filters['center_id']) && $filters['center_id'] !== '') {
             $query->where('center_id', (int) $filters['center_id']);

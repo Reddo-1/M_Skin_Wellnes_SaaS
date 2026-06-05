@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\{ClientProfile, SkinEvaluation};
+use App\Models\{ClientConsent, ClientProfile, SkinEvaluation};
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\{Rule, Validator};
 
 class StoreClientProfileRequest extends FormRequest
 {
@@ -42,5 +42,21 @@ class StoreClientProfileRequest extends FormRequest
             'evaluation.variation_ids' => ['nullable', 'array'],
             'evaluation.variation_ids.*' => ['integer', 'exists:variations,id'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $v) {
+            //el consentimiento firmado es prerrequisito de la ficha: sin client_consents activo no se crea
+            $centerId = (int) $this->attributes->get('center_id');
+            $hasConsent = ClientConsent::forCenter($centerId)
+                ->active()
+                ->where('user_id', (int) $this->input('user_id'))
+                ->exists();
+
+            if (! $hasConsent) {
+                $v->errors()->add('user_id', 'El cliente debe tener el consentimiento firmado antes de crear su ficha clínica.');
+            }
+        });
     }
 }

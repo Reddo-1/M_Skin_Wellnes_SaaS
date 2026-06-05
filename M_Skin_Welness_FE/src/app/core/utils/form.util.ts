@@ -1,21 +1,20 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl } from '@angular/forms';
 
-//fallback generico cuando el back no manda body o el catch no pone un fallback propio
 export const GENERIC_ERROR = 'Ha ocurrido un error. Inténtalo de nuevo en unos segundos.';
 
 export function loadResourceError(resource: string): string {
   return `No se han podido cargar ${resource}. Vuelve a intentarlo en unos segundos.`;
 }
 
-export function apiError(error: unknown, fallback: string = GENERIC_ERROR): string {
+export function apiError(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     const message = error.error?.message;
     if (typeof message === 'string' && message.trim() !== '') {
       return message;
     }
   }
-  return fallback;
+  return GENERIC_ERROR;
 }
 
 export function hasFieldError(control: AbstractControl): boolean {

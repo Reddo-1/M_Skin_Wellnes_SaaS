@@ -16,6 +16,7 @@ class PlanResource extends JsonResource
             'code' => $this->code,
             'name' => $this->name,
             'description' => $this->description,
+            'monthly_price' => $this->monthly_price,
             'max_workers' => $this->max_workers,
             'allows_online_clients' => $this->allows_online_clients,
             'allows_emails' => $this->allows_emails,

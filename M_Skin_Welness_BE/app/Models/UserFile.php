@@ -23,10 +23,8 @@ class UserFile extends Model
     //avatar del usuario, no requiere skin_evaluation
     public const CATEGORY_AVATAR = 'foto_perfil';
 
-    //firma manuscrita del paciente para un consentimiento de tratamiento
     public const CATEGORY_CONSENT_SIGNATURE = 'firma_consentimiento';
 
-    //PDF del documento de consentimiento firmado y archivado
     public const CATEGORY_CONSENT_PDF = 'consent_pdf';
 
     protected $fillable = [

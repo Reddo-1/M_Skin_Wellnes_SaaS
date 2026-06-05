@@ -8,13 +8,13 @@ import { NotificationService } from '../../../core/services/notification.service
 import { User } from '../../../core/models/user.model';
 import { PaginatedMeta } from '../../../core/models/paginated.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { ClientModalComponent, ClientFormValue } from './modals/client-modal/client-modal.component';
 import { ActivateOnlineModalComponent, ActivateOnlineFormValue } from './modals/activate-online-modal/activate-online-modal.component';
-import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -36,9 +36,9 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     ActivateOnlineModalComponent,
     SegmentedControlComponent,
     TableScrollHintComponent,
-    LoadingOverlayComponent,
-    SearchInputComponent
-],
+    TableLoadingOverlayComponent,
+    SearchInputComponent,
+  ],
   templateUrl: './clients-list.component.html',
 })
 export class ClientsListComponent {
@@ -58,7 +58,7 @@ export class ClientsListComponent {
 
   protected readonly activeFilterOptions = ACTIVE_FILTER_OPTIONS;
 
-  private readonly clienteRoleId = computed(
+  private readonly clientRoleId = computed(
     () => this.lookups.roles().find((role) => role.name === 'cliente')?.id ?? null,
   );
 
@@ -100,7 +100,7 @@ export class ClientsListComponent {
   }
 
   protected openCreateModal(): void {
-    if (this.clienteRoleId() === null) {
+    if (this.clientRoleId() === null) {
       this.notifications.toast.error('No se han podido cargar los roles. Vuelve a intentarlo en unos segundos.');
       return;
     }
@@ -135,7 +135,7 @@ export class ClientsListComponent {
         this.modalOpen.set(false);
         this.notifications.toast.success('Cliente actualizado.');
       } else {
-        const roleId = this.clienteRoleId();
+        const roleId = this.clientRoleId();
         if (roleId === null) return;
         const payload: CreateClientData = { ...data, role_ids: [roleId] };
         await this.clients.create(payload);
@@ -145,8 +145,7 @@ export class ClientsListComponent {
         await this.load();
       }
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }
@@ -173,8 +172,7 @@ export class ClientsListComponent {
       this.activateOnlineTarget.set(null);
       this.notifications.toast.success('Correo de activación enviado al cliente.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingActivateOnline.set(false);
     }

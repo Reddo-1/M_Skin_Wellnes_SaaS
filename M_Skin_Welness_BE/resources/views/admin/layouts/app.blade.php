@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel') · MSkinWellness</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon-96x96.png') }}" sizes="96x96">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     @vite(['resources/css/app.css', 'resources/css/admin/dashboard.css', 'resources/js/app.js'])
     @stack('head')
 </head>

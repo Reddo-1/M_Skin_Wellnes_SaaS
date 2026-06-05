@@ -87,7 +87,7 @@ class SaleService
                 $sale->lines()->create($payload);
             }
 
-            //descuenta stock por cada linea de tipo product (convirtiendo paquetes → dosis)
+            //el stock se lleva en dosis: registerByPackages convierte la cantidad vendida de paquetes a dosis
             foreach ($linesPayload as $payload) {
                 if ($payload['type'] !== 'product') {
                     continue;
@@ -145,7 +145,6 @@ class SaleService
         });
     }
 
-    //comprueba que cada reference_id existe en el centro segun el tipo de la linea
     private function validateLineReferences(int $centerId, array $lines): void
     {
         $treatmentIds = collect($lines)->where('type', 'treatment')->pluck('reference_id')->unique()->all();

@@ -16,7 +16,7 @@ class ClientConsentController extends Controller
 
         $centerId = (int) $request->attributes->get('center_id');
         $actor = $request->user();
-        //un usuario que solo tiene el rol cliente solo ve sus propios consents, ignore el filtro que pida
+        //el cliente puro solo ve sus propios consentimientos, se ignora el filtro que pida
         $restrictToSelf = $actor->hasRole('cliente') && $actor->roles->count() === 1;
 
         $query = ClientConsent::query()

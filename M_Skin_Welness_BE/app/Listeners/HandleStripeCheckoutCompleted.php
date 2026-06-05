@@ -146,5 +146,7 @@ class HandleStripeCheckoutCompleted
             $user->trial_ends_at = $trialEndsAt;
             $user->save();
         }
+
+        return $stripeSubscription->latest_invoice;
     }
 }

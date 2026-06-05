@@ -58,7 +58,7 @@ class ActivateOnlineAccessRequest extends FormRequest
     {
         return [
             'email.unique' => 'Ya existe un usuario con ese correo.',
-            'email.email' => 'El correo no tiene un formato valido.',
+            'email.email' => 'El correo no tiene un formato válido.',
         ];
     }
 }

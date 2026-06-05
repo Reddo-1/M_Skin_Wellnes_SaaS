@@ -3,7 +3,6 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { AppointmentSummary } from '../../../../../core/models/appointment.model';
 import { User } from '../../../../../core/models/user.model';
 import { AppointmentService } from '../../../../../core/services/appointment.service';
-import { NotificationService } from '../../../../../core/services/notification.service';
 import { loadResourceError } from '../../../../../core/utils/form.util';
 import { NormalizePipe } from '../../../../../shared/pipes/normalize.pipe';
 import { AlertComponent } from '../../../../../shared/ui/alert/alert.component';
@@ -18,7 +17,6 @@ export class SessionsTabComponent {
   readonly client = input.required<User>();
 
   private readonly appointments = inject(AppointmentService);
-  private readonly notifications = inject(NotificationService);
 
   protected readonly items = signal<AppointmentSummary[]>([]);
   protected readonly loading = signal(false);

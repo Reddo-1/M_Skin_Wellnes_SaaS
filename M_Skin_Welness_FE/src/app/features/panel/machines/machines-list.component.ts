@@ -12,6 +12,7 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { MachineModalComponent, MachineFormValue } from './modals/machine-modal/machine-modal.component';
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -24,7 +25,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
 @Component({
   selector: 'app-machines-list',
   standalone: true,
-  imports: [AlertComponent, SegmentedControlComponent, TableScrollHintComponent, MachineModalComponent],
+  imports: [AlertComponent, SegmentedControlComponent, TableScrollHintComponent, MachineModalComponent, TableLoadingOverlayComponent],
   templateUrl: './machines-list.component.html',
 })
 export class MachinesListComponent {
@@ -188,7 +189,6 @@ export class MachinesListComponent {
     } catch {
       const message = loadResourceError('las máquinas');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

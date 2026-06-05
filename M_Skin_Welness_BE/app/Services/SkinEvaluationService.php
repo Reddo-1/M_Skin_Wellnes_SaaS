@@ -35,7 +35,7 @@ class SkinEvaluationService
             $profile->current_skin_evaluation_id = $evaluation->id;
             $profile->save();
 
-            return $evaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations']);
+            return $evaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations', 'files']);
         });
     }
 
@@ -46,10 +46,10 @@ class SkinEvaluationService
             $evaluation->fill($data)->save();
 
             if (array_key_exists('variation_ids', $data)) {
-                $evaluation->variations()->sync($data['variation_ids'] ?? []);
+                $evaluation->variations()->sync($data['variation_ids']);
             }
 
-            return $evaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations']);
+            return $evaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations', 'files']);
         });
     }
 }

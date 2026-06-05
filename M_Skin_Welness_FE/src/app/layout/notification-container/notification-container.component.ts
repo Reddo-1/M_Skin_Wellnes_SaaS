@@ -19,14 +19,6 @@ const VARIANT_STYLES: Record<AlertVariant, { background: string; icon: string; b
 export class NotificationContainerComponent {
   protected readonly notifications = inject(NotificationService);
 
-  protected dismissToast(id: number): void {
-    this.notifications.dismissToast(id);
-  }
-
-  protected resolveModal(value: boolean): void {
-    this.notifications.resolveModal(value);
-  }
-
   protected styles(type: AlertVariant) {
     return VARIANT_STYLES[type];
   }

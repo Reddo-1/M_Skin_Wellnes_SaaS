@@ -8,12 +8,12 @@ import { NotificationService } from '../../../core/services/notification.service
 import { Treatment } from '../../../core/models/treatment.model';
 import { LookupItem } from '../../../core/models/lookup.model';
 import { PaginatedMeta } from '../../../core/models/paginated.model';
-import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { TreatmentModalComponent, TreatmentFormValue } from './modals/treatment-modal/treatment-modal.component';
-import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -26,7 +26,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
 @Component({
   selector: 'app-treatments-list',
   standalone: true,
-  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TableScrollHintComponent, TreatmentModalComponent, LoadingOverlayComponent],
+  imports: [CurrencyPipe, TitleCasePipe, AlertComponent, SegmentedControlComponent, TableScrollHintComponent, TreatmentModalComponent, TableLoadingOverlayComponent],
   templateUrl: './treatments-list.component.html',
 })
 export class TreatmentsListComponent {
@@ -118,8 +118,7 @@ export class TreatmentsListComponent {
       }
       this.modalOpen.set(false);
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }

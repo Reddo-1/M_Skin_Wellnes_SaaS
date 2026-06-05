@@ -10,6 +10,7 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { TimeSlotModalComponent, TimeSlotFormValue } from './modals/time-slot-modal/time-slot-modal.component';
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -27,6 +28,7 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     SegmentedControlComponent,
     TableScrollHintComponent,
     TimeSlotModalComponent,
+    TableLoadingOverlayComponent,
   ],
   templateUrl: './time-slots-list.component.html',
 })
@@ -185,7 +187,6 @@ export class TimeSlotsListComponent {
     } catch {
       const message = loadResourceError('las franjas horarias');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

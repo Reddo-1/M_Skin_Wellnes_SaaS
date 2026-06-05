@@ -67,15 +67,12 @@
         </div>
     </div>
 
-    <h2>Aptitud y consentimiento por tratamiento</h2>
+    <h2>Consentimiento por tratamiento</h2>
     <table>
         <thead>
             <tr>
                 <th>Tratamiento</th>
-                <th>Apto</th>
-                <th>Motivo (si no apto)</th>
                 <th>Consentimiento del paciente</th>
-                <th>Notas</th>
             </tr>
         </thead>
         <tbody>
@@ -83,21 +80,12 @@
                 <tr>
                     <td>{{ $t['name'] }}</td>
                     <td>
-                        @if ($t['is_suitable'])
-                            <span class="yes">Sí</span>
-                        @else
-                            <span class="no">No</span>
-                        @endif
-                    </td>
-                    <td>{{ $t['unsuitability_reason'] ?? '—' }}</td>
-                    <td>
                         @if ($t['treatment_consent'])
                             <span class="yes">Acepta</span>
                         @else
                             <span class="no">No acepta</span>
                         @endif
                     </td>
-                    <td>{{ $t['notes'] ?? '—' }}</td>
                 </tr>
             @endforeach
         </tbody>

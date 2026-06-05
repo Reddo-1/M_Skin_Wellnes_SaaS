@@ -3,8 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
+import { apiError, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { AuthPageLayoutComponent } from '../../../layout/auth-page-layout/auth-page-layout.component';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { InputComponent } from '../../../shared/ui/input/input.component';
@@ -41,8 +40,7 @@ export class ForgotPasswordComponent {
       this.successMessage.set(response.message);
       this.form.reset({ email: '' });
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }

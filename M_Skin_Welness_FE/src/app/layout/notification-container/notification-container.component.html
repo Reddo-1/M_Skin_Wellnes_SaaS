@@ -6,7 +6,7 @@
       <app-alert [variant]="toast.variant" [title]="toast.title ?? ''" [message]="toast.message" />
       <button
         type="button"
-        (click)="dismissToast(toast.id)"
+        (click)="notifications.dismissToast(toast.id)"
         aria-label="Cerrar notificación"
         class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
       >
@@ -23,13 +23,11 @@
   }
 </div>
 
-@let modal = notifications.activeModal();
-@if (modal) {
+@if (notifications.activeModal(); as modal) {
   <app-modal
     [isOpen]="true"
-    [showCloseButton]="modal.kind === 'alert'"
     panelClass="p-6 sm:p-10"
-    (close)="resolveModal(false)"
+    (close)="notifications.resolveModal(false)"
   >
     @let style = styles(modal.variant);
     <div class="text-center">
@@ -94,7 +92,7 @@
         @if (modal.kind === 'confirm') {
           <button
             type="button"
-            (click)="resolveModal(false)"
+            (click)="notifications.resolveModal(false)"
             class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           >
             {{ modal.cancelText }}
@@ -102,7 +100,7 @@
         }
         <button
           type="button"
-          (click)="resolveModal(true)"
+          (click)="notifications.resolveModal(true)"
           [class]="'rounded-lg px-4 py-2.5 text-sm font-medium text-white transition ' + style.button"
         >
           {{ modal.confirmText }}

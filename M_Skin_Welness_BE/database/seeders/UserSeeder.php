@@ -33,12 +33,12 @@ class UserSeeder extends Seeder
 
         $staff = [
             ['admin@gmail.com',          'Admin del Centro',  'administrador'],
-            ['recepcionista@gmail.com',  'Sheila Recepción',  'recepcionista'],
-            ['rrhh@gmail.com',           'María RRHH',        'rrhh'],
-            ['diagnosticador@gmail.com', 'Marc Díaz',         'diagnosticador'],
-            ['dermo@gmail.com',          'Raquel Soler',      'dermo_esteticien'],
-            ['fisio@gmail.com',          'Iván Bravo',        'fisioterapeuta'],
-            ['manicura@gmail.com',       'Mari Manicura',     'manicurista'],
+            ['recepcionista@gmail.com',  'Diego',  'recepcionista'],
+            ['rrhh@gmail.com',           'David',        'rrhh'],
+            ['diagnosticador@gmail.com', 'Marc',         'diagnosticador'],
+            ['dermo@gmail.com',          'Raquel',      'dermo_esteticien'],
+            ['fisio@gmail.com',          'Iván',        'fisioterapeuta'],
+            ['manicura@gmail.com',       'Mari',     'manicurista'],
         ];
 
         foreach ($staff as [$email, $name, $role]) {

@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
-use App\Models\SkinEvaluation;
+use App\Models\{SkinEvaluation, UserFile};
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\URL;
 
 /** @mixin SkinEvaluation */
 class SkinEvaluationResource extends JsonResource
@@ -43,6 +44,20 @@ class SkinEvaluationResource extends JsonResource
                 return $this->variations->map(function ($v) {
                     return ['id' => $v->id, 'name' => $v->name];
                 })->all();
+            }),
+            //solo las imagenes clinicas (no el resto de archivos), cada una con URL firmada temporal
+            'clinical_images' => $this->whenLoaded('files', function () {
+                return $this->files
+                    ->whereIn('category', UserFile::CATEGORIES_CLINICAL)
+                    ->map(fn ($file) => [
+                        'id' => $file->id,
+                        'category' => $file->category,
+                        'url' => URL::temporarySignedRoute(
+                            'user-files.file',
+                            now()->addMinutes(10),
+                            ['user_file' => $file->id],
+                        ),
+                    ])->values()->all();
             }),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

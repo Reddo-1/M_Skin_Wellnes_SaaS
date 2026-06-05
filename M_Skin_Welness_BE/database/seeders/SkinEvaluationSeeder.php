@@ -46,7 +46,6 @@ class SkinEvaluationSeeder extends Seeder
                 'updated_at' => now(),
             ]);
 
-            //marcamos esa evaluacion como vigente para el perfil
             DB::table('client_profiles')
                 ->where('id', $profile->id)
                 ->update(['current_skin_evaluation_id' => $evaluationId, 'updated_at' => now()]);

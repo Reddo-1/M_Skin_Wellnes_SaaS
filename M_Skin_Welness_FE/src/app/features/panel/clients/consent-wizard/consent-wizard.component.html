@@ -64,9 +64,9 @@
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       @if (currentStep() === 1) {
         <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 class="text-lg font-semibold text-ink">Aptitud y consentimiento por tratamiento</h2>
+          <h2 class="text-lg font-semibold text-ink">Consentimiento por tratamiento</h2>
           <p class="mt-1 text-sm text-muted">
-            Marca por cada tratamiento del centro si el cliente es apto y, si lo es, si lo acepta tras conocer los riesgos.
+            Marca por cada tratamiento del centro si el cliente lo acepta tras conocer sus riesgos. La aptitud clínica (apto / no apto) la valora el diagnosticador después, en la ficha.
           </p>
 
           <div class="mt-5 flex flex-col gap-4" formArrayName="treatments">
@@ -77,81 +77,19 @@
                   <span class="text-xs text-muted">{{ (treatments()[$index]?.price | currency:'EUR':'symbol':'1.2-2') ?? '' }}</span>
                 </header>
 
-                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
-                    <p class="text-xs uppercase tracking-wide text-muted">Apto para este tratamiento</p>
-                    <div class="mt-1 flex gap-3">
-                      <label class="inline-flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          formControlName="is_suitable"
-                          [value]="true"
-                          (change)="onSuitabilityChange($index, true)"
-                          class="h-4 w-4 text-brand-500"
-                        />
-                        Sí, es apto
-                      </label>
-                      <label class="inline-flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          formControlName="is_suitable"
-                          [value]="false"
-                          (change)="onSuitabilityChange($index, false)"
-                          class="h-4 w-4 text-brand-500"
-                        />
-                        No es apto
-                      </label>
-                    </div>
-                    @if (group.controls['is_suitable'].touched && group.controls['is_suitable'].value === null) {
-                      <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
-                    }
-                  </div>
-
-                  @if (group.controls['is_suitable'].value === false) {
-                    <div>
-                      <label class="text-xs uppercase tracking-wide text-muted">Motivo (obligatorio)</label>
-                      <div class="mt-1">
-                        <app-input
-                          formControlName="unsuitability_reason"
-                          placeholder="Contraindicación clínica…"
-                          [invalid]="group.controls['unsuitability_reason'].touched && group.controls['unsuitability_reason'].invalid"
-                        />
-                      </div>
-                      @if (group.controls['unsuitability_reason'].touched && group.controls['unsuitability_reason'].hasError('required')) {
-                        <p class="mt-1 text-xs text-error-500">Indica el motivo por el que no es apto.</p>
-                      }
-                    </div>
-                  }
-
-                  @if (group.controls['is_suitable'].value === true) {
-                    <div>
-                      <p class="text-xs uppercase tracking-wide text-muted">Acepta el tratamiento</p>
-                      <div class="mt-1 flex gap-3">
-                        <label class="inline-flex items-center gap-2 text-sm">
-                          <input type="radio" formControlName="treatment_consent" [value]="true" class="h-4 w-4 text-brand-500" />
-                          Acepta
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm">
-                          <input type="radio" formControlName="treatment_consent" [value]="false" class="h-4 w-4 text-brand-500" />
-                          No acepta
-                        </label>
-                      </div>
-                      @if (group.controls['treatment_consent'].touched && group.controls['treatment_consent'].hasError('required')) {
-                        <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
-                      }
-                    </div>
-                  }
-                </div>
-
                 <div class="mt-3">
-                  <label class="text-xs uppercase tracking-wide text-muted">Notas (opcional)</label>
+                  <p class="text-xs uppercase tracking-wide text-muted">Acepta el tratamiento</p>
                   <div class="mt-1">
-                    <app-textarea
-                      formControlName="notes"
-                      [rows]="2"
-                      placeholder="Observaciones de aptitud o consentimiento…"
+                    <app-radio-group
+                      [options]="consentOptions"
+                      [selected]="group.controls['treatment_consent'].value"
+                      [invalid]="group.controls['treatment_consent'].touched && group.controls['treatment_consent'].hasError('required')"
+                      (selectionChange)="group.controls['treatment_consent'].setValue($event)"
                     />
                   </div>
+                  @if (group.controls['treatment_consent'].touched && group.controls['treatment_consent'].hasError('required')) {
+                    <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
+                  }
                 </div>
               </article>
             }
@@ -167,9 +105,13 @@
           <div class="mt-5 space-y-5">
             <div>
               <p class="text-sm font-medium text-ink">Uso de fotografías clínicas para seguimiento del tratamiento</p>
-              <div class="mt-1 flex gap-4 text-sm">
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="clinical_photos_consent" [value]="true" class="h-4 w-4 text-brand-500" /> Acepta</label>
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="clinical_photos_consent" [value]="false" class="h-4 w-4 text-brand-500" /> No acepta</label>
+              <div class="mt-1">
+                <app-radio-group
+                  [options]="consentOptions"
+                  [selected]="form.controls.rgpd.controls.clinical_photos_consent.value"
+                  [invalid]="form.controls.rgpd.controls.clinical_photos_consent.touched && form.controls.rgpd.controls.clinical_photos_consent.value === null"
+                  (selectionChange)="form.controls.rgpd.controls.clinical_photos_consent.setValue($event)"
+                />
               </div>
               @if (form.controls.rgpd.controls.clinical_photos_consent.touched && form.controls.rgpd.controls.clinical_photos_consent.value === null) {
                 <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
@@ -177,9 +119,13 @@
             </div>
             <div>
               <p class="text-sm font-medium text-ink">Uso de datos personales para comunicaciones de marketing del centro</p>
-              <div class="mt-1 flex gap-4 text-sm">
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="marketing_data_consent" [value]="true" class="h-4 w-4 text-brand-500" /> Acepta</label>
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="marketing_data_consent" [value]="false" class="h-4 w-4 text-brand-500" /> No acepta</label>
+              <div class="mt-1">
+                <app-radio-group
+                  [options]="consentOptions"
+                  [selected]="form.controls.rgpd.controls.marketing_data_consent.value"
+                  [invalid]="form.controls.rgpd.controls.marketing_data_consent.touched && form.controls.rgpd.controls.marketing_data_consent.value === null"
+                  (selectionChange)="form.controls.rgpd.controls.marketing_data_consent.setValue($event)"
+                />
               </div>
               @if (form.controls.rgpd.controls.marketing_data_consent.touched && form.controls.rgpd.controls.marketing_data_consent.value === null) {
                 <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
@@ -187,9 +133,13 @@
             </div>
             <div>
               <p class="text-sm font-medium text-ink">Uso de imágenes con fines comerciales o de promoción del centro</p>
-              <div class="mt-1 flex gap-4 text-sm">
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="commercial_images_consent" [value]="true" class="h-4 w-4 text-brand-500" /> Acepta</label>
-                <label class="inline-flex items-center gap-2"><input type="radio" formControlName="commercial_images_consent" [value]="false" class="h-4 w-4 text-brand-500" /> No acepta</label>
+              <div class="mt-1">
+                <app-radio-group
+                  [options]="consentOptions"
+                  [selected]="form.controls.rgpd.controls.commercial_images_consent.value"
+                  [invalid]="form.controls.rgpd.controls.commercial_images_consent.touched && form.controls.rgpd.controls.commercial_images_consent.value === null"
+                  (selectionChange)="form.controls.rgpd.controls.commercial_images_consent.setValue($event)"
+                />
               </div>
               @if (form.controls.rgpd.controls.commercial_images_consent.touched && form.controls.rgpd.controls.commercial_images_consent.value === null) {
                 <p class="mt-1 text-xs text-error-500">Selecciona una opción.</p>
@@ -239,17 +189,8 @@
                   <li class="py-2 text-sm">
                     <p class="font-medium text-ink">{{ treatmentName($index) }}</p>
                     <p class="text-muted">
-                      Apto: <span class="text-ink">{{ (group.controls['is_suitable'].value | boolean) }}</span>
-                      @if (group.controls['is_suitable'].value === false && group.controls['unsuitability_reason'].value) {
-                        · Motivo: <span class="text-ink">{{ group.controls['unsuitability_reason'].value }}</span>
-                      }
-                      @if (group.controls['is_suitable'].value === true) {
-                        · Acepta: <span class="text-ink">{{ (group.controls['treatment_consent'].value | boolean) }}</span>
-                      }
+                      Acepta: <span class="text-ink">{{ (group.controls['treatment_consent'].value | boolean) }}</span>
                     </p>
-                    @if (group.controls['notes'].value) {
-                      <p class="mt-1 text-xs text-muted">Notas: {{ group.controls['notes'].value }}</p>
-                    }
                   </li>
                 }
               </ul>

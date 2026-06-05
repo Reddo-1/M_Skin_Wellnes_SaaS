@@ -52,6 +52,12 @@ export class AppointmentService {
     return page.data;
   }
 
+  //portal del cliente: el BE auto-filtra por client_id = usuario autenticado; per_page alto para traer todo su historial
+  async listMine(): Promise<AppointmentSummary[]> {
+    const page = await this.api.getCollection<AppointmentSummary>('/appointments', { per_page: 200 });
+    return page.data;
+  }
+
   async create(data: AppointmentCreateData): Promise<AppointmentSummary> {
     return await this.api.postResource<AppointmentSummary>('/appointments', data);
   }

@@ -10,7 +10,6 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    //Recoje todos los distintos datos de las funciones y los muestra
     public function index(): View
     {
         $now = CarbonImmutable::now();
@@ -70,7 +69,6 @@ class DashboardController extends Controller
             ->count('tokenable_id');
     }
 
-    //Calculo las ganancias mensuales dependiendo de los centros activos y su plan
     private function computeMonthlyRevenue(?CarbonImmutable $createdBefore = null): float
     {
         $query = Center::query()
@@ -84,7 +82,6 @@ class DashboardController extends Controller
         return (float) $query->sum('plans.monthly_price');
     }
 
-    //Calcular 
     private function buildGrowthSeries(): array
     {
         $months = [];
@@ -97,7 +94,6 @@ class DashboardController extends Controller
                 ->count();
 
             $months[] = [
-                //mb_convert_case convierte todo a mayusculas incluso si tiene letras como Ñ
                 'label' => mb_convert_case($cutoff->locale('es')->isoFormat('MMM'), MB_CASE_TITLE, 'UTF-8'),
                 'value' => $count,
             ];
@@ -106,7 +102,6 @@ class DashboardController extends Controller
         return $months;
     }
 
-    //Porcentaje de centros segun del plan
     private function buildPlanDistribution(): array
     {
         $countsByPlan = Center::query()
@@ -133,7 +128,6 @@ class DashboardController extends Controller
             ->all();
     }
 
-    //Obtener datos de la tabla de auditoria
     private function buildRecentActivity(): array
     {
         return AuditLog::query()

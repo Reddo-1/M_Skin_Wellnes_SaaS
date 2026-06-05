@@ -1,0 +1,29 @@
+<div [class]="inline() ? 'flex flex-wrap gap-2' : 'flex flex-col gap-2'">
+  @for (option of options(); track $index) {
+    <label class="cursor-pointer">
+      <input
+        type="radio"
+        class="peer sr-only"
+        [name]="groupName"
+        [checked]="isSelected(option.value)"
+        (change)="onSelect(option.value)"
+      />
+      <span
+        class="flex flex-col items-center justify-center rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/30"
+        [class.border-brand-500]="isSelected(option.value)"
+        [class.bg-brand-50]="isSelected(option.value)"
+        [class.text-brand-600]="isSelected(option.value)"
+        [class.bg-white]="!isSelected(option.value)"
+        [class.text-gray-700]="!isSelected(option.value)"
+        [class.border-gray-200]="!isSelected(option.value) && !invalid()"
+        [class.border-error-500]="!isSelected(option.value) && invalid()"
+        [class.hover:bg-gray-50]="!isSelected(option.value)"
+      >
+        {{ option.label }}
+        @if (option.description) {
+          <span class="mt-0.5 text-xs font-normal text-muted">{{ option.description }}</span>
+        }
+      </span>
+    </label>
+  }
+</div>

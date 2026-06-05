@@ -27,12 +27,12 @@ const INVOICE_STATUS_LABELS: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-subscripcion',
+  selector: 'app-subscription',
   standalone: true,
   imports: [DatePipe, AlertComponent, IconComponent, TableScrollHintComponent],
-  templateUrl: './subscripcion.component.html',
+  templateUrl: './subscription.component.html',
 })
-export class SubscripcionComponent {
+export class SubscriptionComponent {
   private readonly subscriptions = inject(SubscriptionService);
   private readonly notifications = inject(NotificationService);
 

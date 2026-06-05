@@ -8,13 +8,13 @@ import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { User } from '../../../core/models/user.model';
 import { PaginatedMeta } from '../../../core/models/paginated.model';
-import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { SelectComponent, SelectOption } from '../../../shared/ui/select/select.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { WorkerModalComponent, WorkerFormValue } from './modals/worker-modal/worker-modal.component';
-import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -36,9 +36,9 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     SelectComponent,
     TableScrollHintComponent,
     WorkerModalComponent,
-    LoadingOverlayComponent,
-    SearchInputComponent
-],
+    TableLoadingOverlayComponent,
+    SearchInputComponent,
+  ],
   templateUrl: './workers-list.component.html',
 })
 export class WorkersListComponent {
@@ -154,8 +154,7 @@ export class WorkersListComponent {
         await this.load();
       }
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }

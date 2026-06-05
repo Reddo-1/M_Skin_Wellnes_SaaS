@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('client_consents', function (Blueprint $table) {
-            //FK al UserFile del PDF generado por el wizard; nullable porque los consents firmados con el flujo antiguo no tienen PDF asociado
+            //nullable: los consents firmados con el flujo antiguo no tienen PDF asociado
             $table->unsignedBigInteger('pdf_user_file_id')->nullable()->after('signature_user_file_id');
 
             $table->foreign('pdf_user_file_id', 'fk_client_consents_pdf')

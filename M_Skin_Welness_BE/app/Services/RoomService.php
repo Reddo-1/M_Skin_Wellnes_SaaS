@@ -10,14 +10,7 @@ class RoomService
 {
     public function create(int $centerId, array $data): Room
     {
-        return DB::transaction(function () use ($centerId, $data) {
-            return Room::create([
-                'center_id' => $centerId,
-                'name' => $data['name'],
-                'grid_position' => $data['grid_position'] ?? null,
-                'is_active' => $data['is_active'] ?? true,
-            ]);
-        });
+        return Room::create([...$data, 'center_id' => $centerId])->refresh();
     }
 
     public function update(Room $room, array $data): Room
@@ -37,9 +30,6 @@ class RoomService
             ]);
         }
 
-        DB::transaction(function () use ($room) {
-            //Las maquinas con sala fija se quedan sin ella
-            $room->delete();
-        });
+        $room->delete();
     }
 }

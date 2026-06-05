@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Builder, Model};
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
 
 class SkinEvaluation extends Model
 {
@@ -56,7 +56,13 @@ class SkinEvaluation extends Model
 
     public function variations(): BelongsToMany
     {
-        return $this->belongsToMany(Variation::class, 'skin_evaluation_variation')
-            ->withTimestamps();
+        //el pivote solo tiene created_at (no updated_at), asi que withTimestamps() rompia el select; created_at ya usa default useCurrent
+        return $this->belongsToMany(Variation::class, 'skin_evaluation_variation');
+    }
+
+    //las 7 imagenes clinicas se distinguen del resto de archivos por su category
+    public function files(): HasMany
+    {
+        return $this->hasMany(UserFile::class);
     }
 }

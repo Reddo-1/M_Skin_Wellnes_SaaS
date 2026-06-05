@@ -85,10 +85,10 @@
     </nav>
 
     @switch (activeTab()) {
-      @case ('datos') {
+      @case ('data') {
         <app-worker-data-tab [worker]="data" (updated)="onWorkerUpdated($event)" />
       }
-      @case ('horario') {
+      @case ('schedule') {
         <app-worker-schedule-tab [workerId]="data.id" />
       }
     }

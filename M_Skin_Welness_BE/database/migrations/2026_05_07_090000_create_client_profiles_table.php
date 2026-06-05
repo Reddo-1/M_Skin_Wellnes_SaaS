@@ -13,16 +13,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('center_id');
             $table->foreignId('user_id');
-            //tipo de ficha: facial o corporal. cada cliente puede tener una de cada
             $table->string('body_type', 20);
-            //puntero a la evaluacion vigente. nullable hasta que haya primera revision
+            //evaluacion vigente; nullable hasta la primera revision
             $table->unsignedBigInteger('current_skin_evaluation_id')->nullable();
-            //notas permanentes del cliente (alergias, embarazo, etc.) no de una revision concreta
+            //notas permanentes del cliente (alergias, embarazo...), no de una revision concreta
             $table->text('general_notes')->nullable();
             $table->timestampsTz();
 
             $table->unique(['id', 'center_id'], 'uq_client_profiles_id_center');
-            //un cliente solo puede tener una ficha facial y una corporal activas en el mismo centro
             $table->unique(['center_id', 'user_id', 'body_type'], 'uq_client_profiles_user_body');
 
             $table->foreign('center_id', 'fk_client_profiles_center')

@@ -16,10 +16,11 @@ return new class extends Migration
             $table->foreignId('reviewed_by_user_id');
             $table->date('review_date')->useCurrent();
 
-            $table->boolean('is_suitable')->default(true);
+            //null = sin valorar; true = apto; false = no apto. la fija el diagnosticador desde la ficha
+            $table->boolean('is_suitable')->nullable();
             $table->string('unsuitability_reason', 150)->nullable();
 
-            //consentimiento específico de este tratamiento concreto tras conocer sus riesgos
+            //consentimiento específico de este tratamiento tras conocer sus riesgos
             $table->boolean('treatment_consent')->default(false);
 
             $table->text('notes')->nullable();

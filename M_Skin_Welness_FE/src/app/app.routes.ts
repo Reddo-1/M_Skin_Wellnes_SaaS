@@ -37,6 +37,29 @@ export const routes: Routes = [
       import('./features/welcome/welcome.component').then((m) => m.WelcomeComponent),
   },
   {
+    path: 'registro',
+    canMatch: [publicOnlyGuard],
+    data: { title: 'Crea tu centro' },
+    loadComponent: () =>
+      import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
+    path: 'registro/exito',
+    data: { title: 'Alta completada' },
+    loadComponent: () =>
+      import('./features/auth/register-success/register-success.component').then(
+        (m) => m.RegisterSuccessComponent,
+      ),
+  },
+  {
+    path: 'registro/cancelado',
+    data: { title: 'Alta cancelada' },
+    loadComponent: () =>
+      import('./features/auth/register-cancelled/register-cancelled.component').then(
+        (m) => m.RegisterCancelledComponent,
+      ),
+  },
+  {
     path: 'impersonate',
     loadComponent: () =>
       import('./features/impersonation/impersonation.component').then(
@@ -74,7 +97,7 @@ export const routes: Routes = [
         ],
         data: { title: 'Cuadrante' },
         loadComponent: () =>
-          import('./features/panel/cuadrante/cuadrante.component').then((m) => m.CuadranteComponent),
+          import('./features/panel/schedule-board/schedule-board.component').then((m) => m.ScheduleBoardComponent),
       },
       {
         path: 'tratamientos',
@@ -274,15 +297,15 @@ export const routes: Routes = [
         canActivate: [roleGuard(['administrador'])],
         data: { title: 'Mi centro' },
         loadComponent: () =>
-          import('./features/panel/mi-centro/mi-centro.component').then((m) => m.MiCentroComponent),
+          import('./features/panel/my-center/my-center.component').then((m) => m.MyCenterComponent),
       },
       {
         path: 'subscripcion',
         canActivate: [roleGuard(['administrador'])],
         data: { title: 'Subscripción' },
         loadComponent: () =>
-          import('./features/panel/subscripcion/subscripcion.component').then(
-            (m) => m.SubscripcionComponent,
+          import('./features/panel/subscription/subscription.component').then(
+            (m) => m.SubscriptionComponent,
           ),
       },
       {

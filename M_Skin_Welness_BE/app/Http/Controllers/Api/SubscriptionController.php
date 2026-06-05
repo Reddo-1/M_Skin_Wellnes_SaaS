@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanResource;
+use App\Services\SubscriptionInvoiceMailer;
 use Carbon\Carbon;
 use Illuminate\Http\{JsonResponse, Request};
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SubscriptionController extends Controller
@@ -44,13 +46,49 @@ class SubscriptionController extends Controller
                 ? Carbon::createFromTimestamp($firstItem->current_period_end)->toIso8601String()
                 : null,
             'plan' => PlanResource::make($user->center->plan),
-            'card' => $user->pm_last_four !== null
-                ? ['brand' => $user->pm_type, 'last_four' => $user->pm_last_four]
-                : null,
         ]);
     }
 
-    //llevar al admin al portal suyo de stripe para gestionar la subscripción.
+    public function invoices(Request $request): JsonResponse
+    {
+        $user = $this->resolveBillingUser($request);
+
+        if (! $user->can('subscriptions.view')) {
+            throw new HttpException(403, 'No tienes permiso para ver las facturas de la suscripción.');
+        }
+
+        if (! $user->hasStripeId()) {
+            return response()->json(['data' => []]);
+        }
+
+        $invoices = $user->invoices()->map(fn ($invoice) => [
+            'id' => $invoice->id,
+            'number' => $invoice->number,
+            'date' => $invoice->date()->toIso8601String(),
+            'total' => $invoice->total(),
+            'status' => $invoice->status,
+        ])->values();
+
+        return response()->json(['data' => $invoices]);
+    }
+
+    public function invoicePdf(Request $request, string $invoiceId): Response
+    {
+        $user = $this->resolveBillingUser($request);
+
+        if (! $user->can('subscriptions.view')) {
+            throw new HttpException(403, 'No tienes permiso para descargar las facturas de la suscripción.');
+        }
+
+        $invoice = $user->hasStripeId() ? $user->findInvoice($invoiceId) : null;
+
+        if ($invoice === null) {
+            throw new HttpException(404, 'La factura no existe.');
+        }
+
+        return $invoice->download(SubscriptionInvoiceMailer::issuerData());
+    }
+
     public function portal(Request $request): JsonResponse
     {
         $user = $this->resolveBillingUser($request);

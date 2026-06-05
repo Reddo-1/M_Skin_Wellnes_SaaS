@@ -13,10 +13,10 @@ class CenterFileService
         return DB::transaction(function () use ($centerId, $type, $file) {
             $this->deleteExisting($centerId, $type);
 
-            $directory = "centers/{$centerId}";
+            $directory = "centers/{$centerId}/branding";
             $filename = $type.'_'.now()->format('YmdHis').'.'.$file->getClientOriginalExtension();
 
-            $path = $file->storeAs($directory, $filename, 'public');
+            $path = $file->storeAs($directory, $filename, 'local');
 
             return CenterFile::create([
                 'center_id' => $centerId,
@@ -30,7 +30,7 @@ class CenterFileService
     public function delete(CenterFile $file): void
     {
         DB::transaction(function () use ($file) {
-            Storage::disk('public')->delete($file->path);
+            Storage::disk('local')->delete($file->path);
             $file->delete();
         });
     }
@@ -43,7 +43,7 @@ class CenterFileService
             ->first();
 
         if ($existing !== null) {
-            Storage::disk('public')->delete($existing->path);
+            Storage::disk('local')->delete($existing->path);
             $existing->delete();
         }
     }

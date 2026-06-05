@@ -31,7 +31,8 @@ export class DatePickerComponent implements ControlValueAccessor {
   readonly required = input(false);
   readonly placeholder = input('Selecciona una fecha');
   readonly invalid = input(false);
-
+  
+  //lo consumen sobre todo los filtros que reaccionan al cambio de fecha
   readonly valueChange = output<string | null>();
 
   protected readonly fieldId = `app-date-picker-${nextId++}`;

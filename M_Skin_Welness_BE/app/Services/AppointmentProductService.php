@@ -42,8 +42,7 @@ class AppointmentProductService
         });
     }
 
-    //consume el stock real al pasar la cita a 'realizada'. Idempotente: si ya se descontó,
-    //la función no se debe volver a llamar; el AppointmentService garantiza un solo paso a 'realizada'.
+    //consume el stock al pasar la cita a 'realizada'; no es idempotente, el AppointmentService garantiza un solo paso a 'realizada'
     public function applyStockConsumption(Appointment $appointment, int $actorId): void
     {
         $lines = AppointmentProduct::query()

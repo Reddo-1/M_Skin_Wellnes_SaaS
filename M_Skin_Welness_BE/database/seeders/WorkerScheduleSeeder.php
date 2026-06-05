@@ -21,7 +21,6 @@ class WorkerScheduleSeeder extends Seeder
             ->pluck('id', 'name')
             ->all();
 
-        //cada rol trabaja en su franja
         $roleSlots = [
             'administrador'    => 'Completo',
             'recepcionista'    => 'Completo',

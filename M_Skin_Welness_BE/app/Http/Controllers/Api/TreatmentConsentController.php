@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateTreatmentConsentRequest;
 use App\Http\Resources\TreatmentConsentResource;
 use App\Models\TreatmentConsent;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class TreatmentConsentController extends Controller
 
         $centerId = (int) $request->attributes->get('center_id');
         $actor = $request->user();
-        //un usuario que solo tiene el rol cliente solo ve sus propios consents, ignore el filtro que pida
+        //un usuario que solo es cliente ve unicamente sus consents, ignorando cualquier filtro que pida
         $restrictToSelf = $actor->hasRole('cliente') && $actor->roles->count() === 1;
 
         $query = TreatmentConsent::query()
@@ -36,5 +37,24 @@ class TreatmentConsentController extends Controller
             ->orderByDesc('id');
 
         return TreatmentConsentResource::collection($query->paginate(10));
+    }
+
+    //el diagnosticador fija la aptitud desde la ficha; NO toca treatment_consent (el acto firmado por el cliente se respeta)
+    public function update(UpdateTreatmentConsentRequest $request, TreatmentConsent $treatmentConsent): TreatmentConsentResource
+    {
+        $data = $request->validated();
+        $isSuitable = (bool) $data['is_suitable'];
+
+        $treatmentConsent->update([
+            'is_suitable' => $isSuitable,
+            'unsuitability_reason' => $isSuitable ? null : ($data['unsuitability_reason'] ?? null),
+            'notes' => $data['notes'] ?? null,
+            'reviewed_by_user_id' => $request->user()->id,
+            'review_date' => now()->toDateString(),
+        ]);
+
+        return TreatmentConsentResource::make(
+            $treatmentConsent->load(['client', 'treatment', 'reviewer'])
+        );
     }
 }

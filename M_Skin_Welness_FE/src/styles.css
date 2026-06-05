@@ -278,7 +278,7 @@
 .custom-calendar .fc-bg-event.fc-band {
   opacity: 1;
 }
-.custom-calendar .fc-bg-event.fc-band-jornada {
+.custom-calendar .fc-bg-event.fc-band-workday {
   background-color: rgba(102, 112, 133, 0.12);
 }
 .custom-calendar .fc-bg-event.fc-band-absence {
@@ -296,7 +296,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
-.custom-calendar .fc-band-jornada .fc-event-title,
+.custom-calendar .fc-band-workday .fc-event-title,
 .custom-calendar .fc-band.fc-break-bg .fc-event-title {
   color: #475467;
 }

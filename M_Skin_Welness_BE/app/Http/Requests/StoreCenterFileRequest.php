@@ -17,7 +17,7 @@ class StoreCenterFileRequest extends FormRequest
     {
         return [
             'type' => ['required', 'string', Rule::in(CenterFile::TYPES)],
-            'file' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'file' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 

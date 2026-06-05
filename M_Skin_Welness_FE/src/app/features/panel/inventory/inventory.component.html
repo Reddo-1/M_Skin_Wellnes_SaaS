@@ -34,15 +34,7 @@
     } @else {
     <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       @if (loading() && stockItems().length > 0) {
-        <div class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-white/60">
-          <span class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm ring-1 ring-gray-200">
-            <svg class="h-4 w-4 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"></path>
-            </svg>
-            Actualizando…
-          </span>
-        </div>
+        <app-table-loading-overlay></app-table-loading-overlay>
       }
       @if (stockItems().length > 0) {
         <app-table-scroll-hint />
@@ -68,7 +60,7 @@
             }
             @for (stock of stockItems(); track stock.id) {
               <tr class="transition hover:bg-gray-50">
-                <td class="px-5 py-3 font-semibold text-ink">{{ stock.product?.name ?? '—' }}</td>
+                <td class="px-5 py-3 font-semibold text-ink">{{ stock.product?.name ?? 'N/D' }}</td>
                 <td class="px-5 py-3">
                   <span class="font-medium text-ink">{{ (+stock.current_quantity / (stock.product?.doses_per_package ?? 1)) | number:'1.0-2' }}</span>
                   <span class="text-xs text-muted"> paquetes ({{ stock.current_quantity | number:'1.0-3' }} dosis)</span>
@@ -144,15 +136,7 @@
     } @else {
     <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       @if (loading() && movementItems().length > 0) {
-        <div class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-white/60">
-          <span class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm ring-1 ring-gray-200">
-            <svg class="h-4 w-4 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"></path>
-            </svg>
-            Actualizando…
-          </span>
-        </div>
+        <app-table-loading-overlay />
       }
       @if (movementItems().length > 0) {
         <app-table-scroll-hint />
@@ -181,14 +165,14 @@
             @for (movement of movementItems(); track movement.id) {
               <tr class="transition hover:bg-gray-50">
                 <td class="px-5 py-3 text-muted">{{ movement.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="px-5 py-3 font-medium text-ink">{{ movement.product?.name ?? '—' }}</td>
+                <td class="px-5 py-3 font-medium text-ink">{{ movement.product?.name ?? 'N/D' }}</td>
                 <td class="px-5 py-3 text-muted">{{ typeLabel(movement.type?.name) }}</td>
                 <td class="px-5 py-3 text-muted">{{ movement.quantity | number:'1.0-3' }}</td>
                 <td class="px-5 py-3 text-muted">
                   {{ movement.previous_quantity | number:'1.0-3' }} → {{ movement.new_quantity | number:'1.0-3' }}
                 </td>
                 <td class="px-5 py-3 text-muted">{{ movement.user?.name ?? 'Sistema' }}</td>
-                <td class="px-5 py-3 text-muted">{{ movement.reason ?? '—' }}</td>
+                <td class="px-5 py-3 text-muted">{{ movement.reason ?? 'N/D' }}</td>
               </tr>
             }
           </tbody>

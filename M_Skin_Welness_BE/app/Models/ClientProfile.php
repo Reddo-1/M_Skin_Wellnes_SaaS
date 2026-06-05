@@ -30,13 +30,11 @@ class ClientProfile extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    //evaluacion vigente que representa el estado actual del cliente
     public function currentEvaluation(): BelongsTo
     {
         return $this->belongsTo(SkinEvaluation::class, 'current_skin_evaluation_id');
     }
 
-    //historico completo de evaluaciones de esta ficha
     public function evaluations(): HasMany
     {
         return $this->hasMany(SkinEvaluation::class);

@@ -53,12 +53,10 @@ export class ApiService {
     return response.data;
   }
 
-  //Cogiendo la url base de las variables de entorno devuelve la ruta hacia la api
   private url(path: string): string {
     return `${this.baseUrl}${path}`;
   }
 
-  //Helper para paginación de colecciones y/o busquedas.
   private toHttpParams(input?: QueryParams): HttpParams | undefined {
     if (input === undefined) return undefined;
     let params = new HttpParams();

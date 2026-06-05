@@ -1,11 +1,11 @@
-import { TitleCasePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UserService } from '../../../core/services/user.service';
-import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
+import { apiError, hasFieldError, hasValidationError } from '../../../core/utils/form.util';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { InputComponent } from '../../../shared/ui/input/input.component';
@@ -29,6 +29,7 @@ type PasswordField = 'password' | 'password_confirmation';
   imports: [
     ReactiveFormsModule,
     TitleCasePipe,
+    DatePipe,
     IconComponent,
     ModalComponent,
     InputComponent,
@@ -102,8 +103,7 @@ export class ProfileComponent {
       this.editModalOpen.set(false);
       this.notifications.toast.success('Datos personales actualizados.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingPersonal.set(false);
     }
@@ -134,8 +134,7 @@ export class ProfileComponent {
       this.passwordForm.reset({ password: '', password_confirmation: '' });
       this.notifications.toast.success('Contraseña actualizada.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingPassword.set(false);
     }

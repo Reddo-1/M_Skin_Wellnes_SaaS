@@ -33,7 +33,7 @@ class WorkerAbsenceController extends Controller
         return WorkerAbsenceResource::collection($query->paginate(100));
     }
 
-    //crea una ausencia por cada día del rango from..to (un POST devuelve N filas)
+    //un POST devuelve N filas: una ausencia por cada día del rango from..to
     public function store(StoreWorkerAbsenceRequest $request): AnonymousResourceCollection
     {
         $absences = $this->service->create(

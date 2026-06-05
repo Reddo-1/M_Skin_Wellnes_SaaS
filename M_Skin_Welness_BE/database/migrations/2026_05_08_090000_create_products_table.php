@@ -15,7 +15,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
-            //numero de dosis que rinde un paquete; 1 para productos donde 1 paquete = 1 dosis (mascarillas individuales)
+            //dosis que rinde un paquete; 1 cuando un paquete es una sola dosis (mascarillas individuales)
             $table->integer('doses_per_package')->default(1);
             $table->decimal('minimum_stock', 10, 3)->default(0);
             $table->boolean('is_sellable')->default(true);

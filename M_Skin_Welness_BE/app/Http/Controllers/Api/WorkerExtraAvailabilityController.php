@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class WorkerExtraAvailabilityController extends Controller
 {
-    //inyecta el service de disponibilidad extra
     public function __construct(private readonly WorkerExtraAvailabilityService $service)
     {
     }
@@ -24,11 +23,8 @@ class WorkerExtraAvailabilityController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = WorkerExtraAvailability::query()
-            //solo del centro actual
             ->forCenter($centerId)
-            //carga el trabajador
             ->with(['worker'])
-            //filtros opcionales
             ->when($request->filled('worker_id'), fn ($q) => $q->where('worker_id', $request->integer('worker_id')))
             ->when($request->filled('from'), fn ($q) => $q->where('date', '>=', $request->date('from')))
             ->when($request->filled('to'), fn ($q) => $q->where('date', '<=', $request->date('to')))

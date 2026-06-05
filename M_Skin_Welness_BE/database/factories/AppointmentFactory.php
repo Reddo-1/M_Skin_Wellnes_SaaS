@@ -23,7 +23,7 @@ class AppointmentFactory extends Factory
             'machine_id' => null,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
-            'booking_source' => $this->faker->randomElement(['staff', 'online']),
+            'booking_source' => $this->faker->randomElement(['panel', 'online']),
             'status_id' => (int) config('lookups.session_statuses.confirmada'),
             'reserved_price' => $this->faker->randomFloat(2, 20, 150),
             'notes' => $this->faker->optional()->sentence(),

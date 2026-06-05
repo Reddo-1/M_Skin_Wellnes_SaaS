@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ProductStockService } from '../../../core/services/product-stock.service';
 import { StockMovementService, StockEntryData } from '../../../core/services/stock-movement.service';
 import { LookupService } from '../../../core/services/lookup.service';
@@ -8,20 +7,21 @@ import { NotificationService } from '../../../core/services/notification.service
 import { ProductStock } from '../../../core/models/product-stock.model';
 import { StockMovement } from '../../../core/models/stock-movement.model';
 import { PaginatedMeta } from '../../../core/models/paginated.model';
-import { GENERIC_ERROR, loadResourceError } from '../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../core/utils/form.util';
 import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { SelectComponent, SelectOption } from '../../../shared/ui/select/select.component';
 import { DatePickerComponent } from '../../../shared/ui/date-picker/date-picker.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { InventoryEntryModalComponent, InventoryEntryFormValue } from './modals/inventory-entry-modal/inventory-entry-modal.component';
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 
-type InventoryTab = 'stock' | 'movimientos';
+type InventoryTab = 'stock' | 'movements';
 type StockFilter = 'all' | 'below';
 
 const TAB_OPTIONS: SegmentedControlOption<InventoryTab>[] = [
   { value: 'stock', label: 'Stock actual' },
-  { value: 'movimientos', label: 'Movimientos' },
+  { value: 'movements', label: 'Movimientos' },
 ];
 
 const STOCK_FILTER_OPTIONS: SegmentedControlOption<StockFilter>[] = [
@@ -54,6 +54,7 @@ interface EntryTarget {
     DatePickerComponent,
     TableScrollHintComponent,
     InventoryEntryModalComponent,
+    TableLoadingOverlayComponent,
   ],
   templateUrl: './inventory.component.html',
 })
@@ -182,8 +183,7 @@ export class InventoryComponent {
       this.notifications.toast.success('Entrada de stock registrada.');
       await this.loadStock();
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingEntry.set(false);
     }
@@ -202,7 +202,6 @@ export class InventoryComponent {
     } catch {
       const message = loadResourceError('el stock');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }
@@ -223,7 +222,6 @@ export class InventoryComponent {
     } catch {
       const message = loadResourceError('los movimientos de stock');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

@@ -40,7 +40,7 @@ class StoreAppointmentRequest extends FormRequest
             ],
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
-            'booking_source' => ['required'],
+            'booking_source' => ['required', 'string', Rule::in(['panel', 'online'])],
             'notes' => ['nullable', 'string', 'max:5000'],
             'assistant_ids' => ['nullable', 'array'],
             'assistant_ids.*' => [

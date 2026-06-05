@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\DB;
 
 class ClientProfileService
 {
+    private const EVALUATION_RELATIONS = [
+        'client',
+        'currentEvaluation.skinType',
+        'currentEvaluation.variations',
+        'currentEvaluation.professional',
+        'currentEvaluation.files',
+    ];
+
     public function __construct(private readonly SkinEvaluationService $evaluations)
     {
     }
@@ -26,12 +34,7 @@ class ClientProfileService
             $evaluationData['client_profile_id'] = $profile->id;
             $this->evaluations->create($centerId, $actorId, $evaluationData);
 
-            return $profile->refresh()->load([
-                'client',
-                'currentEvaluation.skinType',
-                'currentEvaluation.variations',
-                'currentEvaluation.professional',
-            ]);
+            return $profile->refresh()->load(self::EVALUATION_RELATIONS);
         });
     }
 
@@ -40,7 +43,7 @@ class ClientProfileService
         return DB::transaction(function () use ($profile, $data) {
             $profile->fill($data)->save();
 
-            return $profile->load(['client', 'currentEvaluation']);
+            return $profile->load(self::EVALUATION_RELATIONS);
         });
     }
 }

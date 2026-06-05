@@ -12,7 +12,7 @@ import { AlertComponent } from '../../../shared/ui/alert/alert.component';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/ui/segmented-control/segmented-control.component';
 import { TableScrollHintComponent } from '../../../shared/ui/table-scroll-hint/table-scroll-hint.component';
 import { ProductModalComponent, ProductFormValue } from './modals/product-modal/product-modal.component';
-import { LoadingOverlayComponent } from "../../../shared/ui/table-loading-overlay/table-loading-overlay.component";
+import { TableLoadingOverlayComponent } from '../../../shared/ui/table-loading-overlay/table-loading-overlay.component';
 import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -34,9 +34,9 @@ const ACTIVE_FILTER_OPTIONS: SegmentedControlOption<ActiveFilter>[] = [
     SegmentedControlComponent,
     TableScrollHintComponent,
     ProductModalComponent,
-    LoadingOverlayComponent,
-    SearchInputComponent
-],
+    TableLoadingOverlayComponent,
+    SearchInputComponent,
+  ],
   templateUrl: './products-list.component.html',
 })
 export class ProductsListComponent {

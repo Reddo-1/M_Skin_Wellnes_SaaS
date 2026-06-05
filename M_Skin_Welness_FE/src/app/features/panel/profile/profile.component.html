@@ -69,7 +69,7 @@
             </div>
             <div>
               <dt class="text-xs uppercase tracking-wide text-muted">Fecha de nacimiento</dt>
-              <dd class="mt-1 text-sm font-medium text-ink">{{ user.birth_date ?? 'Sin indicar' }}</dd>
+              <dd class="mt-1 text-sm font-medium text-ink">{{ (user.birth_date | date:'dd/MM/yyyy') ?? 'Sin indicar' }}</dd>
             </div>
           </dl>
         </div>

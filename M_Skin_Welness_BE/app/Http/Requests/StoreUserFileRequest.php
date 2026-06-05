@@ -29,7 +29,6 @@ class StoreUserFileRequest extends FormRequest
                 'nullable',
                 Rule::exists('skin_evaluations', 'id')->where('center_id', $centerId),
             ],
-            //hasta 5 MB. jpg/png/webp gestionados por la regla 'image'
             'file' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
@@ -57,7 +56,6 @@ class StoreUserFileRequest extends FormRequest
                 return;
             }
 
-            //categoria clinica
             if ($evalId === null) {
                 $v->errors()->add('skin_evaluation_id', 'Las fotos clínicas deben ir vinculadas a una evaluación.');
             }

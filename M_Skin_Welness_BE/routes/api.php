@@ -47,18 +47,26 @@ Route::post('email/verification-notification', [EmailVerificationController::cla
 //alta de centro nuevo: crea checkout session de stripe; el webhook crea center+admin al cobrar
 Route::post('centers/register', [CenterRegistrationController::class, 'register']);
 
+//catalogo de planes publico para el alta de centro (el detalle sigue autenticado)
+Route::get('plans', [PlanController::class, 'index']);
+
 Route::get('user-files/{user_file}/file', [UserFileController::class, 'file'])
     ->middleware('signed')
     ->name('user-files.file');
+
+//branding del centro (logo): disco privado servido por URL firmada, igual que los user-files
+Route::get('center-files/{center_file}/file', [CenterFileController::class, 'file'])
+    ->middleware('signed')
+    ->name('center-files.file');
 
 Route::middleware(['auth:sanctum','verified'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
 
-    //planes: catalogo global, no van bajo center.scope
-    Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
+    //planes: el index es publico (alta de centro); aqui solo el detalle autenticado
+    Route::apiResource('plans', PlanController::class)->only(['show']);
 
-    //lookups globales (combos del FE): se cargan una vez al iniciar
+    //lookups globales: catalogo, fuera de center.scope
     Route::get('lookups', [LookupController::class, 'index']);
 
     //centros: el admin solo puede leer y actualizar el suyo. Index/store/destroy viven en Blade del superadmin
@@ -66,6 +74,8 @@ Route::middleware(['auth:sanctum','verified'])->group(function () {
 
     //suscripcion del centro: solo accesible por el billing_user (el admin que dio de alta y paga)
     Route::get('subscription', [SubscriptionController::class, 'show']);
+    Route::get('subscription/invoices', [SubscriptionController::class, 'invoices']);
+    Route::get('subscription/invoices/{invoiceId}/pdf', [SubscriptionController::class, 'invoicePdf']);
     Route::post('subscription/portal', [SubscriptionController::class, 'portal']);
 
     Route::middleware('center.scope')->group(function () {
@@ -127,10 +137,10 @@ Route::middleware(['auth:sanctum','verified'])->group(function () {
             ->parameters(['skin-evaluations' => 'skin_evaluation'])
             ->except(['destroy']);
 
-        //historico de aptitudes + consent por tratamiento; alta/edicion solo a traves del wizard de consents
+        //index: historico de consent por tratamiento (alta solo via wizard). update: el diagnosticador fija la aptitud desde la ficha
         Route::apiResource('treatment-consents', TreatmentConsentController::class)
             ->parameters(['treatment-consents' => 'treatment_consent'])
-            ->only(['index']);
+            ->only(['index', 'update']);
 
         //historico de consents RGPD del paciente; alta solo a traves del wizard, sin update porque es registro legal
         Route::apiResource('client-consents', ClientConsentController::class)

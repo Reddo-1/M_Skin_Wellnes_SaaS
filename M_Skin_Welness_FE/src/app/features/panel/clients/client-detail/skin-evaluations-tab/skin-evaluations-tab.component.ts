@@ -1,5 +1,4 @@
 import { DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { ClinicalRecordSummary } from '../../../../../core/models/clinical-record.model';
 import { SkinEvaluationSummary } from '../../../../../core/models/skin-evaluation.model';
@@ -8,14 +7,15 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { ClinicalRecordService } from '../../../../../core/services/clinical-record.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { SkinEvaluationService } from '../../../../../core/services/skin-evaluation.service';
-import { GENERIC_ERROR, loadResourceError } from '../../../../../core/utils/form.util';
+import { apiError, loadResourceError } from '../../../../../core/utils/form.util';
 import { AlertComponent } from '../../../../../shared/ui/alert/alert.component';
+import { ClinicalImagesComponent } from '../clinical-images/clinical-images.component';
 import { SkinEvaluationFormValue, SkinEvaluationModalComponent } from './modals/skin-evaluation-modal/skin-evaluation-modal.component';
 
 @Component({
   selector: 'app-skin-evaluations-tab',
   standalone: true,
-  imports: [DatePipe, AlertComponent, SkinEvaluationModalComponent],
+  imports: [DatePipe, AlertComponent, ClinicalImagesComponent, SkinEvaluationModalComponent],
   templateUrl: './skin-evaluations-tab.component.html',
 })
 export class SkinEvaluationsTabComponent {
@@ -90,8 +90,7 @@ export class SkinEvaluationsTabComponent {
       }
       this.modalOpen.set(false);
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }
@@ -110,7 +109,6 @@ export class SkinEvaluationsTabComponent {
     } catch {
       const message = loadResourceError('las evaluaciones de piel');
       this.errorMessage.set(message);
-      this.notifications.toast.error(message);
     } finally {
       this.loading.set(false);
     }

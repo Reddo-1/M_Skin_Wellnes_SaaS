@@ -43,10 +43,36 @@ class UserService
                 metadata: ['user_id' => $user->id, 'role_ids' => $data['role_ids']],
             );
 
-            //si el admin no fijo password y el usuario tiene email, le mandamos el correo para que la establezca
+            //sin password fijada, le mandamos el correo para que la establezca el mismo
             if (!$hasPassword && $user->email !== null) {
                 Password::sendResetLink(['email' => $user->email]);
             }
+
+            return $user;
+        });
+    }
+
+    public function registerSelfSignup(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            $user = User::create([
+                'center_id' => $data['center_id'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'birth_date' => $data['birth_date'] ?? null,
+                'password' => $data['password'],
+                'registration_source' => 'online',
+                'is_active' => true,
+            ]);
+
+            $user->assignRole('cliente');
+
+            $this->auditLogs->record(
+                action: 'user.created',
+                centerId: $user->center_id,
+                metadata: ['user_id' => $user->id, 'role' => 'cliente', 'source' => 'self_registration'],
+            );
 
             return $user;
         });
@@ -61,7 +87,7 @@ class UserService
         });
     }
 
-    //baja logica: marca el usuario como inactivo y revoca sus tokens activos
+    //baja logica: ademas de inactivar, revoca los tokens para cerrar sus sesiones
     public function deactivate(User $user, int $actorUserId): User
     {
         return DB::transaction(function () use ($user, $actorUserId) {
@@ -82,17 +108,19 @@ class UserService
 
     public function activate(User $user, int $actorUserId): User
     {
-        $user->is_active = true;
-        $user->save();
+        return DB::transaction(function () use ($user, $actorUserId) {
+            $user->is_active = true;
+            $user->save();
 
-        $this->auditLogs->record(
-            action: 'user.reactivated',
-            actorUserId: $actorUserId,
-            centerId: $user->center_id,
-            metadata: ['user_id' => $user->id],
-        );
+            $this->auditLogs->record(
+                action: 'user.reactivated',
+                actorUserId: $actorUserId,
+                centerId: $user->center_id,
+                metadata: ['user_id' => $user->id],
+            );
 
-        return $user;
+            return $user;
+        });
     }
 
     public function changePassword(User $user, string $newPassword): User
@@ -103,7 +131,6 @@ class UserService
         return $user;
     }
 
-    //activa el acceso online: opcionalmente fija el email y manda correo para que el cliente establezca contrasena
     public function activateOnlineAccess(User $user, ?string $email): User
     {
         return DB::transaction(function () use ($user, $email) {
@@ -119,7 +146,6 @@ class UserService
         });
     }
 
-    //reemplaza la lista completa de roles del usuario por los indicados
     public function syncRoles(User $user, array $roleIds): User
     {
         return DB::transaction(function () use ($user, $roleIds) {

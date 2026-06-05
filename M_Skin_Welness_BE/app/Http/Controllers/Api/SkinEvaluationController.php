@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SkinEvaluationController extends Controller
 {
-    //inyecta el service de evaluaciones
     public function __construct(private readonly SkinEvaluationService $service)
     {
     }
@@ -24,17 +23,13 @@ class SkinEvaluationController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = SkinEvaluation::query()
-            //solo evaluaciones del centro actual
             ->forCenter($centerId)
-            //carga relaciones para no hacer N+1
-            ->with(['client', 'clientProfile', 'skinType', 'professional', 'variations'])
-            //filtros opcionales
+            ->with(['client', 'clientProfile', 'skinType', 'professional', 'variations', 'files'])
             ->when($request->filled('client_profile_id'), fn ($q) => $q->where('client_profile_id', $request->integer('client_profile_id')))
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
             ->when($request->filled('professional_id'), fn ($q) => $q->where('professional_id', $request->integer('professional_id')))
             ->when($request->filled('from'), fn ($q) => $q->where('evaluation_date', '>=', $request->date('from')))
             ->when($request->filled('to'), fn ($q) => $q->where('evaluation_date', '<=', $request->date('to')))
-            //historico ordenado por fecha de evaluacion descendente (mas reciente primero)
             ->orderByDesc('evaluation_date')
             ->orderByDesc('id');
 
@@ -57,7 +52,7 @@ class SkinEvaluationController extends Controller
         $this->authorize('view', $skinEvaluation);
 
         return SkinEvaluationResource::make(
-            $skinEvaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations'])
+            $skinEvaluation->load(['client', 'clientProfile', 'skinType', 'professional', 'variations', 'files'])
         );
     }
 

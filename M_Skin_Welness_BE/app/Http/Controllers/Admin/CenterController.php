@@ -14,11 +14,9 @@ class CenterController extends Controller
     {
     }
 
-    //listado de todos los centros y filtro si los ponemos.
     public function index(Request $request): View
     {
         $filters = $request->only(['search', 'plan_id', 'status']);
-        //en el servicio hace toda la query entera
         $centers = $this->centers->list($filters);
         $plans = Plan::query()->orderBy('id')->get();
 
@@ -29,7 +27,6 @@ class CenterController extends Controller
         ]);
     }
 
-    //Listado de todos los datos de un centro junto a su subscripción de stripe cojiendolo de su api
     public function show(Center $center): View
     {
         $center->load(['plan', 'billingUser']);

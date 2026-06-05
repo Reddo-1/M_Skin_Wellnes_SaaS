@@ -25,7 +25,6 @@ class StoreConsentWizardRequest extends FormRequest
         $centerId = (int) $this->attributes->get('center_id');
 
         return [
-            //destinatario del consent: el cliente debe pertenecer al centro
             'user_id' => [
                 'required',
                 'integer',
@@ -43,10 +42,8 @@ class StoreConsentWizardRequest extends FormRequest
                 'integer',
                 Rule::exists('treatments', 'id')->where('center_id', $centerId),
             ],
-            'treatments.*.is_suitable' => ['required', 'boolean'],
-            'treatments.*.unsuitability_reason' => ['nullable', 'string', 'max:150'],
+            //el wizard solo recoge el consentimiento por tratamiento; la aptitud (is_suitable/motivo/notas) la fija el diagnosticador en la ficha
             'treatments.*.treatment_consent' => ['required', 'boolean'],
-            'treatments.*.notes' => ['nullable', 'string', 'max:2000'],
 
             //la firma viene como dataURL base64 PNG generado por angular-signature-pad
             'signature_base64' => ['required', 'string'],

@@ -13,8 +13,6 @@ class AppointmentService
     {
     }
 
-
-    //funcion para validar si algo ya está en uso o ocupado al intentar hacer la inserción.
     private function guardAgainstConflicts(
         int $centerId,
         CarbonImmutable $startsAt,
@@ -22,7 +20,6 @@ class AppointmentService
         int $clientId,
         int $workerId,
         int $roomId,
-        //si tienen el ? delante es que accepta un entero o puede llegar un null
         ?int $machineId,
         array $assistantIds = [],
         ?int $ignoreId = null,
@@ -101,8 +98,7 @@ class AppointmentService
         }
     }
 
-    //bloquea la cita si el paciente no tiene firmado el consentimiento general del centro
-    //o no tiene una valoración vigente apta y consentida para este tratamiento
+    //bloquea la cita si falta el consentimiento general del centro o una valoración vigente apta y consentida para el tratamiento
     private function guardAgainstMissingConsent(int $centerId, int $clientId, int $treatmentId): void
     {
         $hasGeneralConsent = ClientConsent::query()
@@ -145,7 +141,6 @@ class AppointmentService
         }
     }
 
-    //comprueba si la cita cae dentro del descanso interno (break_start..break_end) del trabajador
     private function guardAgainstWorkerBreak(int $centerId, CarbonImmutable $startsAt, CarbonImmutable $endsAt, int $workerId): void
     {
         //ISO 8601: 1=lunes ... 7=domingo (coincide con worker_schedules.weekday)
@@ -154,7 +149,6 @@ class AppointmentService
         $apptStart = $startsAt->format('H:i:s');
         $apptEnd = $endsAt->format('H:i:s');
 
-        //busca un schedule vigente del trabajador para ese día cuyo time_slot tenga un break que se solape con la cita
         $hasBreakConflict = WorkerSchedule::query()
             ->forCenter($centerId)
             ->where('worker_id', $workerId)
@@ -235,13 +229,11 @@ class AppointmentService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            //La cantidad de ayudantes que vayan a acudir a la cita
             if (! empty($data['assistant_ids'])) {
                 $pivotData = [];
                 foreach ($data['assistant_ids'] as $id) {
                     $pivotData[$id] = ['center_id' => $centerId];
                 }
-                //Hacemos que cree los asistentes que van a acudir a esa cita en la tabla intermedia.
                 $appointment->assistants()->sync($pivotData);
             }
 
@@ -303,12 +295,10 @@ class AppointmentService
                 );
             }
 
-            //pone los valores en el objeto en memoria
             $appointment->fill($data);
 
             $appointment->save();
 
-            //igual que en el create pero aqui modifica o deja igual
             if (array_key_exists('assistant_ids', $data)) {
                 $pivotData = [];
                 foreach ($data['assistant_ids'] ?? [] as $id) {
@@ -321,7 +311,6 @@ class AppointmentService
         });
     }
 
-    //cambia el estado de la cita; el id del estado llega directamente del FE.
     //al cerrar la sesion (realizada) pueden llegar los productos consumidos para adjuntarlos y descontar stock
     public function changeStatus(Appointment $appointment, int $statusId, int $actorId, array $products = []): Appointment
     {

@@ -72,25 +72,21 @@ class ConsentWizardService
                     ->where('is_active', true)
                     ->update(['is_active' => false]);
 
+                //la aptitud (is_suitable/unsuitability_reason) NO entra por el wizard; la fija el diagnosticador desde la ficha. Nace null (sin valorar).
                 TreatmentConsent::create([
                     'center_id' => $centerId,
                     'user_id' => $clientId,
                     'treatment_id' => $treatmentId,
                     'reviewed_by_user_id' => $actorId,
                     'review_date' => now()->toDateString(),
-                    'is_suitable' => (bool) $entry['is_suitable'],
-                    'unsuitability_reason' => $entry['unsuitability_reason'] ?? null,
+                    'is_suitable' => null,
                     'treatment_consent' => (bool) $entry['treatment_consent'],
-                    'notes' => $entry['notes'] ?? null,
                     'is_active' => true,
                 ]);
 
                 $treatmentRows[] = [
                     'name' => $treatments[$treatmentId]->name ?? 'Tratamiento #'.$treatmentId,
-                    'is_suitable' => (bool) $entry['is_suitable'],
-                    'unsuitability_reason' => $entry['unsuitability_reason'] ?? null,
                     'treatment_consent' => (bool) $entry['treatment_consent'],
-                    'notes' => $entry['notes'] ?? null,
                 ];
             }
 

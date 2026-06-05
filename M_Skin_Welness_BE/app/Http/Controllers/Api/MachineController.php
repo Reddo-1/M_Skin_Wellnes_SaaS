@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MachineController extends Controller
 {
-    //inyecta el service de máquinas
     public function __construct(private readonly MachineService $service)
     {
     }
@@ -24,11 +23,8 @@ class MachineController extends Controller
         $centerId = (int) $request->attributes->get('center_id');
 
         $query = Machine::query()
-            //solo del centro actual
             ->forCenter($centerId)
-            //carga sala fija y tratamientos compatibles
             ->with(['fixedRoom', 'treatments'])
-            //filtros opcionales
             ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->when($request->filled('is_mobile'), fn ($q) => $q->where('is_mobile', $request->boolean('is_mobile')))
             ->orderBy('name');

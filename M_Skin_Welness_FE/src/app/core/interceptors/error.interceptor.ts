@@ -12,7 +12,7 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && auth.isAuthenticated()) {
         auth.clearSession();
-        router.navigate(['/login'], { queryParams: { sesionExpirada: '1' } });
+        router.navigate(['/login'], { queryParams: { sessionExpired: '1' } });
       }
       return throwError(() => error);
     }),

@@ -16,8 +16,7 @@ class ProductStockSeeder extends Seeder
             return;
         }
 
-        //todas las cantidades van en dosis. La conversion paquete→dosis ya esta hecha aqui:
-        //Crema 100 = 2 botes (50 dosis/bote); Sérum 90 = 3 frascos (30 dosis); etc.
+        //cantidades en dosis, con la conversion paquete→dosis ya aplicada (p.ej. crema 100 = 2 botes de 50)
         $stocks = [
             'Crema hidratante facial' => 100,
             'Sérum vitamina C'        => 90,

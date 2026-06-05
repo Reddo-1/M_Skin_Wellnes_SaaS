@@ -24,7 +24,6 @@ class MachineResource extends JsonResource
                     'name' => $this->fixedRoom->name,
                 ] : null;
             }),
-            //tratamientos vinculados
             'treatments' => $this->whenLoaded('treatments', function () {
                 return $this->treatments->map(function ($t) {
                     return [

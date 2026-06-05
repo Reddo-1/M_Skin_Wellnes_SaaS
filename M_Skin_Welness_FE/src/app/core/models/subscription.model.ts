@@ -9,11 +9,6 @@ export type SubscriptionStatus =
   | 'incomplete'
   | 'incomplete_expired';
 
-export interface SubscriptionCard {
-  brand: string | null;
-  last_four: string;
-}
-
 export interface SubscriptionSummary {
   has_subscription: boolean;
   id?: string;
@@ -25,7 +20,6 @@ export interface SubscriptionSummary {
   current_period_start?: string | null;
   current_period_end?: string | null;
   plan?: Plan | null;
-  card?: SubscriptionCard | null;
 }
 
 export interface SubscriptionInvoice {

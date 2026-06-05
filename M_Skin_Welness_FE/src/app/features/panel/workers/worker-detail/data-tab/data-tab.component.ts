@@ -1,14 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { WorkerService, UpdateWorkerData } from '../../../../../core/services/worker.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { LookupService } from '../../../../../core/services/lookup.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { User } from '../../../../../core/models/user.model';
 import { LookupItem } from '../../../../../core/models/lookup.model';
-import { GENERIC_ERROR, hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
+import { apiError, hasFieldError, hasValidationError } from '../../../../../core/utils/form.util';
 import { MultiSelectComponent } from '../../../../../shared/ui/multi-select/multi-select.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { WorkerModalComponent, WorkerFormValue } from '../../modals/worker-modal/worker-modal.component';
@@ -80,8 +79,7 @@ export class WorkerDataTabComponent {
       this.modalOpen.set(false);
       this.notifications.toast.success('Datos del trabajador actualizados.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submitting.set(false);
     }
@@ -103,8 +101,7 @@ export class WorkerDataTabComponent {
       this.selectedRoleIds.set(this.resolveRoleIds(updated));
       this.notifications.toast.success('Roles actualizados.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingRoles.set(false);
     }
@@ -126,8 +123,7 @@ export class WorkerDataTabComponent {
       this.passwordForm.reset({ password: '', password_confirmation: '' });
       this.notifications.toast.success('Contraseña actualizada.');
     } catch (error) {
-      const message = (error as HttpErrorResponse).error?.message ?? GENERIC_ERROR;
-      this.notifications.toast.error(message);
+      this.notifications.toast.error(apiError(error));
     } finally {
       this.submittingPassword.set(false);
     }

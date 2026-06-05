@@ -9,13 +9,14 @@ export type NavIcon =
   | 'package'
   | 'archive'
   | 'shopping-bag'
+  | 'document'
   | 'building'
   | 'user'
   | 'shield-check'
   | 'sparkles'
   | 'cpu';
 
-export type NavSection = 'operativa' | 'catalogo' | 'clinico' | 'equipo' | 'inventario' | 'cuenta';
+export type NavSection = 'operations' | 'catalog' | 'clinical' | 'team' | 'inventory' | 'account';
 
 export interface NavItem {
   label: string;

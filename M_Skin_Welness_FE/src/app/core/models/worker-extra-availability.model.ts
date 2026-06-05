@@ -1,7 +1,4 @@
-export interface WorkerExtraAvailabilityWorker {
-  id: number;
-  name: string;
-}
+import { WorkerRef } from './worker-absence.model';
 
 export interface WorkerExtraAvailability {
   id: number;
@@ -11,6 +8,6 @@ export interface WorkerExtraAvailability {
   start_time: string;
   end_time: string;
   reason: string | null;
-  worker?: WorkerExtraAvailabilityWorker;
+  worker?: WorkerRef;
   created_at: string | null;
 }
