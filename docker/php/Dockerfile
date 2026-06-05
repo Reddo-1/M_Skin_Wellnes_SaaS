@@ -10,8 +10,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-ARG APP_ENV=production
-
 COPY ./M_Skin_Welness_BE/composer.json ./M_Skin_Welness_BE/composer.lock ./
 RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts \
     && composer clear-cache

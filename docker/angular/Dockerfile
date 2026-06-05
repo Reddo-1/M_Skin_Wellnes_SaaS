@@ -9,6 +9,4 @@ RUN pnpm install --frozen-lockfile
 
 COPY M_Skin_Welness_FE/ .
 
-EXPOSE 4200
-
 CMD ["pnpm", "exec", "ng", "serve", "--host", "0.0.0.0", "--poll", "2000"]
