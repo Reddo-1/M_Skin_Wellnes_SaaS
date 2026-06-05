@@ -1,0 +1,188 @@
+<app-auth-page-layout>
+  <div class="flex flex-col flex-1 w-full lg:w-1/2">
+    <div class="w-full max-w-2xl pt-10 mx-auto">
+      <a
+        routerLink="/"
+        class="inline-flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-700"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-5">
+          <path d="M12.7083 5L7.5 10.2083L12.7083 15.4167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Volver al inicio
+      </a>
+    </div>
+
+    <div class="flex flex-col justify-center flex-1 w-full max-w-2xl py-10 mx-auto">
+      <div>
+        <div class="mb-5 sm:mb-8">
+          <h1 class="mb-2 font-semibold text-gray-800 text-title-sm sm:text-title-md">Crea tu centro</h1>
+          <p class="text-sm text-gray-500">
+            Elige un plan y crea la cuenta de administrador. Después continúas con el pago seguro en Stripe.
+          </p>
+        </div>
+
+        @if (plansError(); as message) {
+          <div class="mb-6">
+            <app-alert variant="error" [message]="message" />
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6" novalidate>
+          <div>
+            <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Plan</p>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              @for (plan of plans(); track plan.code) {
+                <button
+                  type="button"
+                  (click)="selectPlan(plan.code)"
+                  class="rounded-xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                  [class]="planCardClass(plan.code)"
+                >
+                  <span class="block text-sm font-semibold text-gray-800">{{ plan.name }}</span>
+                  <span class="mt-1 block text-base font-semibold text-gray-800">
+                    {{ plan.monthly_price | currency: 'EUR':'symbol':'1.0-0' }}<span class="text-xs font-normal text-gray-500">/mes</span>
+                  </span>
+                  @if (plan.description) {
+                    <p class="mt-2 text-xs text-gray-500">{{ plan.description }}</p>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2">
+            <div>
+              <app-input
+                label="Nombre del centro"
+                [required]="true"
+                formControlName="centerName"
+                placeholder="Clínica Bella"
+                [invalid]="hasFieldError('centerName')"
+              />
+              @if (hasValidationError('centerName', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">El nombre del centro es obligatorio.</p>
+              }
+              @if (hasValidationError('centerName', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+              }
+            </div>
+
+            <div>
+              <app-input
+                label="Identificador del centro"
+                [required]="true"
+                formControlName="centerSlug"
+                placeholder="clinica-bella"
+                hint="Solo minúsculas, números y guiones."
+                [invalid]="hasFieldError('centerSlug')"
+              />
+              @if (hasValidationError('centerSlug', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">El identificador es obligatorio.</p>
+              }
+              @if (hasValidationError('centerSlug', 'pattern')) {
+                <p class="mt-1.5 text-xs text-error-500">Usa solo minúsculas, números y guiones, sin espacios.</p>
+              }
+              @if (hasValidationError('centerSlug', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">El identificador no puede superar los 80 caracteres.</p>
+              }
+            </div>
+
+            <div>
+              <app-input
+                label="Tu nombre"
+                [required]="true"
+                autocomplete="name"
+                formControlName="adminName"
+                placeholder="Nombre y apellidos"
+                [invalid]="hasFieldError('adminName')"
+              />
+              @if (hasValidationError('adminName', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Tu nombre es obligatorio.</p>
+              }
+              @if (hasValidationError('adminName', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+              }
+            </div>
+
+            <div>
+              <app-input
+                label="Correo electrónico"
+                [required]="true"
+                type="email"
+                autocomplete="email"
+                formControlName="adminEmail"
+                placeholder="tu@correo.com"
+                [invalid]="hasFieldError('adminEmail')"
+              />
+              @if (hasValidationError('adminEmail', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">El correo es obligatorio.</p>
+              }
+              @if (hasValidationError('adminEmail', 'email')) {
+                <p class="mt-1.5 text-xs text-error-500">Introduce un correo válido.</p>
+              }
+              @if (hasValidationError('adminEmail', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">El correo no puede superar los 160 caracteres.</p>
+              }
+            </div>
+
+            <div>
+              <app-input
+                label="Contraseña"
+                [required]="true"
+                type="password"
+                [revealToggle]="true"
+                autocomplete="new-password"
+                formControlName="password"
+                placeholder="Mínimo 8 caracteres"
+                [invalid]="hasFieldError('password')"
+              />
+              @if (hasValidationError('password', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">La contraseña es obligatoria.</p>
+              }
+              @if (hasValidationError('password', 'minlength')) {
+                <p class="mt-1.5 text-xs text-error-500">La contraseña debe tener al menos 8 caracteres.</p>
+              }
+              @if (hasValidationError('password', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">La contraseña no puede superar los 120 caracteres.</p>
+              }
+            </div>
+
+            <div>
+              <app-input
+                label="Confirmar contraseña"
+                [required]="true"
+                type="password"
+                [revealToggle]="true"
+                autocomplete="new-password"
+                formControlName="passwordConfirmation"
+                placeholder="Repite la contraseña"
+                [invalid]="hasFieldError('passwordConfirmation') || showPasswordMismatch()"
+              />
+              @if (hasValidationError('passwordConfirmation', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Confirma la contraseña.</p>
+              }
+              @if (showPasswordMismatch()) {
+                <p class="mt-1.5 text-xs text-error-500">Las contraseñas no coinciden.</p>
+              }
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+          >
+            {{ submitting() ? 'Redirigiendo al pago…' : 'Crear centro y continuar al pago' }}
+          </button>
+        </form>
+
+        <div class="mt-5">
+          <p class="text-sm font-normal text-center text-gray-700 sm:text-start">
+            ¿Ya tienes una cuenta?
+            <a routerLink="/login" class="text-brand-500 hover:text-brand-600">Inicia sesión</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-auth-page-layout>

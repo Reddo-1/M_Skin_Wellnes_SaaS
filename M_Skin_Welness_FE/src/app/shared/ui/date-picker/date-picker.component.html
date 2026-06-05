@@ -1,0 +1,151 @@
+@if (label()) {
+  <label [for]="fieldId" class="mb-1.5 block text-sm font-medium text-gray-700">
+    {{ label() }}@if (required()) {<span class="text-error-500"> *</span>}
+  </label>
+}
+<div class="relative">
+  <button
+    type="button"
+    [id]="fieldId"
+    (click)="toggle()"
+    (blur)="markTouched()"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="dialog"
+    class="flex h-11 w-full items-center justify-between rounded-lg border bg-white px-4 text-left text-sm shadow-sm transition focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60"
+    [class.border-gray-300]="!invalid()"
+    [class.border-error-500]="invalid()"
+  >
+    <span [class.text-gray-400]="!value()" [class.text-ink]="value()">{{ displayValue() || placeholder() }}</span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="size-5 shrink-0 text-gray-400">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V9V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V9V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2ZM8 5.25H5.5C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H16H8ZM19.25 9.75H4.75V19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75Z"
+        fill="currentColor"
+      />
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div
+      role="dialog"
+      aria-label="Selector de fecha"
+      class="absolute left-0 z-50 w-[min(18rem,calc(100vw-2.5rem))] rounded-xl border border-gray-200 bg-white p-3 shadow-lg"
+      [class.top-full]="!openUpward()"
+      [class.mt-2]="!openUpward()"
+      [class.bottom-full]="openUpward()"
+      [class.mb-2]="openUpward()"
+    >
+      @if (mode() === 'days') {
+        <div class="mb-2 flex items-center justify-between">
+          <button
+            type="button"
+            (click)="prevMonth()"
+            aria-label="Mes anterior"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-gray-100 hover:text-ink"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="size-5">
+              <path d="M14.5 6.5L9 12L14.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            (click)="openYears()"
+            class="rounded-lg px-2 py-1 text-sm font-semibold text-ink transition hover:text-brand-500"
+          >
+            {{ monthLabel() }}
+          </button>
+          <button
+            type="button"
+            (click)="nextMonth()"
+            aria-label="Mes siguiente"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-gray-100 hover:text-ink"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="size-5">
+              <path d="M9.5 6.5L15 12L9.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted">
+          @for (weekday of weekdays; track $index) {
+            <span class="py-1">{{ weekday }}</span>
+          }
+        </div>
+
+        <div class="mt-1 grid grid-cols-7 gap-1">
+          @for (cell of cells(); track $index) {
+            @if (cell) {
+              <button
+                type="button"
+                (click)="select(cell.iso)"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-sm transition"
+                [class.bg-brand-500]="cell.selected"
+                [class.text-white]="cell.selected"
+                [class.text-ink]="!cell.selected"
+                [class.hover:bg-brand-50]="!cell.selected"
+                [class.ring-1]="cell.today && !cell.selected"
+                [class.ring-brand-500]="cell.today && !cell.selected"
+              >
+                {{ cell.day }}
+              </button>
+            } @else {
+              <span class="h-8 w-8"></span>
+            }
+          }
+        </div>
+
+        @if (value()) {
+          <button
+            type="button"
+            (click)="clear()"
+            class="mt-2 w-full rounded-lg py-1.5 text-xs font-medium text-muted transition hover:text-error-500"
+          >
+            Borrar fecha
+          </button>
+        }
+      } @else {
+        <div class="mb-2 flex items-center justify-between">
+          <button
+            type="button"
+            (click)="prevYears()"
+            aria-label="Años anteriores"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-gray-100 hover:text-ink"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="size-5">
+              <path d="M14.5 6.5L9 12L14.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <span class="text-sm font-semibold text-ink">{{ yearRangeLabel() }}</span>
+          <button
+            type="button"
+            (click)="nextYears()"
+            aria-label="Años siguientes"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-gray-100 hover:text-ink"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="size-5">
+              <path d="M9.5 6.5L15 12L9.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          @for (year of yearGrid(); track year) {
+            <button
+              type="button"
+              (click)="selectYear(year)"
+              class="rounded-lg py-2 text-sm transition"
+              [class.bg-brand-500]="year === viewYear()"
+              [class.text-white]="year === viewYear()"
+              [class.text-ink]="year !== viewYear()"
+              [class.hover:bg-brand-50]="year !== viewYear()"
+            >
+              {{ year }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

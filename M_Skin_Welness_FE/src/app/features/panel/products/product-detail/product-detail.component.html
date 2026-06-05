@@ -1,0 +1,261 @@
+<div class="flex flex-col gap-6">
+  <a
+    routerLink="/panel/productos"
+    class="inline-flex items-center gap-1.5 self-start text-sm font-medium text-muted transition hover:text-ink"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M14.53 5.47C14.82 5.76 14.82 6.24 14.53 6.53L9.06 12L14.53 17.47C14.82 17.76 14.82 18.24 14.53 18.53C14.24 18.82 13.76 18.82 13.47 18.53L7.47 12.53C7.18 12.24 7.18 11.76 7.47 11.47L13.47 5.47C13.76 5.18 14.24 5.18 14.53 5.47Z" fill="currentColor" />
+    </svg>
+    Volver a productos
+  </a>
+
+  @if (errorMessage(); as message) {
+    <app-alert variant="error" title="No se ha podido cargar el producto" [message]="message" />
+  }
+
+  @if (loading() && product() === null) {
+    <div class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-muted">
+      Cargando el producto…
+    </div>
+  } @else if (product(); as product) {
+    <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-2xl font-bold text-ink">{{ product.name }}</h1>
+            @if (product.is_active) {
+              <span class="inline-flex items-center rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-600">Activo</span>
+            } @else {
+              <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-muted">Inactivo</span>
+            }
+            @if (product.is_sellable) {
+              <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600">Vendible</span>
+            }
+          </div>
+          @if (product.description) {
+            <p class="mt-2 max-w-2xl whitespace-pre-line text-sm text-muted">{{ product.description }}</p>
+          }
+        </div>
+
+        @if (canEdit() || canDelete()) {
+          <div class="flex shrink-0 items-center gap-2">
+            @if (canEdit()) {
+              <button
+                type="button"
+                (click)="openEditModal()"
+                class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-ink shadow-sm transition hover:bg-gray-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M16.48 2.97C16.86 2.59 17.49 2.59 17.87 2.97L21.03 6.13C21.41 6.51 21.41 7.14 21.03 7.52L8.55 20H4V15.45L16.48 2.97ZM5.5 16.07V18.5H7.93L17.31 9.12L14.88 6.69L5.5 16.07ZM15.94 5.63L18.37 8.06L19.44 6.99V6.82L17.18 4.56H17.01L15.94 5.63Z" fill="currentColor" />
+                </svg>
+                Editar
+              </button>
+            }
+            @if (canDelete()) {
+              <button
+                type="button"
+                (click)="deleteProduct()"
+                [disabled]="deleting()"
+                class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-error-500 shadow-sm transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 3.25C9.5 2.84 9.84 2.5 10.25 2.5H13.75C14.16 2.5 14.5 2.84 14.5 3.25V4.25H18.5C18.91 4.25 19.25 4.59 19.25 5C19.25 5.41 18.91 5.75 18.5 5.75H17.8L17.05 18.6C16.98 19.79 16 20.75 14.8 20.75H9.2C8 20.75 7.02 19.79 6.95 18.6L6.2 5.75H5.5C5.09 5.75 4.75 5.41 4.75 5C4.75 4.59 5.09 4.25 5.5 4.25H9.5V3.25Z" fill="currentColor" />
+                </svg>
+                Eliminar
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <dl class="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-muted">Precio de venta</dt>
+          <dd class="mt-1 text-sm font-semibold text-ink">
+            {{ product.sale_price != null ? (product.sale_price | currency:'EUR':'symbol':'1.2-2') : 'N/D' }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-muted">Precio de coste</dt>
+          <dd class="mt-1 text-sm font-semibold text-ink">
+            {{ product.cost_price != null ? (product.cost_price | currency:'EUR':'symbol':'1.2-2') : 'N/D' }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-muted">Dosis por paquete</dt>
+          <dd class="mt-1 text-sm font-semibold text-ink">{{ product.doses_per_package }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-muted">Stock mínimo</dt>
+          <dd class="mt-1 text-sm font-semibold text-ink">{{ product.minimum_stock | number:'1.0-3' }} dosis</dd>
+        </div>
+      </dl>
+    </section>
+
+    @if (product.stock !== undefined) {
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-ink">Stock actual</h2>
+            <div class="mt-2 flex items-baseline gap-2">
+              <span class="text-3xl font-bold" [class.text-warning-600]="belowMinimum()" [class.text-ink]="!belowMinimum()">
+                {{ (+product.stock.current_quantity / product.doses_per_package) | number:'1.0-2' }}
+              </span>
+              <span class="text-sm text-muted">
+                paquetes ({{ product.stock.current_quantity | number:'1.0-3' }} dosis)
+              </span>
+              @if (belowMinimum()) {
+                <span class="inline-flex items-center rounded-full bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-600">
+                  Por debajo del mínimo
+                </span>
+              }
+            </div>
+          </div>
+
+          @if (canCreateMovement() || canAdjust()) {
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+              @if (canCreateMovement()) {
+                <button
+                  type="button"
+                  (click)="openEntryModal()"
+                  class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.25C12.41 4.25 12.75 4.59 12.75 5V11.25H19C19.41 11.25 19.75 11.59 19.75 12C19.75 12.41 19.41 12.75 19 12.75H12.75V19C12.75 19.41 12.41 19.75 12 19.75C11.59 19.75 11.25 19.41 11.25 19V12.75H5C4.59 12.75 4.25 12.41 4.25 12C4.25 11.59 4.59 11.25 5 11.25H11.25V5C11.25 4.59 11.59 4.25 12 4.25Z" fill="currentColor" />
+                  </svg>
+                  Registrar entrada
+                </button>
+              }
+              @if (canAdjust()) {
+                <button
+                  type="button"
+                  (click)="openAdjustModal()"
+                  class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-ink shadow-sm transition hover:bg-gray-50"
+                >
+                  Ajustar stock
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (canViewMovements()) {
+      <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <header class="border-b border-gray-100 px-6 py-4">
+          <h2 class="text-lg font-semibold text-ink">Movimientos de stock</h2>
+          <p class="mt-0.5 text-sm text-muted">Libro de entradas, salidas y ajustes de este producto.</p>
+        </header>
+
+        @if (movementsLoading() && movements().length > 0) {
+          <app-table-loading-overlay align="top" />
+        }
+
+        <div class="overflow-x-auto transition-opacity" [class.opacity-50]="movementsLoading() && movements().length > 0">
+          <table class="min-w-full divide-y divide-gray-100 text-sm">
+            <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-muted">
+              <tr>
+                <th scope="col" class="px-5 py-3 font-semibold">Fecha</th>
+                <th scope="col" class="px-5 py-3 font-semibold">Tipo</th>
+                <th scope="col" class="px-5 py-3 font-semibold">Cantidad</th>
+                <th scope="col" class="px-5 py-3 font-semibold">Stock resultante</th>
+                <th scope="col" class="px-5 py-3 font-semibold">Usuario</th>
+                <th scope="col" class="px-5 py-3 font-semibold">Motivo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @if (movements().length === 0 && !movementsLoading()) {
+                <tr>
+                  <td colspan="6" class="px-5 py-10 text-center text-sm text-muted">
+                    Todavía no hay movimientos de stock para este producto.
+                  </td>
+                </tr>
+              }
+
+              @for (movement of movements(); track movement.id) {
+                <tr class="transition hover:bg-gray-50">
+                  <td class="px-5 py-3 text-muted">{{ (movement.created_at | date:'dd/MM/yyyy HH:mm') ?? 'N/D' }}</td>
+                  <td class="px-5 py-3">
+                    <span class="inline-flex items-center rounded-full bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink">
+                      {{ movement.type?.name | normalize }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3 font-semibold" [class.text-success-600]="+movement.quantity >= 0" [class.text-error-500]="+movement.quantity < 0">
+                    {{ +movement.quantity >= 0 ? '+' : '' }}{{ movement.quantity | number:'1.0-3' }}
+                  </td>
+                  <td class="px-5 py-3 text-muted">{{ movement.new_quantity | number:'1.0-3' }}</td>
+                  <td class="px-5 py-3 text-muted">{{ movement.user?.name ?? 'N/D' }}</td>
+                  <td class="px-5 py-3 text-muted">{{ movement.reason ?? 'N/D' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (movementsMeta(); as pageMeta) {
+          @if (pageMeta.total > 0) {
+            <div class="flex flex-col gap-3 border-t border-gray-100 px-5 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Mostrando
+                <span class="font-semibold text-ink">{{ pageMeta.from ?? 0 }}</span>
+                -
+                <span class="font-semibold text-ink">{{ pageMeta.to ?? 0 }}</span>
+                de
+                <span class="font-semibold text-ink">{{ pageMeta.total }}</span>
+                movimientos.
+              </span>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="goToMovementsPage(pageMeta.current_page - 1)"
+                  [disabled]="pageMeta.current_page <= 1 || movementsLoading()"
+                  class="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Anterior
+                </button>
+                <span class="px-2 text-xs text-muted">
+                  Página {{ pageMeta.current_page }} de {{ pageMeta.last_page }}
+                </span>
+                <button
+                  type="button"
+                  (click)="goToMovementsPage(pageMeta.current_page + 1)"
+                  [disabled]="pageMeta.current_page >= pageMeta.last_page || movementsLoading()"
+                  class="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </section>
+    }
+  }
+</div>
+
+@if (product(); as product) {
+  @if (canEdit()) {
+    <app-product-modal
+      [isOpen]="editOpen()"
+      [product]="product"
+      [submitting]="submittingEdit()"
+      (close)="closeEditModal()"
+      (formSubmit)="submitEdit($event)"
+    />
+  }
+  <app-stock-entry-modal
+    [isOpen]="entryOpen()"
+    [product]="product"
+    [submitting]="submittingEntry()"
+    (close)="closeEntryModal()"
+    (formSubmit)="submitEntry($event)"
+  />
+  <app-stock-adjust-modal
+    [isOpen]="adjustOpen()"
+    [product]="product"
+    [submitting]="submittingAdjust()"
+    (close)="closeAdjustModal()"
+    (formSubmit)="submitAdjust($event)"
+  />
+}

@@ -1,0 +1,246 @@
+/* ============================================================
+   Login del panel superadmin
+   Branding suelto sobre fondo decorativo + card flotante con el form.
+   ============================================================ */
+
+:root {
+    --sa-purple:       #A78BFA;
+    --sa-purple-dark:  #7C6FE3;
+    --sa-bg:           #1A1B21;
+    --sa-card:         #0F1014;
+    --sa-border:       #23252C;
+    --sa-border-2:     #2A2C34;
+    --sa-text:         #F5F5F7;
+    --sa-muted:        #8A8B92;
+    --sa-success:      #5CD88E;
+}
+
+/* ---------- Layout base ---------- */
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    background: var(--sa-bg);
+    color: var(--sa-text);
+}
+
+/* Stage ocupa todo el viewport y se sitúa sobre el fondo decorativo */
+.stage {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+}
+
+/* ---------- Fondo decorativo (fixed, cubre todo el viewport) ---------- */
+
+.bg-grid-overlay {
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(167, 139, 250, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(167, 139, 250, .04) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+.bg-glow-1 {
+    position: fixed;
+    top: -240px;
+    right: -200px;
+    width: 720px;
+    height: 720px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 139, 250, .22), transparent 65%);
+    pointer-events: none;
+}
+
+.bg-glow-2 {
+    position: fixed;
+    bottom: -200px;
+    left: -180px;
+    width: 560px;
+    height: 560px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 111, 227, .18), transparent 65%);
+    pointer-events: none;
+}
+
+/* ---------- Marca ---------- */
+
+.logo-mark {
+    width: 57px;
+    height: 57px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--sa-purple), var(--sa-purple-dark));
+    color: #fff;
+    font-weight: 600;
+    font-size: 21px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(167, 139, 250, .25);
+}
+
+/* Variante reducida usada dentro del card */
+.logo-mark.sm {
+    width: 53px;
+    height: 53px;
+    border-radius: 13px;
+    font-size: 20px;
+}
+
+.eyebrow {
+    font-size: 13px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--sa-muted);
+}
+
+.text-purple {
+    color: var(--sa-purple) !important;
+}
+
+/* ---------- Indicador de estado ---------- */
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sa-success);
+    background: rgba(92, 216, 142, .08);
+    border: .5px solid rgba(92, 216, 142, .25);
+    border-radius: 22px;
+}
+
+.status-pill.sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sa-success);
+    box-shadow: 0 0 0 3px rgba(92, 216, 142, .15);
+    animation: sa-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sa-pulse {
+    50% {
+        opacity: .55;
+    }
+}
+
+/* ---------- Stats del lado izquierdo ---------- */
+
+.stat-row {
+    display: flex;
+    gap: 35px;
+    font-size: 14px;
+    color: var(--sa-muted);
+}
+
+.stat-row .num {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 29px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.01em;
+    color: var(--sa-text);
+}
+
+/* ---------- Card flotante con el formulario ---------- */
+
+.login-card {
+    width: 100%;
+    max-width: 484px;
+    padding: 40px 35px;
+    background: var(--sa-card);
+    border: .5px solid var(--sa-border);
+    border-radius: 20px;
+    box-shadow:
+        0 40px 80px rgba(0, 0, 0, .55),
+        0 0 0 1px rgba(167, 139, 250, .04);
+}
+
+/* ---------- Formulario ---------- */
+
+.login-form .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--sa-muted);
+}
+
+/* Los inputs van un tono mas claros que el card para "emerger" */
+.login-form .form-control {
+    height: 55px;
+    font-size: 17px;
+    color: var(--sa-text);
+    background: var(--sa-bg);
+    border: .5px solid var(--sa-border-2);
+    border-radius: 11px;
+}
+
+.login-form .form-control:focus {
+    color: var(--sa-text);
+    background: var(--sa-bg);
+    border-color: var(--sa-purple);
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, .15);
+}
+
+.login-form .form-control::placeholder {
+    color: #5B5C64;
+}
+
+/* Toggle de visibilidad sobre el input de contrasena */
+.password-wrap {
+    position: relative;
+}
+
+.password-wrap .eye {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--sa-muted);
+    cursor: pointer;
+}
+
+.password-wrap .eye:hover {
+    color: var(--sa-text);
+}
+
+/* ---------- Boton principal ---------- */
+
+.btn-purple {
+    height: 57px;
+    font-size: 17px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--sa-purple), var(--sa-purple-dark));
+    border: none;
+    border-radius: 11px;
+    font-weight: 500;
+    letter-spacing: .04em;
+}
+
+.btn-purple:hover {
+    color: #fff;
+    filter: brightness(1.08);
+}

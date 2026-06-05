@@ -1,0 +1,378 @@
+<app-modal [isOpen]="isOpen()" widthClass="max-w-4xl" (close)="close.emit()">
+  <div class="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white">
+    <div class="shrink-0 border-b border-gray-100 px-6 py-5 pr-14 sm:px-8">
+      <h3 class="text-xl font-semibold text-ink">
+        {{ finalizing() ? 'Cerrar sesión' : isEdit() ? 'Editar cita' : 'Nueva cita' }}
+      </h3>
+      <p class="mt-1 text-sm text-muted">
+        @if (finalizing()) {
+          Registra los productos consumidos en la sesión antes de darla por realizada.
+        } @else if (isEdit()) {
+          El paciente y el tratamiento no se pueden cambiar. Para otro tratamiento, cancela y crea una nueva.
+        } @else {
+          Programa una cita. Solo verás tratamientos aptos del paciente y profesionales autorizados.
+        }
+      </p>
+    </div>
+
+    @if (finalizing()) {
+      <div class="flex min-h-0 flex-1 flex-col sm:min-h-[55vh]" [formGroup]="pickForm">
+        <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
+          <p class="text-sm text-muted">
+            Añade los productos consumidos (en dosis). Puedes finalizar sin productos.
+          </p>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Producto</label>
+              <app-select
+                [options]="availableProductOptions()"
+                [selected]="pickForm.controls.product_id.value"
+                placeholder="Selecciona un producto…"
+                (selectionChange)="pickForm.controls.product_id.setValue($event)"
+              />
+            </div>
+            <div>
+              <app-input label="Dosis" type="number" [min]="0" [step]="0.001" formControlName="quantity" />
+            </div>
+            <button
+              type="button"
+              (click)="addProductLine()"
+              class="inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
+            >
+              Añadir
+            </button>
+          </div>
+
+          @if (productLines().length > 0) {
+            <ul class="divide-y divide-gray-100 overflow-hidden rounded-lg border border-gray-200">
+              @for (line of productLines(); track line.id) {
+                <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+                  <span class="truncate text-sm text-ink">{{ line.name }}</span>
+                  <span class="flex shrink-0 items-center gap-3">
+                    <span class="text-sm text-muted">{{ line.quantity }} dosis</span>
+                    <button
+                      type="button"
+                      (click)="removeProductLine(line.id)"
+                      class="text-sm font-medium text-error-600 transition hover:underline"
+                    >
+                      Quitar
+                    </button>
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="rounded-lg bg-surface-alt px-4 py-3 text-sm text-muted">
+              Aún no has añadido productos.
+            </p>
+          }
+        </div>
+
+        <div class="flex shrink-0 flex-col-reverse gap-3 border-t border-gray-100 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+          <button
+            type="button"
+            (click)="cancelFinalize()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Volver
+          </button>
+          <button
+            type="button"
+            (click)="confirmFinalize()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg bg-success-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-success-600 disabled:cursor-not-allowed disabled:bg-success-300"
+          >
+            {{ submitting() ? 'Finalizando…' : 'Confirmar y finalizar' }}
+          </button>
+        </div>
+      </div>
+    } @else {
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex min-h-0 flex-1 flex-col" novalidate>
+      <div class="flex-1 space-y-8 overflow-y-auto px-6 py-6 sm:px-8">
+        <section>
+          <h4 class="text-sm font-semibold text-ink">Paciente</h4>
+          <div class="mt-3">
+            @if (isEdit()) {
+              <div class="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-4 py-3">
+                <div>
+                  <span class="text-xs font-medium uppercase tracking-wide text-muted">Paciente</span>
+                  <p class="text-sm font-medium text-ink">{{ appointment()?.client?.name }}</p>
+                </div>
+                @if (canViewClient() && clientDetailLink(); as link) {
+                  <a
+                    [routerLink]="link"
+                    class="shrink-0 text-sm font-medium text-brand-600 transition hover:underline"
+                  >
+                    Ver ficha clínica
+                  </a>
+                }
+              </div>
+            } @else {
+              <app-search-select
+                [options]="clientResults()"
+                [selected]="form.controls.client_id.value"
+                [selectedLabel]="selectedClientLabel()"
+                [loading]="clientLoading()"
+                [invalid]="hasFieldError('client_id')"
+                placeholder="Busca y selecciona un paciente…"
+                searchPlaceholder="Nombre, teléfono o email…"
+                (searchInput)="onClientSearch($event)"
+                (selectionChange)="onClientPicked($event)"
+              />
+              @if (hasValidationError('client_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Selecciona el paciente de la cita.</p>
+              }
+            }
+          </div>
+        </section>
+
+        <section>
+          <h4 class="text-sm font-semibold text-ink">Servicio</h4>
+          <div class="mt-3 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Tratamiento</label>
+              @if (isEdit()) {
+                <div class="flex min-h-11 items-center rounded-lg border border-gray-200 bg-surface-alt px-3.5 text-sm text-ink">
+                  {{ appointment()?.treatment?.name }} · {{ appointment()?.treatment?.duration_minutes }} min
+                </div>
+              } @else {
+                <app-select
+                  [options]="treatmentOptions()"
+                  [selected]="form.controls.treatment_id.value"
+                  [disabled]="treatmentDisabled()"
+                  [invalid]="hasFieldError('treatment_id')"
+                  placeholder="Selecciona un tratamiento…"
+                  (selectionChange)="onTreatmentChange($event)"
+                />
+                @if (treatmentDisabled()) {
+                  <p class="mt-1.5 text-xs text-muted">Elige primero el paciente.</p>
+                } @else if (treatmentHint(); as hint) {
+                  <p class="mt-1.5 text-xs text-warning-600">{{ hint }}</p>
+                } @else if (hasValidationError('treatment_id', 'required')) {
+                  <p class="mt-1.5 text-xs text-error-500">Selecciona el tratamiento.</p>
+                } @else if (selectedDuration() !== null) {
+                  <p class="mt-1.5 text-xs text-muted">Bloque reservado: {{ selectedDuration() }} min.</p>
+                }
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Profesional</label>
+              <app-select
+                [options]="workerOptions()"
+                [selected]="form.controls.worker_id.value"
+                [disabled]="workerDisabled()"
+                [invalid]="hasFieldError('worker_id')"
+                placeholder="Selecciona un profesional…"
+                (selectionChange)="onWorkerChange($event)"
+              />
+              @if (workerDisabled()) {
+                <p class="mt-1.5 text-xs text-muted">Disponible al elegir el tratamiento.</p>
+              } @else if (workerHint(); as hint) {
+                <p class="mt-1.5 text-xs text-warning-600">{{ hint }}</p>
+              } @else if (hasValidationError('worker_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Selecciona el profesional que atiende.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                {{ machineRequired() ? 'Máquina' : 'Máquina (opcional)' }}
+              </label>
+              <app-select
+                [options]="machineOptions()"
+                [selected]="form.controls.machine_id.value"
+                [disabled]="machineDisabled()"
+                [invalid]="hasFieldError('machine_id')"
+                [placeholder]="machineRequired() ? 'Selecciona una máquina…' : 'Sin máquina'"
+                (selectionChange)="onMachineChange($event)"
+              />
+              @if (machineDisabled()) {
+                <p class="mt-1.5 text-xs text-muted">Disponible al elegir el tratamiento.</p>
+              } @else if (hasValidationError('machine_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Este tratamiento requiere una máquina.</p>
+              } @else if (machineRequired()) {
+                <p class="mt-1.5 text-xs text-muted">Este tratamiento se realiza con máquina.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Sala</label>
+              <app-select
+                [options]="roomOptions()"
+                [selected]="form.controls.room_id.value"
+                [disabled]="roomDisabled()"
+                [invalid]="hasFieldError('room_id')"
+                placeholder="Selecciona una sala…"
+                (selectionChange)="form.controls.room_id.setValue($event)"
+              />
+              @if (roomLocked()) {
+                <p class="mt-1.5 text-xs text-muted">Definida por la máquina seleccionada.</p>
+              } @else if (machineDisabled()) {
+                <p class="mt-1.5 text-xs text-muted">Disponible al elegir el tratamiento.</p>
+              } @else if (hasValidationError('room_id', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Selecciona la sala.</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h4 class="text-sm font-semibold text-ink">Cuándo</h4>
+          <div class="mt-3 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+            <div>
+              <app-date-picker
+                label="Fecha"
+                formControlName="date"
+                placeholder="Selecciona una fecha"
+                [invalid]="hasFieldError('date')"
+                (valueChange)="onDateChange($event)"
+              />
+              @if (hasValidationError('date', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Indica la fecha de la cita.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Hora de inicio</label>
+              <app-select
+                [options]="timeOptions()"
+                [selected]="form.controls.time.value"
+                [disabled]="timeDisabled()"
+                [invalid]="hasFieldError('time')"
+                placeholder="Selecciona una hora…"
+                (selectionChange)="form.controls.time.setValue($event)"
+              />
+              @if (timeDisabled()) {
+                <p class="mt-1.5 text-xs text-muted">Completa profesional, fecha, tratamiento y sala.</p>
+              } @else if (availabilityLoading()) {
+                <p class="mt-1.5 text-xs text-muted">Buscando huecos…</p>
+              } @else if (timeHint(); as hint) {
+                <p class="mt-1.5 text-xs text-warning-600">{{ hint }}</p>
+              } @else if (hasValidationError('time', 'required')) {
+                <p class="mt-1.5 text-xs text-error-500">Indica la hora de inicio.</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h4 class="text-sm font-semibold text-ink">Detalles</h4>
+          <div class="mt-3 space-y-4">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700">Ayudantes (opcional)</label>
+              <app-multi-select
+                [options]="assistantOptions()"
+                [selectedIds]="form.controls.assistant_ids.value"
+                [disabled]="!timeSelected()"
+                placeholder="Selecciona profesionales de apoyo…"
+                (selectionChange)="form.controls.assistant_ids.setValue($event)"
+              />
+              @if (!timeSelected()) {
+                <p class="mt-1.5 text-xs text-muted">Elige primero la hora para ver los ayudantes disponibles.</p>
+              } @else if (assistantOptions().length === 0) {
+                <p class="mt-1.5 text-xs text-muted">No hay profesionales libres en ese hueco.</p>
+              }
+            </div>
+
+            <div>
+              <app-textarea
+                label="Notas (opcional)"
+                formControlName="notes"
+                [rows]="3"
+                placeholder="Indicaciones de la cita…"
+                [invalid]="hasFieldError('notes')"
+              />
+              @if (hasValidationError('notes', 'maxlength')) {
+                <p class="mt-1.5 text-xs text-error-500">Las notas no pueden superar los 5000 caracteres.</p>
+              }
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="shrink-0 space-y-3 border-t border-gray-100 px-6 py-4 sm:px-8">
+        @if (isEdit() && canChangeStatus() && (isConfirmed() || isInProgress())) {
+          <div class="flex flex-wrap gap-2">
+            @if (isConfirmed()) {
+              <button
+                type="button"
+                (click)="startSession()"
+                [disabled]="submitting()"
+                class="inline-flex items-center justify-center rounded-lg border border-success-200 bg-success-50 px-3.5 py-2 text-sm font-medium text-success-600 shadow-sm transition hover:bg-success-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Iniciar cita
+              </button>
+            }
+            @if (isInProgress()) {
+              <button
+                type="button"
+                (click)="openFinalize()"
+                [disabled]="submitting()"
+                class="inline-flex items-center justify-center rounded-lg border border-success-200 bg-success-50 px-3.5 py-2 text-sm font-medium text-success-600 shadow-sm transition hover:bg-success-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Finalizar sesión
+              </button>
+            }
+            @for (action of statusActions(); track action.status_id) {
+              <button
+                type="button"
+                (click)="statusChange.emit(action.status_id)"
+                [disabled]="submitting()"
+                class="inline-flex items-center justify-center rounded-lg border px-3.5 py-2 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60"
+                [class]="
+                  action.tone === 'success'
+                    ? 'border-success-200 bg-success-50 text-success-600 hover:bg-success-100'
+                    : action.tone === 'danger'
+                      ? 'border-error-200 bg-error-50 text-error-600 hover:bg-error-100'
+                      : 'border-gray-200 bg-white text-ink hover:bg-gray-50'
+                "
+              >
+                {{ action.label }}
+              </button>
+            }
+          </div>
+        }
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+          @if (isEdit() && canManage()) {
+            <button
+              type="button"
+              (click)="remove.emit()"
+              [disabled]="submitting()"
+              class="inline-flex items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-error-600 transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Eliminar cita
+            </button>
+          } @else {
+            <span></span>
+          }
+
+          <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              (click)="close.emit()"
+              [disabled]="submitting()"
+              class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {{ canManage() ? 'Cancelar' : 'Cerrar' }}
+            </button>
+            @if (canManage()) {
+              <button
+                type="submit"
+                [disabled]="submitting()"
+                class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+              >
+                {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Crear cita' }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </form>
+    }
+  </div>
+</app-modal>

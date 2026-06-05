@@ -1,0 +1,97 @@
+<div class="flex flex-col gap-6">
+  <header>
+    <h1 class="text-2xl font-bold text-ink">Hola, {{ auth.user()?.name }}</h1>
+    <p class="mt-1 text-sm text-muted">Resumen del centro a día de hoy.</p>
+  </header>
+
+  @if (errorMessage(); as message) {
+    <app-alert variant="error" title="No se ha podido cargar el panel" [message]="message" />
+  }
+
+  @if (loading() && dashboard.summary() === null) {
+    <div class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-muted">
+      Cargando los datos del centro…
+    </div>
+  }
+
+  @if (dashboard.summary(); as data) {
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">
+      <app-stat-card
+        title="Citas de hoy"
+        [value]="data.appointments_today.total.toString()"
+        icon="calendar"
+        [subtitle]="data.appointments_today.in_progress + ' en curso ahora mismo'"
+      />
+      <app-stat-card
+        title="Ingresos del día"
+        [value]="(data.revenue.today | currency:'EUR':'symbol':'1.2-2') ?? ''"
+        icon="shopping-bag"
+        [subtitle]="'Mes en curso: ' + ((data.revenue.this_month | currency:'EUR':'symbol':'1.2-2') ?? '')"
+      />
+      <app-stat-card
+        title="Ingresos del mes"
+        [value]="(data.revenue.this_month | currency:'EUR':'symbol':'1.2-2') ?? ''"
+        icon="shopping-bag"
+        [subtitle]="revenueChangeText()"
+        [trend]="revenueChangeTrend()"
+      />
+      <app-stat-card
+        title="Nuevos clientes este mes"
+        [value]="data.monthly_metrics.new_clients.toString()"
+        icon="users"
+        [subtitle]="data.monthly_metrics.completed_sessions + ' sesiones realizadas'"
+      />
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <header>
+          <h2 class="text-lg font-semibold text-ink">Sesiones de hoy</h2>
+        </header>
+        @if (data.appointments_today.list.length === 0) {
+          <p class="mt-4 text-sm text-muted">Hoy no hay sesiones registradas.</p>
+        } @else {
+          <ul class="mt-4 flex flex-col divide-y divide-gray-100">
+            @for (appointment of data.appointments_today.list; track appointment.id) {
+              <li class="flex items-center justify-between gap-4 py-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-ink">{{ appointment.client_name ? 'Cliente/a ' + appointment.client_name : 'Cliente sin asignar' }}</p>
+                  <p class="truncate text-xs text-muted">
+                    {{ appointment.treatment_name ?? 'Tratamiento' }}
+                    · {{ appointment.room_name }}
+                    · {{ appointment.worker_name }}
+                    · {{ appointment.status_name }}
+                  </p>
+                </div>
+                <span class="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600">
+                  {{ appointment.starts_at | date:'HH:mm' }} – {{ appointment.ends_at | date:'HH:mm' }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+
+      <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <header>
+          <h2 class="text-lg font-semibold text-ink">Stock por debajo del mínimo</h2>
+          <p class="mt-1 text-xs text-muted">Stock actual y mínimo expresados en dosis (unidad de consumo interna).</p>
+        </header>
+        @if (data.low_stock.length === 0) {
+          <p class="mt-4 text-sm text-muted">Todo el inventario está por encima de los mínimos configurados.</p>
+        } @else {
+          <ul class="mt-4 flex flex-col divide-y divide-gray-100">
+            @for (item of data.low_stock; track item.product_id) {
+              <li class="flex items-center justify-between gap-4 py-3">
+                <p class="text-sm font-semibold text-ink">{{ item.product_name ?? 'Producto' }}</p>
+                <span class="rounded-md bg-error-50 px-2.5 py-1 text-xs font-semibold text-error-600">
+                  {{ item.current_quantity }} / {{ item.minimum_stock }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+    </section>
+  }
+</div>

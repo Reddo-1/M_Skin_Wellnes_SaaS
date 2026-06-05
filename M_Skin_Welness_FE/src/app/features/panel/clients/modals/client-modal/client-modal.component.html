@@ -1,0 +1,95 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar cliente' : 'Dar de alta un cliente' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      @if (isEdit()) {
+        Modifica los datos básicos del cliente. El correo y la fecha de nacimiento son opcionales.
+      } @else {
+        Si introduces un correo le enviaremos el acceso online. El correo y la fecha de nacimiento son opcionales.
+      }
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div>
+        <app-input
+          label="Nombre completo"
+          [required]="true"
+          formControlName="name"
+          placeholder="Nombre y apellidos"
+          [invalid]="hasFieldError('name')"
+        />
+        @if (hasValidationError('name', 'required')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre es obligatorio.</p>
+        }
+        @if (hasValidationError('name', 'maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+        }
+      </div>
+
+      <div>
+        <app-input
+          label="Correo electrónico"
+          type="email"
+          autocomplete="off"
+          formControlName="email"
+          placeholder="opcional@correo.com"
+          [invalid]="hasFieldError('email')"
+        />
+        @if (hasValidationError('email', 'email')) {
+          <p class="mt-1.5 text-xs text-error-500">Introduce un correo válido.</p>
+        }
+        @if (hasValidationError('email', 'maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El correo no puede superar los 150 caracteres.</p>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <app-input
+            label="Teléfono"
+            type="tel"
+            autocomplete="tel"
+            formControlName="phone"
+            placeholder="+34 600 000 000"
+            [invalid]="hasFieldError('phone')"
+          />
+          @if (hasValidationError('phone', 'maxlength')) {
+            <p class="mt-1.5 text-xs text-error-500">El teléfono no puede superar los 30 caracteres.</p>
+          }
+        </div>
+        <div>
+          <app-date-picker
+            label="Fecha de nacimiento"
+            formControlName="birth_date"
+            placeholder="Selecciona una fecha"
+            [invalid]="hasFieldError('birth_date')"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="close.emit()"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+        >
+          @if (submitting()) {
+            Guardando…
+          } @else {
+            {{ isEdit() ? 'Guardar cambios' : 'Crear cliente' }}
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>

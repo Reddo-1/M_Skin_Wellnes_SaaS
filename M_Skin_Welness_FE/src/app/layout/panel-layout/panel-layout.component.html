@@ -1,0 +1,22 @@
+<div class="min-h-screen bg-gray-50 xl:flex">
+  <app-panel-sidebar />
+
+  @if (sidebar.isMobileOpen()) {
+    <div
+      class="fixed inset-0 z-40 bg-gray-900/40 xl:hidden"
+      (click)="sidebar.closeMobile()"
+      aria-hidden="true"
+    ></div>
+  }
+  <!-- el margen izquierdo se ajusta al ancho del sidebar según esté colapsado -->
+  <div
+    class="flex-1 transition-all duration-300 ease-in-out"
+    [class.xl:ml-[290px]]="!sidebar.isDesktopCollapsed()"
+    [class.xl:ml-[90px]]="sidebar.isDesktopCollapsed()"
+  >
+    <app-panel-topbar />
+    <main class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -1,0 +1,331 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
+  layer(base);
+
+@import "tailwindcss";
+
+/* Estructura TailAdmin */
+@theme {
+  --font-*: initial;
+  --font-outfit: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  --text-title-2xl: 72px;
+  --text-title-2xl--line-height: 90px;
+  --text-title-xl: 60px;
+  --text-title-xl--line-height: 72px;
+  --text-title-lg: 48px;
+  --text-title-lg--line-height: 60px;
+  --text-title-md: 36px;
+  --text-title-md--line-height: 44px;
+  --text-title-sm: 30px;
+  --text-title-sm--line-height: 38px;
+
+  /* Paleta de colores */
+  --color-brand-50: #fef4ee;
+  --color-brand-300: #f7a872;
+  --color-brand-500: #e6621f;
+  --color-brand-600: #c84c14;
+  --color-brand-950: #391306;
+
+  --color-ink: #333333;
+  --color-muted: #898989;
+  --color-surface-alt: #ededee;
+
+  --color-error-50: #fef3f2;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-500: #f79009;
+  --color-warning-700: #b54708;
+
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d1fadf;
+  --color-success-200: #a6f4c5;
+  --color-success-300: #6ce9a6;
+  --color-success-500: #12b76a;
+  --color-success-600: #039855;
+
+  --animate-mandala-spin: mandala-spin 120s linear infinite;
+  --animate-toast-in: toast-in 180ms ease-out;
+  --animate-swipe-hint: swipe-hint 1.4s ease-in-out infinite;
+}
+
+@keyframes mandala-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes swipe-hint {
+  0%,
+  100% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+@layer base {
+  body {
+    @apply font-outfit bg-gray-50 text-ink;
+  }
+}
+
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-sm;
+}
+
+@utility menu-item-active {
+  @apply bg-brand-50 text-brand-500;
+}
+
+@utility menu-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700;
+}
+
+@utility menu-item-icon {
+  @apply text-gray-500 group-hover:text-brand-500;
+}
+
+@utility menu-item-icon-active {
+  @apply text-brand-500;
+}
+
+@utility menu-item-icon-size {
+  & svg {
+    @apply !size-5;
+  }
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* FullCalendar — estilo TailAdmin (toolbar, cabeceras, rejilla y eventos), adaptado a la marca */
+.fc .fc-view-harness {
+  @apply max-w-full overflow-x-auto border-x border-b border-gray-200;
+}
+.fc .fc-scrollgrid-section > * {
+  border-right-width: 0;
+  border-bottom-width: 0;
+}
+.fc .fc-scrollgrid {
+  border-left-width: 0;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  @apply flex-col gap-4 px-5 pt-5 sm:flex-row;
+}
+.fc-button-group {
+  @apply gap-2;
+}
+.fc .fc-button {
+  @apply !rounded-lg border border-gray-200 bg-transparent text-sm font-medium capitalize text-gray-700 hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none;
+}
+.fc-button-group .fc-button {
+  @apply flex h-10 w-10 items-center justify-center;
+}
+.fc-button-group .fc-button.fc-prev-button:before {
+  @apply inline-block mt-1;
+  content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.0068 6L9.75684 12.25L16.0068 18.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fc-button-group .fc-button.fc-next-button:before {
+  @apply inline-block mt-1;
+  content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.50684 19L15.7568 12.75L9.50684 6.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fc-button-group .fc-button .fc-icon {
+  @apply hidden;
+}
+.fc-today-button {
+  @apply !h-10 !rounded-lg !border !border-gray-200 !bg-transparent !px-4 !text-sm !font-medium !text-gray-700 hover:!bg-gray-50 focus:!shadow-none disabled:!cursor-not-allowed disabled:!opacity-50;
+}
+.fc-toolbar-title {
+  @apply !text-lg !font-medium text-ink;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child:has(.fc-button) {
+  @apply rounded-lg bg-gray-100 p-0.5;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child:has(.fc-button) .fc-button {
+  @apply !h-auto !w-auto rounded-md !border-0 bg-transparent !px-5 !py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:!shadow-none;
+}
+.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child:has(.fc-button) .fc-button.fc-button-active {
+  @apply bg-white text-gray-900;
+}
+.fc-theme-standard th {
+  @apply !border-x-0 border-t !border-gray-200 bg-gray-50 !text-left;
+}
+.fc-theme-standard td,
+.fc-theme-standard .fc-scrollgrid {
+  @apply !border-gray-200;
+}
+.fc .fc-col-header-cell-cushion {
+  @apply !px-5 !py-4 text-sm font-medium uppercase text-gray-400;
+}
+.fc .fc-daygrid-day.fc-day-today {
+  @apply bg-transparent;
+}
+.fc .fc-daygrid-day {
+  @apply p-2;
+}
+.fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
+  @apply rounded-sm bg-gray-100;
+}
+.fc .fc-daygrid-day-number {
+  @apply !p-3 text-sm font-medium text-gray-700;
+}
+.fc .fc-daygrid-day-top {
+  @apply !flex-row;
+}
+.fc .fc-day-other .fc-daygrid-day-top {
+  opacity: 1;
+}
+.fc .fc-day-other .fc-daygrid-day-top .fc-daygrid-day-number {
+  @apply text-gray-400;
+}
+.fc .fc-timegrid-now-indicator-line {
+  @apply border-brand-500;
+}
+.event-fc-color {
+  @apply rounded-lg py-2.5 pl-4 pr-3;
+}
+.event-fc-color .fc-event-title {
+  @apply p-0 text-sm font-normal text-gray-700;
+}
+.fc-daygrid-event-dot {
+  @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
+}
+.fc-event {
+  @apply focus:shadow-none;
+}
+.fc-timegrid-event {
+  @apply rounded-lg;
+}
+.fc-daygrid-event.fc-event-start {
+  @apply !ml-3;
+}
+.event-fc-color.fc-bg-success {
+  @apply border-success-50 bg-success-50;
+}
+.event-fc-color.fc-bg-danger {
+  @apply border-error-50 bg-error-50;
+}
+.event-fc-color.fc-bg-primary {
+  @apply border-brand-50 bg-brand-50;
+}
+.event-fc-color.fc-bg-warning {
+  @apply border-warning-50 bg-warning-50;
+}
+.event-fc-color.fc-bg-success .fc-daygrid-event-dot {
+  @apply bg-success-500;
+}
+.event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
+  @apply bg-error-500;
+}
+.event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
+  @apply bg-brand-500;
+}
+.event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
+  @apply bg-warning-500;
+}
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+  @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500;
+}
+.fc .fc-timegrid-axis-cushion {
+  @apply text-sm font-medium text-gray-500;
+}
+
+/* en el cuadrante (resource timegrid sin franja all-day) el eje de horas se encoge al ancho del número; el px-3 de TailAdmin no cabe en ese hueco y empuja la hora a la derecha. Se reduce el padding lateral para que quede pegada a la izquierda */
+.custom-calendar .fc-timegrid-slot-label-frame {
+  @apply !px-1;
+}
+.custom-calendar .fc-h-event {
+  background-color: transparent;
+  border: none;
+  color: black;
+}
+
+/* descanso interno de la franja: banda rayada "no disponible" en los calendarios */
+.fc-break-bg {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(102, 112, 133, 0.35) 5px,
+    rgba(102, 112, 133, 0.35) 10px
+  );
+}
+
+/* bandas de estado del horario del profesional en el cuadrante: tintes marcados + etiqueta de esquina */
+.custom-calendar .fc-bg-event.fc-band {
+  opacity: 1;
+}
+.custom-calendar .fc-bg-event.fc-band-workday {
+  background-color: rgba(102, 112, 133, 0.12);
+}
+.custom-calendar .fc-bg-event.fc-band-absence {
+  background-color: rgba(240, 68, 56, 0.2);
+}
+.custom-calendar .fc-bg-event.fc-band-extra {
+  background-color: rgba(18, 183, 106, 0.2);
+}
+.custom-calendar .fc-bg-event.fc-band .fc-event-title {
+  padding: 3px 5px;
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.custom-calendar .fc-band-workday .fc-event-title,
+.custom-calendar .fc-band.fc-break-bg .fc-event-title {
+  color: #475467;
+}
+.custom-calendar .fc-band-absence .fc-event-title {
+  color: #b42318;
+}
+.custom-calendar .fc-band-extra .fc-event-title {
+  color: #027a48;
+}
+
+/* en el cuadrante (un día por columnas) "hoy" teñiría todas las columnas; se quita y queda solo la línea de hora actual */
+.custom-calendar .fc-timegrid-col.fc-day-today,
+.custom-calendar .fc-day-today {
+  background-color: transparent;
+}
+
+/* compacta la barra en móvil (evita que prev/next/hoy se apilen) */
+@media (max-width: 767px) {
+  .fc .fc-toolbar.fc-header-toolbar {
+    @apply px-4 pt-4;
+    margin-bottom: 0.25rem;
+  }
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+}

@@ -1,0 +1,65 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar máquina' : 'Nueva máquina' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      Define el equipo del centro. Si le asignas una sala será fija; si la dejas en "Sin sala fija" se considera móvil.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div>
+        <app-input
+          label="Nombre"
+          [required]="true"
+          formControlName="name"
+          placeholder="Ej. Láser diodo LD-200"
+          [invalid]="hasFieldError('name')"
+        />
+        @if (hasValidationError('name', 'required')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre es obligatorio.</p>
+        }
+        @if (hasValidationError('name', 'maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El nombre no puede superar los 120 caracteres.</p>
+        }
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-gray-700">Sala fija</label>
+        <app-select
+          [options]="roomOptions()"
+          [selected]="form.controls.fixed_room_id.value"
+          placeholder="Sin sala fija (móvil)"
+          (selectionChange)="form.controls.fixed_room_id.setValue($event)"
+        />
+        <p class="mt-1.5 text-xs text-muted">
+          Sin sala fija, la máquina se trata como móvil y puede usarse en cualquier sala.
+        </p>
+      </div>
+
+      <app-toggle
+        formControlName="is_active"
+        label="Máquina activa"
+        description="Disponible para sesiones."
+      />
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="close.emit()"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+        >
+          {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Crear máquina' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>

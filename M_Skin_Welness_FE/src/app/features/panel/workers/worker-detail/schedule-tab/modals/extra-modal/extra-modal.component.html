@@ -1,0 +1,97 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[520px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar disponibilidad extra' : 'Añadir disponibilidad extra' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      Un tramo puntual de disponibilidad fuera del horario habitual (un refuerzo, un día suelto…).
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div>
+        <app-date-picker
+          label="Día"
+          [required]="true"
+          formControlName="date"
+          [invalid]="hasFieldError('date')"
+        />
+        @if (hasFieldError('date')) {
+          <p class="mt-1.5 text-xs text-error-500">Indica el día.</p>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <app-time-picker
+            label="Desde las"
+            [required]="true"
+            formControlName="start_time"
+            [invalid]="hasFieldError('start_time')"
+          />
+          @if (hasFieldError('start_time')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica la hora de inicio.</p>
+          }
+        </div>
+        <div>
+          <app-time-picker
+            label="Hasta las"
+            [required]="true"
+            formControlName="end_time"
+            [invalid]="hasFieldError('end_time') || showEndBeforeStart()"
+          />
+          @if (hasFieldError('end_time')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica la hora de fin.</p>
+          }
+          @if (showEndBeforeStart()) {
+            <p class="mt-1.5 text-xs text-error-500">La hora de fin debe ser posterior a la de inicio.</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <app-input
+          label="Motivo"
+          formControlName="reason"
+          placeholder="Ej. Refuerzo de tarde…"
+          hint="Opcional. Máximo 120 caracteres."
+          [invalid]="hasValidation('maxlength')"
+        />
+        @if (hasValidation('maxlength')) {
+          <p class="mt-1.5 text-xs text-error-500">El motivo no puede superar los 120 caracteres.</p>
+        }
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        @if (isEdit()) {
+          <button
+            type="button"
+            (click)="remove.emit()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-error-600 transition hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Eliminar
+          </button>
+        } @else {
+          <span class="hidden sm:block"></span>
+        }
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            (click)="close.emit()"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+          >
+            {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Añadir extra' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-modal>

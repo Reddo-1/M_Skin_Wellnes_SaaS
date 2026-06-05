@@ -1,0 +1,105 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()" panelClass="m-4">
+  <div class="w-full max-w-[600px] rounded-3xl bg-white p-6 sm:p-8">
+    <h3 class="text-xl font-semibold text-ink">
+      {{ isEdit() ? 'Editar evaluación de piel' : 'Nueva evaluación de piel' }}
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      @if (isEdit()) {
+        Actualiza los datos de esta evaluación. La ficha clínica a la que pertenece no cambia.
+      } @else {
+        Registra el estado de la piel del cliente en una de sus fichas clínicas. Quedará como la evaluación vigente de esa ficha.
+      }
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5" novalidate>
+      <div class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+        @if (!isEdit()) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700">
+              Ficha clínica
+            </label>
+            <app-select
+              [options]="recordOptions()"
+              [selected]="form.controls.client_profile_id.value"
+              [invalid]="hasFieldError('client_profile_id')"
+              placeholder="Selecciona una ficha…"
+              (selectionChange)="form.controls.client_profile_id.setValue($event)"
+            />
+            @if (hasValidationError('client_profile_id', 'required')) {
+              <p class="mt-1.5 text-xs text-error-500">Selecciona la ficha clínica a la que pertenece la evaluación.</p>
+            }
+          </div>
+        }
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">
+            Tipo de piel
+          </label>
+          <app-select
+            [options]="skinTypeOptions()"
+            [selected]="form.controls.skin_type_id.value"
+            [invalid]="hasFieldError('skin_type_id')"
+            placeholder="Selecciona un tipo de piel…"
+            (selectionChange)="form.controls.skin_type_id.setValue($event)"
+          />
+          @if (hasValidationError('skin_type_id', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Selecciona el tipo de piel del cliente.</p>
+          }
+        </div>
+
+        <div>
+          <app-date-picker
+            label="Fecha de evaluación"
+            formControlName="evaluation_date"
+            placeholder="Selecciona una fecha"
+            [invalid]="hasFieldError('evaluation_date')"
+          />
+          @if (hasValidationError('evaluation_date', 'required')) {
+            <p class="mt-1.5 text-xs text-error-500">Indica la fecha de la evaluación.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">Variaciones</label>
+          <app-multi-select
+            [options]="lookup.variations()"
+            [selectedIds]="form.controls.variation_ids.value"
+            placeholder="Selecciona las variaciones observadas…"
+            (selectionChange)="form.controls.variation_ids.setValue($event)"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <app-textarea
+            label="Observaciones"
+            formControlName="general_notes"
+            [rows]="3"
+            placeholder="Notas clínicas de esta evaluación…"
+            [invalid]="hasFieldError('general_notes')"
+          />
+          @if (hasValidationError('general_notes', 'maxlength')) {
+            <p class="mt-1.5 text-xs text-error-500">Las observaciones no pueden superar los 5000 caracteres.</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="close.emit()"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
+        >
+          {{ submitting() ? 'Guardando…' : isEdit() ? 'Guardar cambios' : 'Guardar evaluación' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>

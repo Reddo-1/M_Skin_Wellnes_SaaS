@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+
+class UserPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return $user->can('users.view') || $user->can('clients.view');
+    }
+
+    public function view(User $user, User $target): bool
+    {
+        if ($user->id === $target->id) {
+            return true;
+        }
+
+        if ($user->center_id !== $target->center_id) {
+            return false;
+        }
+
+        //quien solo tiene clients.view (profesionales) accede a la ficha si el target es cliente
+        if ($user->can('users.view')) {
+            return true;
+        }
+
+        return $user->can('clients.view') && $target->hasRole('cliente');
+    }
+
+    public function create(User $user): bool
+    {
+        return $user->can('users.create_staff')
+            || $user->can('users.create_client');
+    }
+
+    public function update(User $user, User $target): bool
+    {
+        if ($user->id === $target->id) {
+            return true;
+        }
+
+        return $user->center_id === $target->center_id
+            && $user->can('users.update');
+    }
+
+    public function deactivate(User $user, User $target): bool
+    {
+        if ($user->id === $target->id) {
+            return false;
+        }
+
+        return $user->center_id === $target->center_id
+            && $user->can('users.deactivate');
+    }
+
+    public function activate(User $user, User $target): bool
+    {
+        return $user->center_id === $target->center_id
+            && $user->can('users.deactivate');
+    }
+
+    //solo el propio usuario puede cambiar su contraseña; el reset por olvido va por el mailer
+    public function changePassword(User $user, User $target): bool
+    {
+        return $user->id === $target->id;
+    }
+
+    //la validacion fina de que roles concretos puede asignar la hace el FormRequest
+    public function manageRoles(User $user, User $target): bool
+    {
+        if ($user->center_id !== $target->center_id) {
+            return false;
+        }
+
+        return $user->can('users.create_staff') || $user->can('users.create_client');
+    }
+
+    //solo se activa el acceso online a clientes del mismo centro que aun no esten verificados
+    public function activateOnlineAccess(User $user, User $target): bool
+    {
+        if ($user->center_id !== $target->center_id) {
+            return false;
+        }
+
+        if (!$target->hasRole('cliente')) {
+            return false;
+        }
+
+        return $user->can('users.activate_online');
+    }
+}
