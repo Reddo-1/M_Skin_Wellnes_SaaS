@@ -6,6 +6,6 @@ $TTL 86400
                         1209600
                         86400 )
 @       IN      NS      ns1.mskinwellness.com.
-53      IN      PTR     ns1.mskinwellness.com.
-50      IN      PTR     mskinwellness.com.
-50      IN      PTR     www.mskinwellness.com.
+ns1     IN      A       10.1.0.53
+@       IN      A       10.1.0.50
+www     IN      A       10.1.0.50

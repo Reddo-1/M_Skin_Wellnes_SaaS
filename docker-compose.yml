@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: mskin_wellness
       POSTGRES_USER: mskin_user
-      POSTGRES_PASSWORD: mskin_pass          # debe coincidir con DB_PASSWORD del .env
+      POSTGRES_PASSWORD: mskin_pass
       TZ: Europe/Madrid
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -63,7 +63,7 @@ services:
     container_name: mskin_stripe_cli
     command: listen --forward-to https://nginx/stripe/webhook --skip-verify
     environment:
-      STRIPE_API_KEY: sk_test_xxx            # = STRIPE_SECRET del .env (clave de TEST)
+      STRIPE_API_KEY: sk_test_xxx
     depends_on:
       - nginx
     networks:

@@ -1,6 +1,6 @@
-zone "mskinwellness.local" {
+zone "mskinwellness.com" {
     type master;
-    file "/etc/bind/zones/db.mskinwellness.local";
+    file "/etc/bind/zones/db.mskinwellness.com";
 };
 
 zone "0.1.10.in-addr.arpa" {
