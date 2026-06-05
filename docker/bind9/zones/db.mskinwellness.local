@@ -1,0 +1,12 @@
+$TTL 86400
+@       IN      SOA     ns1.mskinwellness.local. root.mskinwellness.local. (
+                        2026060301      ; Serial
+                        3600            ; Refresh
+                        1800            ; Retry
+                        1209600         ; Expire
+                        86400 )         ; Minimum TTL
+;
+@       IN      NS      ns1.mskinwellness.local.
+ns1     IN      A       10.1.0.53
+@       IN      A       10.1.0.50
+www     IN      A       10.1.0.50

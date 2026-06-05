@@ -1,0 +1,9 @@
+zone "mskinwellness.local" {
+    type master;
+    file "/etc/bind/zones/db.mskinwellness.local";
+};
+
+zone "0.1.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.10.1.0";
+};
